@@ -1,0 +1,157 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172554;
+  background: #f8fafc;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  width: 400px;
+  min-height: 520px;
+  margin: 0;
+  background: #f8fafc;
+}
+
+button, input, select { font: inherit; }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 14px;
+  color: #f8fafc;
+  background: #172554;
+}
+
+.eyebrow {
+  margin: 0 0 2px;
+  color: #7dd3fc;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+h1, h2, p { margin-top: 0; }
+h1 { margin-bottom: 0; font-size: 24px; }
+h2 { margin-bottom: 0; font-size: 16px; }
+
+.counter {
+  padding: 6px 10px;
+  border: 1px solid #475569;
+  border-radius: 999px;
+  color: #bae6fd;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.store-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0 14px;
+  border-bottom: 1px solid #e2e8f0;
+  background: white;
+}
+
+.store-tab {
+  padding: 13px 6px 11px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #64748b;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.store-tab.active { border-color: #0ea5e9; color: #172554; }
+.store-tab:disabled { color: #94a3b8; }
+
+main { padding: 14px; }
+
+.status {
+  display: none;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.status.visible { display: block; }
+.status.info { color: #075985; background: #e0f2fe; }
+.status.error { color: #991b1b; background: #fee2e2; }
+.status.success { color: #166534; background: #dcfce7; }
+
+.panel {
+  margin-bottom: 18px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 18px rgb(15 23 42 / 5%);
+}
+
+.captured-product { display: flex; flex-direction: column; gap: 4px; padding: 14px; background: #f1f5f9; }
+.captured-product strong { overflow: hidden; font-size: 13px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.label, .hint, .section-title span { color: #64748b; font-size: 11px; }
+.current-price { color: #0369a1; font-size: 20px; font-weight: 800; }
+
+form { display: grid; gap: 12px; padding: 14px; }
+label { display: grid; gap: 6px; color: #334155; font-size: 12px; font-weight: 700; }
+
+input, select {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  color: #0f172a;
+  background: white;
+  outline: none;
+}
+
+input:focus, select:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgb(14 165 233 / 14%); }
+.form-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 10px; }
+.input-suffix { display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 7px; background: white; }
+.input-suffix input { border: 0; box-shadow: none; }
+.input-suffix span { padding-right: 10px; color: #64748b; }
+
+.primary-button {
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  background: #0369a1;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary-button:hover { background: #075985; }
+.primary-button:disabled { cursor: wait; opacity: .6; }
+.hint { margin: -4px 0 0; text-align: center; }
+
+.products-section { padding-top: 2px; }
+.section-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 9px; }
+.product-list { display: grid; gap: 8px; }
+.empty { padding: 20px 12px; border: 1px dashed #cbd5e1; border-radius: 10px; color: #64748b; font-size: 12px; text-align: center; }
+
+.product-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: white;
+}
+
+.product-card strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.product-prices { display: flex; gap: 10px; color: #64748b; font-size: 11px; }
+.product-prices b { color: #0f172a; }
+.product-actions { display: flex; gap: 5px; grid-column: 1 / -1; }
+.secondary-button, .danger-button { padding: 5px 8px; border-radius: 6px; background: white; font-size: 11px; cursor: pointer; }
+.secondary-button { border: 1px solid #bae6fd; color: #0369a1; }
+.danger-button { border: 1px solid #fecaca; color: #b91c1c; }
+

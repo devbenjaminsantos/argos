@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Argos</title>
+    <link rel="stylesheet" href="./popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div>
+        <p class="eyebrow">Fiscal de preços</p>
+        <h1>Argos</h1>
+      </div>
+      <span class="counter" id="product-count">0/3</span>
+    </header>
+
+    <nav class="store-tabs" aria-label="Lojas">
+      <button class="store-tab active" type="button" aria-current="page">Mercado Livre</button>
+      <button class="store-tab" type="button" disabled title="Disponível em uma versão futura">
+        Shopee · em breve
+      </button>
+    </nav>
+
+    <main>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <section id="capture-section" class="panel" hidden>
+        <div class="captured-product">
+          <span class="label">Produto encontrado</span>
+          <strong id="captured-title"></strong>
+          <span class="current-price" id="captured-price"></span>
+        </div>
+
+        <form id="product-form">
+          <label>
+            Nome ou apelido
+            <input id="name" name="name" type="text" maxlength="80" required autocomplete="off" />
+          </label>
+
+          <div class="form-grid">
+            <label>
+              Preço-alvo
+              <input id="target-price" name="targetPrice" type="text" inputmode="decimal" placeholder="1.999,90" required />
+            </label>
+            <label>
+              Queda relevante
+              <span class="input-suffix">
+                <input id="drop-percent" name="dropPercent" type="number" min="1" max="100" value="10" required />
+                <span>%</span>
+              </span>
+            </label>
+          </div>
+
+          <label>
+            Verificar a cada
+            <select id="interval" name="interval">
+              <option value="12">12 horas</option>
+              <option value="24" selected>24 horas</option>
+            </select>
+          </label>
+
+          <button class="primary-button" type="submit">Monitorar produto</button>
+          <p class="hint">As notificações serão enviadas localmente pelo Chrome.</p>
+        </form>
+      </section>
+
+      <section class="products-section" aria-labelledby="products-title">
+        <div class="section-title">
+          <h2 id="products-title">Monitorados</h2>
+          <span>máximo de 3</span>
+        </div>
+        <div id="product-list" class="product-list"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./popup.js"></script>
+  </body>
+</html>
+

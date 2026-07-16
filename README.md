@@ -4,20 +4,42 @@ O **Argos** é um bot de monitoramento de preços que acompanha produtos em loja
 
 O foco inicial do projeto são anúncios do **Mercado Livre** e da **Shopee**.
 
+## Versões do projeto
+
+- **V1 — Chrome (concluída):** extensão local dedicada inicialmente ao Mercado Livre.
+- **V2 — Cloud Azure:** API, PostgreSQL, coleta programada e notificações executados na Azure.
+- **V3 — Back-end local:** edição autohospedada e distribuível para execução na máquina do usuário.
+- **V4 — Android:** aplicativo móvel integrado ao back-end cloud.
+
+O progresso detalhado e a próxima entrega estão registrados em [`ROADMAP.md`](ROADMAP.md).
+
 ## Objetivo
 
 Facilitar o acompanhamento de preços sem exigir que o usuário visite repetidamente as páginas dos produtos. O sistema mantém um histórico dos valores encontrados, aplica regras configuráveis e envia notificações no momento adequado.
 
 ## MVP
 
-O fluxo de cadastro de um produto será:
+O fluxo de cadastro na V1 será:
 
-1. Informar a URL do produto.
-2. Definir um nome ou apelido para identificá-lo.
-3. Informar o preço-alvo.
-4. Escolher o canal de notificação.
+1. Abrir a página do produto no Mercado Livre.
+2. Abrir a extensão para extrair a URL, o título e o preço atual.
+3. Definir um nome ou apelido para identificá-lo.
+4. Informar o preço-alvo.
+5. Definir a queda percentual relevante e o intervalo de verificação.
+6. Receber notificações locais pelo Chrome.
 
 Inicialmente, cada usuário poderá monitorar até **3 produtos**.
+
+### Escopo da V1 Chrome
+
+- Mercado Livre como primeira loja suportada;
+- coleta inicial diretamente da página aberta pelo usuário;
+- coleta periódica em segundo plano enquanto o Chrome estiver disponível;
+- intervalos configuráveis de 12 ou 24 horas;
+- histórico local no IndexedDB;
+- alerta ao atingir o preço-alvo ou uma queda percentual relevante;
+- deduplicação de alertas equivalentes;
+- nenhum servidor, endpoint remoto, conta ou segredo armazenado na extensão.
 
 ## Como funciona
 
@@ -65,59 +87,59 @@ Exemplo de notificação:
 
 O Argos será inicialmente desenvolvido como um **monólito modular**. Os domínios de monitoramento, adaptadores de lojas, histórico de preços e notificações permanecerão desacoplados internamente. Assim, partes do sistema poderão ser extraídas no futuro para workers ou microsserviços, se necessário, sem introduzir a complexidade de uma arquitetura distribuída no MVP.
 
-### Organização do projeto
+### Organização da V1 Chrome
 
 ```text
 argos/
-├── api/
-│   ├── routes/
-│   └── dependencies/
-├── domain/
-│   ├── products/
-│   ├── prices/
-│   └── notifications/
-├── application/
-│   ├── services/
-│   └── use_cases/
-├── infrastructure/
-│   ├── database/
-│   ├── scrapers/
-│   ├── scheduler/
-│   └── telegram/
-├── models/
-├── repositories/
+├── src/
+│   ├── application/
+│   ├── background/
+│   ├── content/
+│   ├── domain/
+│   ├── infrastructure/
+│   │   └── database/
+│   ├── offscreen/
+│   ├── popup/
+│   ├── security/
+│   ├── shared/
+│   └── stores/
+│       └── mercado-livre/
 ├── tests/
-└── main.py
+├── scripts/
+└── package.json
 ```
 
 ### Responsabilidades das camadas
 
-- **`api/`**: expõe as rotas HTTP e reúne as dependências necessárias para executar os casos de uso.
-- **`domain/`**: contém as regras centrais do negócio, organizadas pelos domínios de produtos, preços e notificações. Essa camada não deve depender de frameworks, banco de dados ou serviços externos.
-- **`application/`**: coordena os fluxos da aplicação. Seus serviços e casos de uso combinam as regras do domínio para cadastrar produtos, verificar preços, registrar o histórico e disparar alertas.
-- **`infrastructure/`**: concentra implementações ligadas ao mundo externo, como persistência, scrapers das lojas, tarefas agendadas e integração com o Telegram.
-- **`models/`**: reúne os modelos usados para persistência, validação ou transferência de dados, mantendo clara a diferença entre esses formatos e as entidades do domínio.
-- **`repositories/`**: define os contratos de acesso aos dados. As implementações concretas ficam na infraestrutura, permitindo trocar SQLite por PostgreSQL sem alterar as regras de negócio.
+- **`domain/`**: contém produtos, observações de preço e regras de alerta, sem depender das APIs do Chrome.
+- **`application/`**: valida entradas e coordena os casos de uso de cadastro e monitoramento.
+- **`stores/`**: contém um adaptador por loja. A V1 possui apenas o adaptador `mercado-livre/`.
+- **`infrastructure/`**: implementa a persistência local com IndexedDB.
+- **`background/`**: recebe operações autorizadas, executa coletas agendadas e envia notificações.
+- **`content/`**: extrai dados da página que o usuário abriu.
+- **`offscreen/`**: interpreta o HTML estático obtido durante as verificações agendadas, pois o service worker não possui DOM.
+- **`popup/`**: apresenta a aba e os controles específicos de cada loja.
+- **`security/`**: concentra validação e normalização das URLs permitidas.
+- **`shared/`**: define o protocolo de mensagens entre os contextos da extensão.
 - **`tests/`**: contém testes unitários, de integração e de ponta a ponta.
-- **`main.py`**: é o ponto de entrada e de composição da aplicação.
 
 ### Direção das dependências
 
 ```text
-API ──→ Aplicação ──→ Domínio
-          ↑
-Infraestrutura implementa os contratos usados pela aplicação
+Popup/Background ──→ Aplicação ──→ Domínio
+                           ↑
+   IndexedDB e adaptadores implementam as integrações
 ```
 
-O domínio permanece no centro e não conhece detalhes de HTTP, banco de dados, scraping, agendamento ou Telegram. A infraestrutura pode ser substituída sem reescrever as regras principais. Por exemplo, cada loja terá seu próprio adaptador em `infrastructure/scrapers/`, mas todos deverão entregar os dados em um formato esperado pela aplicação.
+O domínio permanece no centro e não conhece IndexedDB, páginas HTML ou APIs do Chrome. Cada loja possui seu próprio adaptador, mas todas devem entregar um produto extraído no contrato esperado pela aplicação.
 
 Essa separação simplifica o desenvolvimento e a implantação inicial, além de preparar alguns caminhos naturais de evolução:
 
-- o agendador e os scrapers podem se tornar workers independentes;
+- o agendador e os coletores podem se tornar workers independentes;
 - notificações podem ser movidas para um serviço próprio;
 - novos marketplaces podem ser adicionados por meio de adaptadores;
-- SQLite pode ser substituído por PostgreSQL;
-- API, extensão e aplicativo Android podem reutilizar os mesmos casos de uso por meio do back-end.
+- PostgreSQL atende a persistência do back-end cloud sem alterar o domínio;
+- API, extensão e aplicativo Android podem reutilizar os mesmos contratos por meio do back-end.
 
 ## Stack tecnológica
 
@@ -125,18 +147,66 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 
 - **TypeScript**
 - **IndexedDB** para armazenamento local
+- **Manifest V3**
+- **esbuild** para empacotamento
+- **Vitest** para testes
 
-### Back-end local ou em nuvem
+### V2 — Back-end cloud na Azure
 
 - **Python**
-- **FastAPI** ou **Django**
-- **SQLite** para ambientes locais e protótipos
-- **PostgreSQL** para produção e maior escala
+- **FastAPI** ou **Django** — decisão ainda pendente
+- **PostgreSQL**
+- **Docker**
+- **Azure Container Apps**
+- **Azure Container Apps Jobs**
+- **Azure Database for PostgreSQL**
 
-### Aplicativo Android
+### V3 — Back-end local/autohospedado
+
+- mesma base Python e arquitetura modular da V2;
+- banco local ainda a decidir entre SQLite e PostgreSQL empacotado;
+- instalação, atualização e serviço em segundo plano multiplataforma.
+
+### V4 — Aplicativo Android
 
 - **Kotlin**
 - **Jetpack Compose**
+
+## Executando a V1 Chrome
+
+Requisitos: Node.js e npm.
+
+```bash
+npm install
+npm run check
+npm test
+npm run build
+```
+
+Depois do build:
+
+1. Acesse `chrome://extensions`.
+2. Ative o **Modo do desenvolvedor**.
+3. Selecione **Carregar sem compactação**.
+4. Escolha a pasta `dist/` gerada pelo projeto.
+5. Abra ou recarregue uma página de produto do Mercado Livre.
+6. Clique no ícone do Argos.
+
+## Segurança da extensão
+
+A V1 não possui back-end nem expõe endpoints. Entre os controles adotados estão:
+
+- permissão de host limitada a `https://*.mercadolivre.com.br/*`;
+- aceitação somente de páginas HTTPS de produto, sem credenciais ou portas alternativas;
+- remoção de parâmetros comuns de rastreamento;
+- validação das mensagens e de sua origem;
+- bloqueio de operações de banco solicitadas por content scripts;
+- limite de tamanho para páginas coletadas;
+- `credentials: "omit"` nas coletas em segundo plano;
+- renderização da interface com `textContent`, sem inserir HTML coletado;
+- nenhum código remoto, token ou chave de API no pacote.
+
+O modelo de ameaças e as limitações conhecidas estão documentados em [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ## Funcionalidades futuras
 
@@ -149,38 +219,12 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - aumento do limite de produtos monitorados;
 - suporte a outras lojas e marketplaces.
 
-## Roadmap sugerido
-
-### Fase 1 — MVP
-
-- cadastrar, editar e remover produtos;
-- monitorar até 3 URLs;
-- definir preço-alvo e intervalo de verificação;
-- coletar e armazenar o histórico de preços;
-- detectar quedas relevantes;
-- evitar notificações duplicadas;
-- enviar notificações pelo canal escolhido.
-
-### Fase 2 — Histórico e inteligência
-
-- apresentar gráficos de variação;
-- destacar o menor preço em 30 e 90 dias;
-- calcular a queda absoluta e percentual;
-- exportar dados em PDF e CSV;
-- sugerir o melhor momento para compra.
-
-### Fase 3 — Expansão
-
-- disponibilizar um back-end local ou em nuvem;
-- sincronizar dados entre dispositivos;
-- lançar o aplicativo Android;
-- comparar anúncios equivalentes;
-- adicionar novas lojas e canais de notificação.
-
 ## Observações
 
 A coleta de preços deve considerar mudanças no HTML das lojas, páginas que exigem autenticação, variações de produto, promoções temporárias, frete e mecanismos de proteção contra automação. A implementação também deverá respeitar os termos de uso e as políticas de acesso de cada marketplace.
 
 ## Status
 
-Projeto em fase de planejamento e definição do MVP.
+V1 Chrome concluída, com suporte inicial ao Mercado Livre. Melhorias e regressões do adaptador continuam sendo tratadas conforme surgirem novos formatos de página.
+
+> **Teste de aceitação pendente:** a extensão ainda será testada manualmente no Chrome para Windows. O desenvolvimento atual está sendo realizado em um ambiente com Safari, que não executa diretamente o pacote Manifest V3 preparado para o Chrome.

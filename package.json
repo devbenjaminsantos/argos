@@ -1,0 +1,20 @@
+{
+  "name": "argos-price-watcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Extensão Chrome para monitoramento local de preços.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.6",
+    "esbuild": "^0.25.6",
+    "jsdom": "^29.1.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
