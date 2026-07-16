@@ -14,13 +14,13 @@ A V2 será implantada na Azure com a seguinte direção:
 - Azure Container Apps para a API;
 - escala mínima de zero no ambiente de desenvolvimento, quando compatível com o comportamento esperado;
 - Azure Container Apps Jobs para coletas programadas;
-- Azure Database for PostgreSQL para persistência;
+- Azure SQL Database para persistência;
 - uma única imagem e um único monólito modular, com comandos separados para API e job;
 - desenvolvimento e testes executados localmente antes do deploy;
 - orçamento, alertas e limites de escala configurados antes de ativar coletas recorrentes.
 
 ```text
-Extensão ──→ Azure Container App ──→ Azure PostgreSQL
+Extensão ──→ Azure Container App ──→ Azure SQL Database
                                           ↑
 Cron ──→ Azure Container Apps Job ────────┘
                     │
@@ -55,15 +55,14 @@ O free tier será usado como ambiente de piloto, não como garantia de custo zer
 - confirmar elegibilidade e região de cada recurso;
 - configurar orçamento e alertas;
 - limitar réplicas, CPU, memória, logs e retenção;
-- revisar custos de PostgreSQL, Container Registry e tráfego;
+- revisar custos de Azure SQL, Container Registry e tráfego;
 - documentar o comportamento após o fim das franquias promocionais.
 
 ## Consequências
 
-- PostgreSQL passa a ser a persistência preferida da V2;
+- Azure SQL Database passa a ser a persistência da V2;
 - o job deve ser idempotente e protegido contra concorrência;
 - o domínio não pode depender de SDKs da Azure;
 - API e job devem executar com a mesma imagem;
 - configuração e segredos devem entrar por variáveis ou referências seguras;
 - infraestrutura Azure deve ser criada em blocos pequenos e revisáveis.
-

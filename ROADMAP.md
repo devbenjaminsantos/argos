@@ -53,9 +53,11 @@ A V2 será desenvolvida e testada localmente, mas seu produto final rodará na A
 - [x] Confirmar desenvolvimento local com execução programada em nuvem.
 - [x] Escolher a Azure como provedora do piloto.
 - [x] Separar o modo local/autohospedado e adiá-lo para a V3.
-- [ ] Escolher FastAPI ou Django e registrar a decisão.
-- [ ] Confirmar PostgreSQL desde o início, localmente e na Azure.
-- [ ] Definir se o piloto será de usuário único ou terá autenticação desde o início.
+- [x] Escolher FastAPI como framework da API.
+- [x] Escolher Azure SQL Database como persistência da V2.
+- [x] Definir o back-end cloud como multiusuário com autenticação obrigatória.
+- [ ] Escolher o provedor OIDC para login dos usuários.
+- [ ] Definir a estratégia de SQL Server para desenvolvimento e testes locais.
 - [ ] Definir os limites entre domínio, aplicação e infraestrutura.
 - [ ] Definir os contratos de `ProductRepository`, `PriceRepository`, `PriceCollector` e `Notifier`.
 - [ ] Definir o formato inicial da API e dos erros.
@@ -66,7 +68,8 @@ A V2 será desenvolvida e testada localmente, mas seu produto final rodará na A
 Decisões relacionadas:
 
 - [`ADR 0001 — Desenvolvimento local e execução em nuvem`](docs/decisions/0001-local-vs-cloud.md);
-- [`ADR 0002 — Azure como plataforma da V2`](docs/decisions/0002-azure-platform.md).
+- [`ADR 0002 — Azure como plataforma da V2`](docs/decisions/0002-azure-platform.md);
+- [`ADR 0003 — FastAPI, Azure SQL e autenticação`](docs/decisions/0003-backend-stack-and-auth.md).
 
 ### V2.2 — Fundação executável da API
 
@@ -82,7 +85,9 @@ Decisões relacionadas:
 
 ### V2.3 — Domínio e regras de preço
 
+- [ ] Implementar a identidade interna do usuário a partir de `issuer` e `subject` autenticados.
 - [ ] Implementar entidades de produto, observação de preço e entrega de notificação.
+- [ ] Vincular cada agregado ao proprietário sem usar e-mail como identificador.
 - [ ] Armazenar valores monetários em centavos inteiros ou tipo decimal seguro.
 - [ ] Portar as regras de preço-alvo e queda relevante da extensão.
 - [ ] Definir os estados de coleta e suas transições.
@@ -90,19 +95,35 @@ Decisões relacionadas:
 
 **Critério de conclusão:** regras de negócio funcionam sem depender de HTTP, banco ou scraper.
 
-### V2.4 — Persistência com PostgreSQL
+### V2.4 — Persistência com Azure SQL Database
 
 - [ ] Escolher e configurar a ferramenta de migração.
-- [ ] Executar PostgreSQL localmente para desenvolvimento e testes de integração.
-- [ ] Provisionar Azure Database for PostgreSQL no ambiente de desenvolvimento.
+- [ ] Instalar o Microsoft ODBC Driver 18 na imagem Docker.
+- [ ] Definir como os testes de integração usarão SQL Server local ou Azure SQL isolado.
+- [ ] Provisionar Azure SQL Database no ambiente de desenvolvimento.
+- [ ] Configurar identidade gerenciada do Container App para acesso sem senha.
 - [ ] Criar tabelas de produtos, observações e notificações.
+- [ ] Incluir `user_id` e índices de propriedade nas tabelas aplicáveis.
 - [ ] Implementar os repositórios definidos na V2.1.
 - [ ] Garantir unicidade de produto e deduplicação de notificações.
+- [ ] Testar isolamento: um usuário nunca acessa dados de outro.
 - [ ] Criar testes de integração do banco.
 
-**Critério de conclusão:** as mesmas migrações e integrações funcionam no PostgreSQL local e na Azure, e os dados sobrevivem ao reinício da API.
+**Critério de conclusão:** migrações e integrações funcionam no SQL Server/Azure SQL, o Container App acessa o banco sem senha e os testes provam isolamento entre usuários.
 
-### V2.5 — API de produtos
+### V2.5 — Autenticação e identidade do usuário
+
+- [ ] Registrar a aplicação no provedor OIDC escolhido.
+- [ ] Decidir entre autenticação integrada do Container Apps e validação no FastAPI.
+- [ ] Implementar Authorization Code com PKCE para clientes públicos.
+- [ ] Mapear `issuer` e `subject` para o usuário interno.
+- [ ] Criar endpoint autenticado `GET /me`.
+- [ ] Padronizar respostas `401 Unauthorized` e `403 Forbidden`.
+- [ ] Testar token ausente, inválido, expirado e pertencente a outro emissor.
+
+**Critério de conclusão:** um usuário autenticado acessa `/me`, solicitações inválidas são recusadas e nenhuma senha é armazenada pelo Argos.
+
+### V2.6 — API de produtos
 
 - [ ] Criar endpoint para cadastrar produto.
 - [ ] Criar endpoint para listar produtos.
@@ -110,11 +131,12 @@ Decisões relacionadas:
 - [ ] Criar endpoint para atualizar regras de monitoramento.
 - [ ] Criar endpoint para remover produto.
 - [ ] Aplicar o limite inicial de três produtos.
+- [ ] Escopar todas as consultas ao usuário autenticado.
 - [ ] Validar payloads e padronizar respostas de erro.
 
 **Critério de conclusão:** CRUD coberto por testes de API, ainda sem coleta automática.
 
-### V2.6 — Segurança de URLs e SSRF
+### V2.7 — Segurança de URLs e SSRF
 
 - [ ] Aceitar apenas HTTPS e lojas explicitamente suportadas.
 - [ ] Rejeitar credenciais, portas não permitidas e URLs malformadas.
@@ -126,7 +148,7 @@ Decisões relacionadas:
 
 **Critério de conclusão:** o coletor não funciona como proxy genérico nem alcança a rede interna.
 
-### V2.7 — Coletor do Mercado Livre
+### V2.8 — Coletor do Mercado Livre
 
 - [ ] Portar o adaptador do Mercado Livre para o back-end.
 - [ ] Criar uma operação manual de coleta para um produto cadastrado.
@@ -134,9 +156,9 @@ Decisões relacionadas:
 - [ ] Detectar produto indisponível, bloqueio e preço ausente.
 - [ ] Criar fixtures de páginas e testes do extrator.
 
-**Critério de conclusão:** uma coleta manual registra uma observação válida no PostgreSQL.
+**Critério de conclusão:** uma coleta manual registra uma observação válida no Azure SQL para o proprietário correto.
 
-### V2.8 — Histórico e comparação
+### V2.9 — Histórico e comparação
 
 - [ ] Criar endpoint para consultar o histórico de um produto.
 - [ ] Comparar o preço atual com a última observação válida.
@@ -146,7 +168,7 @@ Decisões relacionadas:
 
 **Critério de conclusão:** API retorna histórico e comparações com testes determinísticos.
 
-### V2.9 — Agendador e retentativas
+### V2.10 — Agendador e retentativas
 
 - [ ] Criar um comando de job separado da inicialização da API.
 - [ ] Executar verificações vencidas com Azure Container Apps Jobs.
@@ -159,7 +181,7 @@ Decisões relacionadas:
 
 **Critério de conclusão:** o job agendado na Azure coleta produtos vencidos uma única vez e falhas não geram loops agressivos.
 
-### V2.10 — Notificações remotas
+### V2.11 — Notificações remotas
 
 - [ ] Definir o primeiro canal remoto.
 - [ ] Manter tokens e credenciais somente no servidor.
@@ -170,9 +192,10 @@ Decisões relacionadas:
 
 **Critério de conclusão:** um alerta gera uma única entrega rastreável, sem expor credenciais ao cliente.
 
-### V2.11 — Integração com a extensão
+### V2.12 — Integração com a extensão
 
-- [ ] Definir autenticação entre extensão e API.
+- [ ] Implementar login OIDC com PKCE na extensão.
+- [ ] Enviar e renovar tokens sem persistir senha do usuário.
 - [ ] Criar o modo cloud da extensão separado do armazenamento local da V1.
 - [ ] Sincronizar produtos cloud sem duplicar cadastros.
 - [ ] Exibir estado de sincronização e falhas.
@@ -180,12 +203,13 @@ Decisões relacionadas:
 
 **Critério de conclusão:** a extensão cadastra e consulta produtos pela API em um ambiente de teste.
 
-### V2.12 — Operação e proteção de custos na Azure
+### V2.13 — Operação e proteção de custos na Azure
 
 - [ ] Configurar logs estruturados e métricas básicas.
 - [ ] Criar verificações de prontidão e saúde.
+- [ ] Configurar identidade gerenciada e permissões mínimas no Azure SQL.
 - [ ] Configurar orçamento, alertas de custo e limites de escala.
-- [ ] Revisar consumo de Container Apps, PostgreSQL, registry, logs e tráfego.
+- [ ] Revisar consumo de Container Apps, Azure SQL, registry, logs e tráfego.
 - [ ] Documentar backup, restauração, implantação e rollback.
 - [ ] Executar testes de carga compatíveis com o escopo inicial.
 
@@ -202,7 +226,8 @@ O modo local será tratado como um produto separado. Desenvolvimento local da V2
 - [ ] Criar instalação e atualização reproduzíveis.
 - [ ] Executar API e scheduler como serviço em segundo plano.
 - [ ] Resolver portas, certificados e comunicação com a extensão.
-- [ ] Armazenar segredos com mecanismos próprios do sistema operacional.
+- [ ] Proteger a API local por loopback e credencial aleatória por instalação, sem exigir contas.
+- [ ] Armazenar credenciais locais com mecanismos próprios do sistema operacional.
 - [ ] Criar backup, restauração e diagnóstico local.
 - [ ] Documentar firewall, permissões e desinstalação.
 - [ ] Criar testes de instalação no Windows, macOS e Linux suportados.

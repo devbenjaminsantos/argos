@@ -88,16 +88,16 @@ Agendador cloud ──→ job de coleta ────┘
                          └──→ Mercado Livre / notificações
 ```
 
-## Persistência
+## Persistência — decisão posteriormente refinada
 
 Arquivos locais de contêineres cloud normalmente são efêmeros. Portanto, um arquivo SQLite dentro do contêiner não deve ser considerado armazenamento de produção.
 
-Foram consideradas duas opções:
+Inicialmente foram consideradas duas opções:
 
 1. SQLite no desenvolvimento local e PostgreSQL antes do primeiro deploy;
 2. PostgreSQL desde o início, localmente por contêiner e gerenciado na nuvem.
 
-A segunda opção foi selecionada para a V2 porque reduz diferenças entre desenvolvimento e produção. SQLite permanece como alternativa a ser reavaliada para a edição local/autohospedada da V3.
+Após a escolha da Azure, o projeto decidiu usar Azure SQL Database, e não PostgreSQL, na V2. A decisão posterior e prevalente está no [`ADR 0003`](0003-backend-stack-and-auth.md). SQLite permanece como alternativa a ser reavaliada para a edição local/autohospedada da V3.
 
 ## Avaliação inicial de provedores
 
@@ -126,7 +126,7 @@ A Azure foi escolhida para o piloto. A decisão específica está registrada no 
 - [x] Aprovar desenvolvimento local e execução cloud.
 - [x] Escolher a Azure para a V2.
 - [x] Adiar a edição local/autohospedada para a V3.
-- [ ] Escolher FastAPI ou Django.
-- [ ] Confirmar PostgreSQL desde o primeiro bloco persistente.
+- [x] Escolher FastAPI.
+- [x] Escolher Azure SQL Database.
 - [ ] Definir orçamento mensal máximo e alertas de custo.
-- [ ] Decidir quando autenticação e múltiplos usuários entram no escopo.
+- [x] Incluir autenticação e isolamento multiusuário desde a V2.

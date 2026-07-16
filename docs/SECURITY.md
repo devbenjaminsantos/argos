@@ -60,3 +60,16 @@ A V1 não utiliza endpoint remoto, autenticação ou token de Telegram. Nenhum s
 - o histórico local pode ser perdido ao remover a extensão ou apagar seus dados.
 
 Esses riscos devem ser tratados com testes manuais em páginas reais, telemetria local de status, versionamento dos adaptadores e, posteriormente, coletores controlados no back-end.
+
+## Controles planejados para a V2 cloud
+
+- autenticação federada OIDC/OAuth 2.0 obrigatória;
+- Authorization Code com PKCE para extensão e aplicativo móvel;
+- identidade interna baseada em `issuer` e `subject`;
+- propriedade explícita de produtos, históricos e notificações;
+- consultas sempre escopadas ao usuário autenticado;
+- testes negativos de acesso entre usuários;
+- identidade gerenciada para API e job acessarem Azure SQL sem senha;
+- permissões mínimas e separadas entre identidade humana e identidade da carga;
+- proteção contra SSRF antes de ativar coletas cloud;
+- orçamento, alertas e limites de escala antes de jobs recorrentes.

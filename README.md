@@ -7,7 +7,7 @@ O foco inicial do projeto são anúncios do **Mercado Livre** e da **Shopee**.
 ## Versões do projeto
 
 - **V1 — Chrome (concluída):** extensão local dedicada inicialmente ao Mercado Livre.
-- **V2 — Cloud Azure:** API, PostgreSQL, coleta programada e notificações executados na Azure.
+- **V2 — Cloud Azure:** API, Azure SQL Database, coleta programada e notificações executados na Azure.
 - **V3 — Back-end local:** edição autohospedada e distribuível para execução na máquina do usuário.
 - **V4 — Android:** aplicativo móvel integrado ao back-end cloud.
 
@@ -138,7 +138,7 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - o agendador e os coletores podem se tornar workers independentes;
 - notificações podem ser movidas para um serviço próprio;
 - novos marketplaces podem ser adicionados por meio de adaptadores;
-- PostgreSQL atende a persistência do back-end cloud sem alterar o domínio;
+- Azure SQL Database atende à persistência do back-end cloud sem alterar o domínio;
 - API, extensão e aplicativo Android podem reutilizar os mesmos contratos por meio do back-end.
 
 ## Stack tecnológica
@@ -154,17 +154,20 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 ### V2 — Back-end cloud na Azure
 
 - **Python**
-- **FastAPI** ou **Django** — decisão ainda pendente
-- **PostgreSQL**
+- **FastAPI**
+- **Azure SQL Database**
+- **SQLAlchemy** e ferramenta de migração — implementação ainda pendente
+- **Microsoft ODBC Driver 18 for SQL Server**
 - **Docker**
 - **Azure Container Apps**
 - **Azure Container Apps Jobs**
-- **Azure Database for PostgreSQL**
+- autenticação federada **OIDC/OAuth 2.0** por usuário
+- identidade gerenciada para acesso da aplicação ao banco sem senha
 
 ### V3 — Back-end local/autohospedado
 
 - mesma base Python e arquitetura modular da V2;
-- banco local ainda a decidir entre SQLite e PostgreSQL empacotado;
+- banco local ainda a decidir;
 - instalação, atualização e serviço em segundo plano multiplataforma.
 
 ### V4 — Aplicativo Android
