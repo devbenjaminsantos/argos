@@ -63,6 +63,8 @@ Esses riscos devem ser tratados com testes manuais em páginas reais, telemetria
 
 ## Controles planejados para a V2 Telegram
 
+O modelo de ameaças detalhado e os testes obrigatórios da V2 estão documentados em [`V2_SECURITY.md`](V2_SECURITY.md).
+
 - webhook autenticado por `X-Telegram-Bot-Api-Secret-Token`;
 - aceitação somente de conversas privadas;
 - identidade do proprietário baseada em `telegram_user_id`, nunca em `username`;

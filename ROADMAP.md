@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão concluída:** V1 — Extensão Chrome
 
-**Próximo item:** V2.1 — Comandos, estados da conversa e respostas de erro
+**Próximo item:** V2.2 — Criar o monólito modular Python
 
 **Última atualização:** 19/08/2026
 
@@ -56,19 +56,19 @@ Decisões relacionadas:
 - [`ADR 0003 — FastAPI, Azure SQL e identidades`](docs/decisions/0003-backend-stack-and-auth.md);
 - [`ADR 0004 — Telegram como V2`](docs/decisions/0004-telegram-mvp.md).
 
-### V2.1 — Recorte e contratos do MVP Telegram — EM ANDAMENTO
+### V2.1 — Recorte e contratos do MVP Telegram — CONCLUÍDA
 
 - [x] Escolher FastAPI, Azure Container Apps e Azure SQL Database.
 - [x] Escolher Telegram como interface e canal do MVP.
 - [x] Limitar o MVP a conversas privadas e Mercado Livre.
 - [x] Identificar o proprietário por `telegram_user_id`, nunca por `username`.
 - [x] Definir os contratos de repositório, coletor e notificador em [`docs/V2_CONTRACTS.md`](docs/V2_CONTRACTS.md).
-- [ ] Definir comandos, estados da conversa e respostas de erro.
-- [ ] Atualizar o modelo de ameaças para Telegram, webhook, SSRF e Azure SQL.
+- [x] Definir comandos, estados da conversa e respostas de erro em [`docs/V2_TELEGRAM_CONVERSATION.md`](docs/V2_TELEGRAM_CONVERSATION.md).
+- [x] Atualizar o modelo de ameaças para Telegram, webhook, SSRF e Azure SQL em [`docs/V2_SECURITY.md`](docs/V2_SECURITY.md).
 
 **Critério de conclusão:** recorte e contratos documentados, sem servidor funcional.
 
-### V2.2 — FastAPI local e contêiner
+### V2.2 — FastAPI local e contêiner — PRÓXIMA
 
 - [ ] Criar o monólito modular Python.
 - [ ] Criar `GET /health` e tratamento centralizado de erros.
