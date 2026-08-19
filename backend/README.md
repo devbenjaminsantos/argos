@@ -54,8 +54,23 @@ Os modelos ficam dentro dos respectivos módulos de domínio, em vez de um diret
 
 A aplicação é criada por uma factory e expõe inicialmente apenas `GET /health`. A documentação interativa permanece desabilitada por padrão e os erros usam um envelope seguro com identificador de correlação.
 
-Depois de instalar as dependências do projeto em um ambiente virtual, execute a partir de `backend/`:
+Crie o ambiente e instale também as dependências de desenvolvimento:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -e ".[dev]"
+```
+
+O arquivo `.env.example` contém apenas configuração não sensível e nomes de variáveis. Copie-o para `.env`, preencha segredos localmente e exporte as variáveis antes de iniciar. O `.env` real é ignorado pelo Git.
+
+Execute a partir de `backend/`:
 
 ```bash
 python -m uvicorn argos.main:app --app-dir src --host 127.0.0.1 --port 8000
+```
+
+Para executar os testes:
+
+```bash
+.venv/bin/python -m pytest
 ```

@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão concluída:** V1 — Extensão Chrome
 
-**Próximo item:** V2.2 — Configurar testes e variáveis sem segredos
+**Próximo item:** V2.2 — Criar imagem Docker reproduzível com ODBC Driver 18
 
 **Última atualização:** 19/08/2026
 
@@ -72,7 +72,7 @@ Decisões relacionadas:
 
 - [x] Criar o monólito modular Python em [`backend/`](backend/).
 - [x] Criar `GET /health` e tratamento centralizado de erros.
-- [ ] Configurar testes e variáveis sem segredos no repositório.
+- [x] Configurar testes e variáveis sem segredos no repositório.
 - [ ] Criar uma imagem Docker reproduzível com o ODBC Driver 18.
 
 **Critério de conclusão:** API e testes passam localmente e a imagem inicia com `/health` funcional.

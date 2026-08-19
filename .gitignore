@@ -12,3 +12,7 @@ __pycache__/
 .mypy_cache/
 .venv/
 backend/.env
+.env
+.env.*
+!.env.example
+!backend/.env.example
