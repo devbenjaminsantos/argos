@@ -50,4 +50,12 @@ Importações no sentido contrário são proibidas. Em particular, o domínio n�
 
 Os modelos ficam dentro dos respectivos módulos de domínio, em vez de um diretório global `models`. Contratos de repositório ficam em `application/ports`, e suas implementações ficam em `infrastructure/database`. Isso evita que modelos de banco se tornem acidentalmente o modelo de negócio.
 
-O `main.py`, as dependências de runtime e o endpoint `/health` serão adicionados na próxima entrega da V2.2.
+## API local
+
+A aplicação é criada por uma factory e expõe inicialmente apenas `GET /health`. A documentação interativa permanece desabilitada por padrão e os erros usam um envelope seguro com identificador de correlação.
+
+Depois de instalar as dependências do projeto em um ambiente virtual, execute a partir de `backend/`:
+
+```bash
+python -m uvicorn argos.main:app --app-dir src --host 127.0.0.1 --port 8000
+```
