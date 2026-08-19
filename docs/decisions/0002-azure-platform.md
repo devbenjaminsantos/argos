@@ -39,7 +39,7 @@ Uma VM poderá ser reavaliada se o coletor passar a exigir navegador headless pe
 
 Esta decisão escolhe a plataforma cloud da V2. Ela não transforma o ambiente local de desenvolvimento em uma edição distribuível.
 
-A edição local/autohospedada foi movida para a V3 porque exige decisões próprias sobre:
+A edição local/autohospedada foi movida para a V4 porque exige decisões próprias sobre:
 
 - instalação multiplataforma;
 - execução como serviço em segundo plano;

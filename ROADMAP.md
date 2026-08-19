@@ -12,9 +12,11 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 ## Estado atual
 
-**Versão concluída:** V1 — Extensão Chrome  
-**Próxima etapa:** V2.1 — Decisões e contratos do back-end  
-**Última atualização:** 16/07/2026
+**Versão concluída:** V1 — Extensão Chrome
+
+**Próximo item:** V2.1 — Comandos, estados da conversa e respostas de erro
+
+**Última atualização:** 19/08/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -43,205 +45,176 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 ---
 
-## V2 — Back-end cloud na Azure
+## V2 — MVP Telegram na Azure
 
-A V2 será desenvolvida e testada localmente, mas seu produto final rodará na Azure. O modo local/autohospedado foi separado e movido para a V3.
-
-### V2.1 — Decisões e contratos do back-end — PRÓXIMA
-
-- [x] Avaliar execução local versus execução em nuvem.
-- [x] Confirmar desenvolvimento local com execução programada em nuvem.
-- [x] Escolher a Azure como provedora do piloto.
-- [x] Separar o modo local/autohospedado e adiá-lo para a V3.
-- [x] Escolher FastAPI como framework da API.
-- [x] Escolher Azure SQL Database como persistência da V2.
-- [x] Definir o back-end cloud como multiusuário com autenticação obrigatória.
-- [ ] Escolher o provedor OIDC para login dos usuários.
-- [ ] Definir a estratégia de SQL Server para desenvolvimento e testes locais.
-- [ ] Definir os limites entre domínio, aplicação e infraestrutura.
-- [ ] Definir os contratos de `ProductRepository`, `PriceRepository`, `PriceCollector` e `Notifier`.
-- [ ] Definir o formato inicial da API e dos erros.
-- [ ] Atualizar o modelo de ameaças para incluir API, SSRF e banco de dados.
-
-**Critério de conclusão:** decisões registradas em documentação, sem implementação funcional do servidor.
+A V2 entregará o primeiro Argos cloud utilizável. O Telegram será interface, identidade inicial e canal de notificação. OIDC, extensão cloud, modo local e Android ficam fora desta versão.
 
 Decisões relacionadas:
 
 - [`ADR 0001 — Desenvolvimento local e execução em nuvem`](docs/decisions/0001-local-vs-cloud.md);
-- [`ADR 0002 — Azure como plataforma da V2`](docs/decisions/0002-azure-platform.md);
-- [`ADR 0003 — FastAPI, Azure SQL e autenticação`](docs/decisions/0003-backend-stack-and-auth.md).
+- [`ADR 0002 — Azure como plataforma`](docs/decisions/0002-azure-platform.md);
+- [`ADR 0003 — FastAPI, Azure SQL e identidades`](docs/decisions/0003-backend-stack-and-auth.md);
+- [`ADR 0004 — Telegram como V2`](docs/decisions/0004-telegram-mvp.md).
 
-### V2.2 — Fundação executável da API
+### V2.1 — Recorte e contratos do MVP Telegram — EM ANDAMENTO
 
-- [ ] Criar a estrutura modular do back-end.
-- [ ] Configurar ambiente e variáveis sem armazenar segredos no repositório.
-- [ ] Criar uma imagem Docker reproduzível.
-- [ ] Criar endpoint de saúde, como `GET /health`.
-- [ ] Configurar tratamento centralizado de erros.
-- [ ] Adicionar testes do processo de inicialização e do endpoint de saúde.
-- [ ] Publicar somente o endpoint de saúde em um Azure Container App de desenvolvimento.
+- [x] Escolher FastAPI, Azure Container Apps e Azure SQL Database.
+- [x] Escolher Telegram como interface e canal do MVP.
+- [x] Limitar o MVP a conversas privadas e Mercado Livre.
+- [x] Identificar o proprietário por `telegram_user_id`, nunca por `username`.
+- [x] Definir os contratos de repositório, coletor e notificador em [`docs/V2_CONTRACTS.md`](docs/V2_CONTRACTS.md).
+- [ ] Definir comandos, estados da conversa e respostas de erro.
+- [ ] Atualizar o modelo de ameaças para Telegram, webhook, SSRF e Azure SQL.
 
-**Critério de conclusão:** o mesmo contêiner inicia localmente e na Azure, e o teste de saúde passa nos dois ambientes.
+**Critério de conclusão:** recorte e contratos documentados, sem servidor funcional.
 
-### V2.3 — Domínio e regras de preço
+### V2.2 — FastAPI local e contêiner
 
-- [ ] Implementar a identidade interna do usuário a partir de `issuer` e `subject` autenticados.
-- [ ] Implementar entidades de produto, observação de preço e entrega de notificação.
-- [ ] Vincular cada agregado ao proprietário sem usar e-mail como identificador.
-- [ ] Armazenar valores monetários em centavos inteiros ou tipo decimal seguro.
-- [ ] Portar as regras de preço-alvo e queda relevante da extensão.
-- [ ] Definir os estados de coleta e suas transições.
-- [ ] Criar testes de paridade com as regras da V1.
+- [ ] Criar o monólito modular Python.
+- [ ] Criar `GET /health` e tratamento centralizado de erros.
+- [ ] Configurar testes e variáveis sem segredos no repositório.
+- [ ] Criar uma imagem Docker reproduzível com o ODBC Driver 18.
 
-**Critério de conclusão:** regras de negócio funcionam sem depender de HTTP, banco ou scraper.
+**Critério de conclusão:** API e testes passam localmente e a imagem inicia com `/health` funcional.
 
-### V2.4 — Persistência com Azure SQL Database
+### V2.3 — Fundação Azure
 
-- [ ] Escolher e configurar a ferramenta de migração.
-- [ ] Instalar o Microsoft ODBC Driver 18 na imagem Docker.
-- [ ] Definir como os testes de integração usarão SQL Server local ou Azure SQL isolado.
-- [ ] Provisionar Azure SQL Database no ambiente de desenvolvimento.
-- [ ] Configurar identidade gerenciada do Container App para acesso sem senha.
-- [ ] Criar tabelas de produtos, observações e notificações.
-- [ ] Incluir `user_id` e índices de propriedade nas tabelas aplicáveis.
-- [ ] Implementar os repositórios definidos na V2.1.
-- [ ] Garantir unicidade de produto e deduplicação de notificações.
-- [ ] Testar isolamento: um usuário nunca acessa dados de outro.
-- [ ] Criar testes de integração do banco.
+- [ ] Criar resource group e Container Apps Environment de desenvolvimento.
+- [ ] Configurar orçamento, alertas e limites de escala antes dos recursos recorrentes.
+- [ ] Publicar somente `/health` em um Container App com escala mínima zero.
+- [ ] Validar logs, cold start e implantação.
 
-**Critério de conclusão:** migrações e integrações funcionam no SQL Server/Azure SQL, o Container App acessa o banco sem senha e os testes provam isolamento entre usuários.
+**Critério de conclusão:** o mesmo contêiner responde a `/health` localmente e na Azure.
 
-### V2.5 — Autenticação e identidade do usuário
+### V2.4 — Bot de teste e segredos
 
-- [ ] Registrar a aplicação no provedor OIDC escolhido.
-- [ ] Decidir entre autenticação integrada do Container Apps e validação no FastAPI.
-- [ ] Implementar Authorization Code com PKCE para clientes públicos.
-- [ ] Mapear `issuer` e `subject` para o usuário interno.
-- [ ] Criar endpoint autenticado `GET /me`.
-- [ ] Padronizar respostas `401 Unauthorized` e `403 Forbidden`.
-- [ ] Testar token ausente, inválido, expirado e pertencente a outro emissor.
+- [ ] Criar um bot exclusivo de desenvolvimento no BotFather.
+- [ ] Guardar token e segredo do webhook somente nos secrets da Azure.
+- [ ] Confirmar a identidade do bot com a Bot API.
+- [ ] Garantir que tokens nunca apareçam em código, erros ou logs.
 
-**Critério de conclusão:** um usuário autenticado acessa `/me`, solicitações inválidas são recusadas e nenhuma senha é armazenada pelo Argos.
+**Critério de conclusão:** a API consulta a identidade do bot sem expor credenciais.
 
-### V2.6 — API de produtos
+### V2.5 — Webhook seguro
 
-- [ ] Criar endpoint para cadastrar produto.
-- [ ] Criar endpoint para listar produtos.
-- [ ] Criar endpoint para consultar um produto.
-- [ ] Criar endpoint para atualizar regras de monitoramento.
-- [ ] Criar endpoint para remover produto.
-- [ ] Aplicar o limite inicial de três produtos.
-- [ ] Escopar todas as consultas ao usuário autenticado.
-- [ ] Validar payloads e padronizar respostas de erro.
+- [ ] Criar `POST /webhooks/telegram`.
+- [ ] Validar `X-Telegram-Bot-Api-Secret-Token` em tempo constante.
+- [ ] Limitar corpo, tipos de update e comandos aceitos.
+- [ ] Recusar grupos e aceitar apenas conversas privadas.
+- [ ] Responder rapidamente sem executar scraping no request.
+- [ ] Testar segredo ausente, inválido e payload malformado.
 
-**Critério de conclusão:** CRUD coberto por testes de API, ainda sem coleta automática.
+**Critério de conclusão:** somente updates autenticados e válidos são aceitos.
 
-### V2.7 — Segurança de URLs e SSRF
+### V2.6 — Domínio e regras
 
-- [ ] Aceitar apenas HTTPS e lojas explicitamente suportadas.
-- [ ] Rejeitar credenciais, portas não permitidas e URLs malformadas.
+- [ ] Implementar usuário Telegram, produto, observação e entrega de notificação.
+- [ ] Armazenar dinheiro em unidade segura e portar regras da V1.
+- [ ] Aplicar limite de três produtos por usuário.
+- [ ] Definir estados de coleta e da conversa.
+- [ ] Criar testes sem dependência de FastAPI, Telegram ou banco.
+
+**Critério de conclusão:** regras funcionam isoladamente e mantêm paridade com a V1.
+
+### V2.7 — Azure SQL e isolamento
+
+- [ ] Configurar migrações e estratégia de testes com SQL Server.
+- [ ] Provisionar Azure SQL Database com proteção de custo.
+- [ ] Configurar identidade gerenciada para acesso sem senha.
+- [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
+- [ ] Implementar repositórios e índices de propriedade.
+- [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.
+
+**Critério de conclusão:** migrações são reproduzíveis, acesso cloud não usa senha e isolamento é comprovado.
+
+### V2.8 — Usuário, deduplicação e conversa
+
+- [ ] Implementar `/start`, `/ajuda` e `/cancelar`.
+- [ ] Persistir usuário por `telegram_user_id` e destino por `chat_id`.
+- [ ] Deduplicar updates por `update_id`.
+- [ ] Implementar rate limit e máquina de estados persistente.
+
+**Critério de conclusão:** updates repetidos não duplicam ações e conversas sobrevivem a reinícios.
+
+### V2.9 — Cadastro de produtos pelo Telegram
+
+- [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
+- [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
+- [ ] Validar entrada e permitir confirmação antes de salvar.
+- [ ] Escopar todas as operações ao usuário Telegram.
+
+**Critério de conclusão:** dois usuários gerenciam listas isoladas com limite individual de três produtos.
+
+### V2.10 — Segurança de URLs e SSRF
+
+- [ ] Aceitar apenas HTTPS e hosts explicitamente suportados.
+- [ ] Rejeitar credenciais, portas alternativas e URLs malformadas.
 - [ ] Resolver DNS e bloquear destinos privados, locais ou reservados.
-- [ ] Validar novamente cada redirecionamento.
-- [ ] Limitar tamanho, duração e quantidade de respostas.
-- [ ] Impedir que clientes escolham endpoints internos do coletor.
-- [ ] Criar testes com URLs maliciosas e redirecionamentos.
+- [ ] Validar cada redirecionamento e limitar tamanho e duração da resposta.
+- [ ] Criar testes com URLs maliciosas.
 
-**Critério de conclusão:** o coletor não funciona como proxy genérico nem alcança a rede interna.
+**Critério de conclusão:** o coletor não funciona como proxy genérico nem alcança rede interna.
 
-### V2.8 — Coletor do Mercado Livre
+### V2.11 — Coleta manual do Mercado Livre
 
 - [ ] Portar o adaptador do Mercado Livre para o back-end.
-- [ ] Criar uma operação manual de coleta para um produto cadastrado.
-- [ ] Registrar sucesso ou falha sem transformar erro em preço zero.
-- [ ] Detectar produto indisponível, bloqueio e preço ausente.
-- [ ] Criar fixtures de páginas e testes do extrator.
+- [ ] Implementar `/verificar` para um produto cadastrado.
+- [ ] Registrar sucesso e falhas explícitas, nunca preço zero.
+- [ ] Criar fixtures e testes do extrator.
 
-**Critério de conclusão:** uma coleta manual registra uma observação válida no Azure SQL para o proprietário correto.
+**Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
 
-### V2.9 — Histórico e comparação
+### V2.12 — Histórico, job e alertas
 
-- [ ] Criar endpoint para consultar o histórico de um produto.
-- [ ] Comparar o preço atual com a última observação válida.
-- [ ] Calcular queda absoluta e percentual.
-- [ ] Calcular o menor preço observado no período disponível.
-- [ ] Não afirmar histórico de 30 ou 90 dias sem dados suficientes.
+- [ ] Comparar preço atual, último preço válido e preço-alvo.
+- [ ] Criar comando de job separado da API.
+- [ ] Agendar produtos vencidos com Container Apps Jobs em UTC.
+- [ ] Impedir coletas concorrentes e aplicar retentativas limitadas.
+- [ ] Enviar alerta pelo Telegram e deduplicar entregas.
 
-**Critério de conclusão:** API retorna histórico e comparações com testes determinísticos.
+**Critério de conclusão:** uma queda gera exatamente um alerta e o job continua após reinícios.
 
-### V2.10 — Agendador e retentativas
+### V2.13 — Fechamento do MVP
 
-- [ ] Criar um comando de job separado da inicialização da API.
-- [ ] Executar verificações vencidas com Azure Container Apps Jobs.
-- [ ] Configurar execução cron em UTC.
-- [ ] Evitar duas coletas simultâneas do mesmo produto.
-- [ ] Implementar retentativa com espera progressiva para falhas transitórias.
-- [ ] Aplicar limites por loja.
-- [ ] Recuperar tarefas interrompidas após reinício.
-- [ ] Testar relógio, concorrência e recuperação.
+- [ ] Configurar métricas, logs sem dados sensíveis e prontidão.
+- [ ] Revisar permissões, backup, rollback e consumo da Azure.
+- [ ] Testar cold start, falhas do Telegram, bloqueio da loja e banco indisponível.
+- [ ] Executar teste de aceitação com dois usuários.
 
-**Critério de conclusão:** o job agendado na Azure coleta produtos vencidos uma única vez e falhas não geram loops agressivos.
-
-### V2.11 — Notificações remotas
-
-- [ ] Definir o primeiro canal remoto.
-- [ ] Manter tokens e credenciais somente no servidor.
-- [ ] Criar contrato de notificador independente do canal.
-- [ ] Implementar deduplicação persistente.
-- [ ] Registrar tentativas, falhas e entregas.
-- [ ] Testar o canal com um adaptador falso antes da integração real.
-
-**Critério de conclusão:** um alerta gera uma única entrega rastreável, sem expor credenciais ao cliente.
-
-### V2.12 — Integração com a extensão
-
-- [ ] Implementar login OIDC com PKCE na extensão.
-- [ ] Enviar e renovar tokens sem persistir senha do usuário.
-- [ ] Criar o modo cloud da extensão separado do armazenamento local da V1.
-- [ ] Sincronizar produtos cloud sem duplicar cadastros.
-- [ ] Exibir estado de sincronização e falhas.
-- [ ] Tratar indisponibilidade e cold start da API sem corromper o estado local.
-
-**Critério de conclusão:** a extensão cadastra e consulta produtos pela API em um ambiente de teste.
-
-### V2.13 — Operação e proteção de custos na Azure
-
-- [ ] Configurar logs estruturados e métricas básicas.
-- [ ] Criar verificações de prontidão e saúde.
-- [ ] Configurar identidade gerenciada e permissões mínimas no Azure SQL.
-- [ ] Configurar orçamento, alertas de custo e limites de escala.
-- [ ] Revisar consumo de Container Apps, Azure SQL, registry, logs e tráfego.
-- [ ] Documentar backup, restauração, implantação e rollback.
-- [ ] Executar testes de carga compatíveis com o escopo inicial.
-
-**Critério de conclusão:** o ambiente Azure pode ser operado, restaurado e limitado dentro do orçamento definido para o piloto.
+**Critério de conclusão:** o usuário cadastra um link e recebe um alerta real sem acessar código ou Azure.
 
 ---
 
-## V3 — Back-end local/autohospedado
+## V3 — Plataforma cloud e integração da extensão
 
-O modo local será tratado como um produto separado. Desenvolvimento local da V2 não significa que essa edição esteja pronta para distribuição.
+- [ ] Escolher provedor OIDC e implementar Authorization Code com PKCE.
+- [ ] Identificar contas por `issuer` + `subject` e vincular identidade Telegram.
+- [ ] Criar API pública de produtos e histórico escopada ao usuário autenticado.
+- [ ] Integrar a extensão Chrome com o modo cloud.
+- [ ] Sincronizar sem duplicar produtos ou corromper o modo local da V1.
+- [ ] Adicionar canais de notificação além do Telegram.
 
-- [ ] Definir sistemas operacionais suportados.
-- [ ] Escolher SQLite ou PostgreSQL empacotado para a edição local.
-- [ ] Criar instalação e atualização reproduzíveis.
-- [ ] Executar API e scheduler como serviço em segundo plano.
-- [ ] Resolver portas, certificados e comunicação com a extensão.
-- [ ] Proteger a API local por loopback e credencial aleatória por instalação, sem exigir contas.
-- [ ] Armazenar credenciais locais com mecanismos próprios do sistema operacional.
-- [ ] Criar backup, restauração e diagnóstico local.
-- [ ] Documentar firewall, permissões e desinstalação.
-- [ ] Criar testes de instalação no Windows, macOS e Linux suportados.
-
-**Critério de conclusão:** um usuário consegue instalar, atualizar, executar e remover o Argos local sem configurar manualmente Python, banco ou scheduler.
+**Critério de conclusão:** uma conta cloud acessa os mesmos produtos pelo Telegram e pela extensão.
 
 ---
 
-## V4 — Android
+## V4 — Back-end local/autohospedado
 
-- [ ] Aplicativo Android com Kotlin e Jetpack Compose.
-- [ ] Autenticação e comunicação com a API cloud.
-- [ ] Cadastro e gerenciamento de produtos.
-- [ ] Histórico e notificações no dispositivo.
+- [ ] Definir sistemas operacionais e banco suportados.
+- [ ] Criar instalação, atualização e serviço em segundo plano.
+- [ ] Proteger API por loopback e credencial por instalação.
+- [ ] Implementar backup, diagnóstico e desinstalação.
+- [ ] Criar testes de instalação nos sistemas suportados.
+
+**Critério de conclusão:** usuário instala e remove o Argos sem configurar Python, banco ou scheduler.
+
+---
+
+## V5 — Android
+
+- [ ] Criar aplicativo com Kotlin e Jetpack Compose.
+- [ ] Integrar autenticação e API cloud.
+- [ ] Gerenciar produtos, histórico e notificações.
 
 ---
 

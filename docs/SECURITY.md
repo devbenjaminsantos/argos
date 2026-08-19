@@ -61,15 +61,26 @@ A V1 não utiliza endpoint remoto, autenticação ou token de Telegram. Nenhum s
 
 Esses riscos devem ser tratados com testes manuais em páginas reais, telemetria local de status, versionamento dos adaptadores e, posteriormente, coletores controlados no back-end.
 
-## Controles planejados para a V2 cloud
+## Controles planejados para a V2 Telegram
 
-- autenticação federada OIDC/OAuth 2.0 obrigatória;
-- Authorization Code com PKCE para extensão e aplicativo móvel;
-- identidade interna baseada em `issuer` e `subject`;
+- webhook autenticado por `X-Telegram-Bot-Api-Secret-Token`;
+- aceitação somente de conversas privadas;
+- identidade do proprietário baseada em `telegram_user_id`, nunca em `username`;
+- `chat_id` tratado apenas como destino de mensagens;
+- deduplicação persistente por `update_id`;
+- rate limit por usuário e lista fechada de comandos;
 - propriedade explícita de produtos, históricos e notificações;
-- consultas sempre escopadas ao usuário autenticado;
+- consultas sempre escopadas ao usuário Telegram;
 - testes negativos de acesso entre usuários;
 - identidade gerenciada para API e job acessarem Azure SQL sem senha;
 - permissões mínimas e separadas entre identidade humana e identidade da carga;
 - proteção contra SSRF antes de ativar coletas cloud;
 - orçamento, alertas e limites de escala antes de jobs recorrentes.
+
+## Controles planejados para a V3 cloud
+
+- autenticação federada OIDC/OAuth 2.0;
+- Authorization Code com PKCE para extensão e aplicativo móvel;
+- identidade interna baseada em `issuer` e `subject`;
+- vinculação explícita e auditável entre conta OIDC e identidade Telegram;
+- autorização dentro da aplicação, além da autenticação na borda.

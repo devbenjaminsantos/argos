@@ -1,11 +1,11 @@
-# ADR 0003 — FastAPI, Azure SQL e autenticação
+# ADR 0003 — FastAPI, Azure SQL e identidades
 
 **Status:** aceita  
 **Data:** 16/07/2026
 
 ## Contexto
 
-A V2 será uma API cloud multiusuário executada em Azure Container Apps. Cada produto, observação, regra e notificação pertence a um usuário e não pode ser exposto a outro.
+A V2 será um bot Telegram multiusuário executado em Azure Container Apps. Cada produto, observação, regra e notificação pertence a um usuário e não pode ser exposto a outro. A API OIDC para extensão e Android foi movida para a V3.
 
 O projeto busca uma API pequena, modular e adequada a processos orientados a I/O, além de uma persistência integrada ao ambiente Azure.
 
@@ -32,37 +32,39 @@ Direção técnica inicial:
 
 O SQL Server adiciona uma dependência nativa: o driver ODBC precisa ser instalado e validado na imagem. Isso será tratado no primeiro bloco de persistência.
 
-### Autenticação por usuário
+### Identidade do usuário na V2 Telegram
 
-A API cloud exigirá autenticação federada compatível com OIDC/OAuth 2.0. O provedor de identidade ainda será escolhido.
+Na V2, o Telegram será a interface e a fonte da identidade inicial. O bot aceitará somente conversas privadas.
 
 Regras obrigatórias:
 
-- clientes públicos, como extensão e Android, usarão Authorization Code com PKCE;
-- a aplicação não armazenará senha do usuário;
-- o usuário interno será identificado pela combinação estável `issuer` + `subject`, nunca apenas pelo e-mail;
+- o proprietário será identificado pelo `telegram_user_id`, nunca por `username`;
+- o `chat_id` será armazenado separadamente como destino das mensagens;
+- o webhook exigirá `X-Telegram-Bot-Api-Secret-Token` válido;
+- updates serão deduplicados por `update_id`;
 - cada agregado persistido terá proprietário explícito;
-- todas as consultas e comandos serão escopados ao usuário autenticado;
+- todas as consultas e comandos serão escopados ao usuário Telegram;
 - o limite de três produtos será aplicado por usuário;
-- autenticação na borda não substituirá autorização dentro da aplicação;
 - testes tentarão acessar, alterar e remover dados pertencentes a outro usuário.
 
-Azure Container Apps possui autenticação integrada com Microsoft Entra ID, Google e outros provedores OIDC. Essa opção será comparada com validação de tokens dentro do FastAPI antes da implementação.
+### Autenticação na V3
+
+OIDC/OAuth 2.0 permanece aprovado para a plataforma cloud da V3. Extensão e Android usarão Authorization Code com PKCE, e o usuário interno será identificado por `issuer` + `subject`. A V3 também definirá como vincular uma conta OIDC à identidade Telegram existente.
 
 ## Identidades diferentes
 
 O sistema terá duas categorias de identidade:
 
-1. **identidade humana:** autentica o usuário da extensão ou do aplicativo;
+1. **identidade humana:** na V2 vem do Telegram; na V3 também poderá vir do OIDC;
 2. **identidade da carga:** permite que API e job acessem Azure SQL e outros recursos sem senha.
 
 Uma identidade gerenciada representa o serviço e não deve ser confundida com o usuário final.
 
-## V3 local
+## V4 local
 
 A edição local não precisará de contas de usuário no escopo inicial. Mesmo assim, uma API HTTP local não pode ficar aberta apenas porque o sistema operacional protege downloads.
 
-A direção da V3 será:
+A direção da V4 será:
 
 - escutar somente no loopback por padrão;
 - usar uma credencial aleatória por instalação ou um canal IPC equivalente;
@@ -79,6 +81,6 @@ SmartScreen, Gatekeeper e mecanismos semelhantes ajudam a verificar ou restringi
 - a imagem Docker incluirá dependências ODBC;
 - o pipeline deverá testar migrações e consultas contra SQL Server/Azure SQL;
 - API e job usarão identidade gerenciada com privilégio mínimo;
-- a escolha do provedor OIDC permanece uma decisão pendente;
-- autenticação e isolamento de dados entram antes da integração cloud da extensão.
-
+- a escolha do provedor OIDC permanece pendente para a V3;
+- isolamento por `telegram_user_id` entra desde a primeira migração da V2;
+- a vinculação entre Telegram e OIDC deverá preservar a propriedade dos dados existentes.

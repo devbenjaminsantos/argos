@@ -7,9 +7,10 @@ O foco inicial do projeto são anúncios do **Mercado Livre** e da **Shopee**.
 ## Versões do projeto
 
 - **V1 — Chrome (concluída):** extensão local dedicada inicialmente ao Mercado Livre.
-- **V2 — Cloud Azure:** API, Azure SQL Database, coleta programada e notificações executados na Azure.
-- **V3 — Back-end local:** edição autohospedada e distribuível para execução na máquina do usuário.
-- **V4 — Android:** aplicativo móvel integrado ao back-end cloud.
+- **V2 — MVP Telegram:** cadastro, monitoramento e alertas pelo Telegram, executados na Azure.
+- **V3 — Plataforma cloud:** autenticação OIDC, API de clientes e integração cloud da extensão.
+- **V4 — Back-end local:** edição autohospedada e distribuível para execução na máquina do usuário.
+- **V5 — Android:** aplicativo móvel integrado ao back-end cloud.
 
 O progresso detalhado e a próxima entrega estão registrados em [`ROADMAP.md`](ROADMAP.md).
 
@@ -151,7 +152,7 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - **esbuild** para empacotamento
 - **Vitest** para testes
 
-### V2 — Back-end cloud na Azure
+### V2 — MVP Telegram na Azure
 
 - **Python**
 - **FastAPI**
@@ -161,16 +162,23 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - **Docker**
 - **Azure Container Apps**
 - **Azure Container Apps Jobs**
-- autenticação federada **OIDC/OAuth 2.0** por usuário
+- identidade do usuário baseada no `telegram_user_id`
+- Telegram Bot API com webhook autenticado
 - identidade gerenciada para acesso da aplicação ao banco sem senha
 
-### V3 — Back-end local/autohospedado
+### V3 — Plataforma cloud e extensão
+
+- autenticação federada **OIDC/OAuth 2.0**;
+- integração da extensão Chrome com a API;
+- vinculação da identidade Telegram à conta cloud.
+
+### V4 — Back-end local/autohospedado
 
 - mesma base Python e arquitetura modular da V2;
 - banco local ainda a decidir;
 - instalação, atualização e serviço em segundo plano multiplataforma.
 
-### V4 — Aplicativo Android
+### V5 — Aplicativo Android
 
 - **Kotlin**
 - **Jetpack Compose**

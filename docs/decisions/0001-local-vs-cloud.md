@@ -76,7 +76,7 @@ Desvantagens:
 - utilizar banco persistente externo ao filesystem do contêiner;
 - manter a implantação independente do provedor escolhido.
 - entregar a execução cloud na V2;
-- adiar a edição local/autohospedada, com instalação própria, para a V3.
+- adiar a edição local/autohospedada, com instalação própria, para a V4.
 
 Fluxo proposto:
 
@@ -97,7 +97,7 @@ Inicialmente foram consideradas duas opções:
 1. SQLite no desenvolvimento local e PostgreSQL antes do primeiro deploy;
 2. PostgreSQL desde o início, localmente por contêiner e gerenciado na nuvem.
 
-Após a escolha da Azure, o projeto decidiu usar Azure SQL Database, e não PostgreSQL, na V2. A decisão posterior e prevalente está no [`ADR 0003`](0003-backend-stack-and-auth.md). SQLite permanece como alternativa a ser reavaliada para a edição local/autohospedada da V3.
+Após a escolha da Azure, o projeto decidiu usar Azure SQL Database, e não PostgreSQL, na V2. A decisão posterior e prevalente está no [`ADR 0003`](0003-backend-stack-and-auth.md). SQLite permanece como alternativa a ser reavaliada para a edição local/autohospedada da V4.
 
 ## Avaliação inicial de provedores
 
@@ -125,7 +125,7 @@ A Azure foi escolhida para o piloto. A decisão específica está registrada no 
 
 - [x] Aprovar desenvolvimento local e execução cloud.
 - [x] Escolher a Azure para a V2.
-- [x] Adiar a edição local/autohospedada para a V3.
+- [x] Adiar a edição local/autohospedada para a V4.
 - [x] Escolher FastAPI.
 - [x] Escolher Azure SQL Database.
 - [ ] Definir orçamento mensal máximo e alertas de custo.
