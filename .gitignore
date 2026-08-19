@@ -3,3 +3,11 @@ dist/
 coverage/
 .DS_Store
 
+# Python back-end
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+backend/.env

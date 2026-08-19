@@ -134,6 +134,12 @@ Popup/Background ──→ Aplicação ──→ Domínio
 
 O domínio permanece no centro e não conhece IndexedDB, páginas HTML ou APIs do Chrome. Cada loja possui seu próprio adaptador, mas todas devem entregar um produto extraído no contrato esperado pela aplicação.
 
+### Organização da V2 Telegram
+
+O back-end Python está isolado em [`backend/`](backend/). Ele usa um layout `src` e mantém domínio, aplicação, API e infraestrutura em módulos distintos. Modelos de negócio ficam nos seus domínios; contratos de repositório ficam na aplicação; SQLAlchemy, Telegram, scrapers e Azure permanecem como adaptadores de infraestrutura.
+
+A estrutura detalhada e as regras de dependência estão em [`backend/README.md`](backend/README.md).
+
 Essa separação simplifica o desenvolvimento e a implantação inicial, além de preparar alguns caminhos naturais de evolução:
 
 - o agendador e os coletores podem se tornar workers independentes;

@@ -1,0 +1,1 @@
+"""Domínio de produtos monitorados."""

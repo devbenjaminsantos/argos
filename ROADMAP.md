@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão concluída:** V1 — Extensão Chrome
 
-**Próximo item:** V2.2 — Criar o monólito modular Python
+**Próximo item:** V2.2 — Criar `GET /health` e tratamento centralizado de erros
 
 **Última atualização:** 19/08/2026
 
@@ -70,7 +70,7 @@ Decisões relacionadas:
 
 ### V2.2 — FastAPI local e contêiner — PRÓXIMA
 
-- [ ] Criar o monólito modular Python.
+- [x] Criar o monólito modular Python em [`backend/`](backend/).
 - [ ] Criar `GET /health` e tratamento centralizado de erros.
 - [ ] Configurar testes e variáveis sem segredos no repositório.
 - [ ] Criar uma imagem Docker reproduzível com o ODBC Driver 18.
