@@ -14,9 +14,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão concluída:** V1 — Extensão Chrome
 
-**Próximo item:** V2.2 — Criar imagem Docker reproduzível com ODBC Driver 18
+**Próximo item:** V2.3 — Criar a fundação Azure com proteção de custo
 
-**Última atualização:** 19/08/2026
+**Última atualização:** 20/08/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -68,16 +68,17 @@ Decisões relacionadas:
 
 **Critério de conclusão:** recorte e contratos documentados, sem servidor funcional.
 
-### V2.2 — FastAPI local e contêiner — PRÓXIMA
+### V2.2 — FastAPI local e contêiner — CONCLUÍDA
 
 - [x] Criar o monólito modular Python em [`backend/`](backend/).
 - [x] Criar `GET /health` e tratamento centralizado de erros.
 - [x] Configurar testes e variáveis sem segredos no repositório.
-- [ ] Criar uma imagem Docker reproduzível com o ODBC Driver 18.
+- [x] Criar a definição reproduzível da imagem com Python fixado, dependências travadas, usuário sem privilégios e ODBC Driver 18.
+- [x] Validar build, presença do ODBC Driver 18, execução sem privilégios e `/health` dentro do contêiner.
 
 **Critério de conclusão:** API e testes passam localmente e a imagem inicia com `/health` funcional.
 
-### V2.3 — Fundação Azure
+### V2.3 — Fundação Azure — PRÓXIMA
 
 - [ ] Criar resource group e Container Apps Environment de desenvolvimento.
 - [ ] Configurar orçamento, alertas e limites de escala antes dos recursos recorrentes.

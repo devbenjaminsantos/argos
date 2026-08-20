@@ -74,3 +74,27 @@ Para executar os testes:
 ```bash
 .venv/bin/python -m pytest
 ```
+
+## Contêiner
+
+A imagem usa Python 3.14 sobre Debian 12, instala o Microsoft ODBC Driver 18 e executa a API com um usuário sem privilégios. Dependências de runtime são resolvidas pelo arquivo `requirements.runtime.lock`; dependências de teste não entram na imagem.
+
+Construa a partir deste diretório:
+
+```bash
+docker build --platform linux/amd64 --tag argos-backend:dev .
+```
+
+Valide o driver incluído:
+
+```bash
+docker run --rm --entrypoint odbcinst argos-backend:dev -q -d
+```
+
+Inicie a API localmente:
+
+```bash
+docker run --rm --publish 8000:8000 argos-backend:dev
+```
+
+O contêiner não contém `.env`, tokens, testes ou ferramentas de desenvolvimento. Segredos serão injetados por referências seguras do Azure Container Apps nas etapas posteriores.
