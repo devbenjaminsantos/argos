@@ -16,7 +16,7 @@ Este documento define os comandos, estados e respostas do MVP Telegram. O bot at
 - textos recebidos do usuário ou da loja são enviados como texto simples, sem interpretação de HTML ou Markdown;
 - o webhook apenas valida e aceita o update; coleta de página e outras tarefas lentas ocorrem fora da requisição.
 
-O bot não solicita senha, código de autenticação, dados de pagamento ou token. Respostas nunca incluem stack trace, segredo, query SQL, HTML coletado ou detalhes internos da Azure.
+O bot não solicita senha, código de autenticação, dados de pagamento ou token. Respostas nunca incluem stack trace, segredo, query SQL, HTML coletado ou detalhes internos da infraestrutura cloud.
 
 ## Comandos do MVP
 

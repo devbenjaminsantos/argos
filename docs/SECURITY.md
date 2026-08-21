@@ -74,10 +74,10 @@ O modelo de ameaças detalhado e os testes obrigatórios da V2 estão documentad
 - propriedade explícita de produtos, históricos e notificações;
 - consultas sempre escopadas ao usuário Telegram;
 - testes negativos de acesso entre usuários;
-- identidade gerenciada para API e job acessarem Azure SQL sem senha;
-- permissões mínimas e separadas entre identidade humana e identidade da carga;
+- conexão TLS com Supabase PostgreSQL usando credencial de runtime armazenada somente como segredo;
+- permissões mínimas e separadas entre identidade humana e credencial da carga;
 - proteção contra SSRF antes de ativar coletas cloud;
-- orçamento, alertas e limites de escala antes de jobs recorrentes.
+- quotas do plano Free verificadas antes de jobs recorrentes.
 
 ## Controles planejados para a V3 cloud
 

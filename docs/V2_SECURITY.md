@@ -8,9 +8,9 @@ A V2 inclui:
 
 - bot do Telegram em conversas privadas;
 - webhook público em FastAPI;
-- API e job executados no Azure Container Apps;
+- API executada no Render Free e job iniciado por agendador externo;
 - coleta de páginas do Mercado Livre;
-- persistência no Azure SQL Database;
+- persistência PostgreSQL no Supabase Free;
 - envio de respostas e alertas pela Telegram Bot API.
 
 OIDC, API pública para extensão, Android, grupos do Telegram e painel administrativo estão fora do escopo.
@@ -22,8 +22,8 @@ OIDC, API pública para extensão, Android, grupos do Telegram e painel administ
 - produtos, regras e históricos de cada proprietário;
 - integridade das observações de preço;
 - estado das conversas e updates processados;
-- credenciais e identidade gerenciada da carga;
-- disponibilidade e limite de custo dos recursos Azure;
+- credenciais de conexão e segredos da carga;
+- disponibilidade e quotas dos recursos Render, Supabase e do agendador;
 - rede interna, endpoint de metadados e serviços acessíveis pelo coletor.
 
 ## Atores e conteúdo não confiável
@@ -35,7 +35,7 @@ São tratados como não confiáveis:
 - nome, `username`, texto e URL enviados pelo usuário;
 - HTML, JSON, cabeçalhos, certificados e redirecionamentos retornados pela loja;
 - DNS e cada endereço resolvido para um host externo;
-- mensagens de erro de Telegram, SQL Server, driver ODBC e serviços Azure;
+- mensagens de erro de Telegram, PostgreSQL, Render, Supabase e do agendador;
 - valores vindos de variáveis de ambiente antes da validação de configuração.
 
 O segredo correto do webhook autentica a entrega, mas não transforma o conteúdo do update em dado confiável.
@@ -51,12 +51,12 @@ Telegram ── HTTPS + segredo ──► Webhook público
                                       ▼
                               Casos de uso do Argos
                                 │              │
-                     identidade gerenciada    │ HTTPS controlado
+                      conexão TLS restrita     │ HTTPS controlado
                                 ▼              ▼
-                         Azure SQL       Mercado Livre
+                      Supabase/PostgreSQL  Mercado Livre
                                 ▲
                                 │
-                         Container Apps Job
+                      job agendado externamente
 
 Argos ── HTTPS + token do bot ──► Telegram Bot API
 ```
@@ -128,7 +128,7 @@ O caminho do webhook não é considerado segredo. Trocar a URL sem validar o cab
 
 ### Ameaças
 
-- acesso a loopback, rede privada, link-local ou endpoint de metadados da Azure;
+- acesso a loopback, rede privada, link-local ou endpoints de metadados cloud;
 - host permitido usado para redirecionar a um destino proibido;
 - DNS rebinding entre validação e conexão;
 - URLs com credenciais, portas alternativas, caracteres ambíguos ou host semelhante;
@@ -185,7 +185,7 @@ Se a biblioteca HTTP não permitir fixar de maneira segura o endereço validado 
 - aplicar limites de tamanho a título, apelido, URL e detalhes persistidos;
 - nunca converter falha de parser em preço zero.
 
-## Azure SQL Database
+## Supabase PostgreSQL
 
 ### Ameaças
 
@@ -198,10 +198,11 @@ Se a biblioteca HTTP não permitir fixar de maneira segura o endereço validado 
 
 ### Controles obrigatórios
 
-- API e job usam identidade gerenciada e autenticação sem senha na Azure;
-- migrações usam identidade separada da identidade de runtime;
-- privilégios mínimos por identidade e ambiente;
-- ODBC Driver 18 configurado com criptografia e validação de certificado;
+- connection string existe apenas nos secrets do Render e do agendador;
+- migrações usam uma credencial separada da credencial de runtime, quando o provedor permitir;
+- privilégios mínimos por credencial e ambiente;
+- conexão PostgreSQL exige TLS e validação de certificado;
+- chaves administrativas do Supabase nunca são expostas ao cliente ou usadas como identidade humana;
 - acesso de rede limitado aos recursos necessários, conforme capacidade e custo do ambiente;
 - queries parametrizadas e repositórios sempre escopados ao proprietário;
 - constraints e índices únicos para integridade e deduplicação;
@@ -249,7 +250,7 @@ Segredos locais eventualmente usados no desenvolvimento ficam em arquivo ignorad
 - leases com expiração para recuperação após falha;
 - retentativa com espera progressiva, jitter e número máximo de tentativas;
 - limites de réplicas, CPU, memória, execução de jobs e retenção de logs;
-- orçamento e alertas configurados antes do agendamento recorrente;
+- quotas e restrições do plano Free verificadas antes do agendamento recorrente;
 - métricas para rejeições, duração, falhas, deduplicação e consumo;
 - procedimento para desativar jobs e webhook sem perder dados.
 
@@ -297,9 +298,9 @@ Esses riscos exigem deduplicação, transparência sobre o preço observado, tes
 ## Portões de segurança por etapa
 
 - **V2.2:** configuração validada, imagem sem segredos, processo não privilegiado e `/health` sem detalhes internos;
-- **V2.3:** HTTPS, limites de escala, orçamento, logs e acesso mínimo na Azure;
+- **V2.3:** plataforma Free, proteção de custo e contingência documentadas;
 - **V2.4:** token e segredo separados, armazenados como secrets e ausentes dos logs;
 - **V2.5:** autenticação do webhook, schema fechado, limite de corpo e deduplicação testados;
-- **V2.7:** identidade gerenciada, criptografia, migrações separadas e isolamento entre usuários testados;
+- **V2.7:** TLS, credenciais mínimas, migrações separadas e isolamento entre usuários testados;
 - **V2.10:** suíte negativa de SSRF aprovada antes de qualquer URL gerar tráfego;
 - **V2.13:** backup, restauração, rotação, rollback e desligamento operacional exercitados.

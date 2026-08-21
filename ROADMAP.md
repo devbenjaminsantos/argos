@@ -14,9 +14,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão concluída:** V1 — Extensão Chrome
 
-**Próximo item:** V2.3 — Criar a fundação Azure com proteção de custo
+**Próximo item:** V2.7 — Criar o projeto Supabase Free e validar a conexão TLS
 
-**Última atualização:** 20/08/2026
+**Última atualização:** 21/08/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -45,26 +45,27 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 ---
 
-## V2 — MVP Telegram na Azure
+## V2 — MVP Telegram em cloud
 
 A V2 entregará o primeiro Argos cloud utilizável. O Telegram será interface, identidade inicial e canal de notificação. OIDC, extensão cloud, modo local e Android ficam fora desta versão.
 
 Decisões relacionadas:
 
 - [`ADR 0001 — Desenvolvimento local e execução em nuvem`](docs/decisions/0001-local-vs-cloud.md);
-- [`ADR 0002 — Azure como plataforma`](docs/decisions/0002-azure-platform.md);
-- [`ADR 0003 — FastAPI, Azure SQL e identidades`](docs/decisions/0003-backend-stack-and-auth.md);
-- [`ADR 0004 — Telegram como V2`](docs/decisions/0004-telegram-mvp.md).
+- [`ADR 0002 — Azure como plataforma (histórica)`](docs/decisions/0002-azure-platform.md);
+- [`ADR 0003 — FastAPI e identidades; persistência refinada posteriormente`](docs/decisions/0003-backend-stack-and-auth.md);
+- [`ADR 0004 — Telegram como V2`](docs/decisions/0004-telegram-mvp.md);
+- [`ADR 0005 — Render e Supabase como plataforma primária`](docs/decisions/0005-render-supabase-platform.md).
 
 ### V2.1 — Recorte e contratos do MVP Telegram — CONCLUÍDA
 
-- [x] Escolher FastAPI, Azure Container Apps e Azure SQL Database.
+- [x] Escolher FastAPI e uma arquitetura cloud portátil; Render e Supabase foram definidos posteriormente no ADR 0005.
 - [x] Escolher Telegram como interface e canal do MVP.
 - [x] Limitar o MVP a conversas privadas e Mercado Livre.
 - [x] Identificar o proprietário por `telegram_user_id`, nunca por `username`.
 - [x] Definir os contratos de repositório, coletor e notificador em [`docs/V2_CONTRACTS.md`](docs/V2_CONTRACTS.md).
 - [x] Definir comandos, estados da conversa e respostas de erro em [`docs/V2_TELEGRAM_CONVERSATION.md`](docs/V2_TELEGRAM_CONVERSATION.md).
-- [x] Atualizar o modelo de ameaças para Telegram, webhook, SSRF e Azure SQL em [`docs/V2_SECURITY.md`](docs/V2_SECURITY.md).
+- [x] Atualizar o modelo de ameaças para Telegram, webhook, SSRF e banco cloud em [`docs/V2_SECURITY.md`](docs/V2_SECURITY.md).
 
 **Critério de conclusão:** recorte e contratos documentados, sem servidor funcional.
 
@@ -78,19 +79,23 @@ Decisões relacionadas:
 
 **Critério de conclusão:** API e testes passam localmente e a imagem inicia com `/health` funcional.
 
-### V2.3 — Fundação Azure — PRÓXIMA
+### V2.3 — Escolha da infraestrutura cloud — CONCLUÍDA
 
-- [ ] Criar resource group e Container Apps Environment de desenvolvimento.
-- [ ] Configurar orçamento, alertas e limites de escala antes dos recursos recorrentes.
-- [ ] Publicar somente `/health` em um Container App com escala mínima zero.
-- [ ] Validar logs, cold start e implantação.
+- [x] Preparar a Azure CLI isolada, registrar `Microsoft.App` e criar o resource group de desenvolvimento.
+- [x] Documentar nomenclatura, estado e ordem de provisionamento em [`docs/AZURE_FOUNDATION.md`](docs/AZURE_FOUNDATION.md).
+- [x] Registrar a restrição temporária de custo estritamente zero.
+- [x] Avaliar App Service Linux F1 e confirmar custo publicado igual a zero.
+- [x] Confirmar que a assinatura possui quota zero para App Service e que a tentativa não criou recursos.
+- [x] Escolher Render Free para a API e Supabase Free para PostgreSQL.
+- [x] Manter Oracle Cloud Always Free como alternativa futura.
+- [x] Preservar a Azure sem provisionar novos recursos durante o piloto de custo zero.
 
-**Critério de conclusão:** o mesmo contêiner responde a `/health` localmente e na Azure.
+**Critério de conclusão:** plataforma primária e contingência documentadas sem criar recurso sujeito a cobrança.
 
 ### V2.4 — Bot de teste e segredos
 
 - [ ] Criar um bot exclusivo de desenvolvimento no BotFather.
-- [ ] Guardar token e segredo do webhook somente nos secrets da Azure.
+- [ ] Guardar token e segredo do webhook somente nas variáveis secretas do Render.
 - [ ] Confirmar a identidade do bot com a Bot API.
 - [ ] Garantir que tokens nunca apareçam em código, erros ou logs.
 
@@ -98,12 +103,14 @@ Decisões relacionadas:
 
 ### V2.5 — Webhook seguro
 
-- [ ] Criar `POST /webhooks/telegram`.
-- [ ] Validar `X-Telegram-Bot-Api-Secret-Token` em tempo constante.
-- [ ] Limitar corpo, tipos de update e comandos aceitos.
-- [ ] Recusar grupos e aceitar apenas conversas privadas.
-- [ ] Responder rapidamente sem executar scraping no request.
-- [ ] Testar segredo ausente, inválido e payload malformado.
+- [x] Criar `POST /webhooks/telegram`.
+- [x] Validar `X-Telegram-Bot-Api-Secret-Token` em tempo constante.
+- [x] Limitar o corpo antes do parsing e aceitar somente updates de mensagem de texto.
+- [ ] Restringir os comandos aceitos.
+- [x] Recusar grupos e aceitar apenas conversas privadas.
+- [x] Responder rapidamente sem executar scraping no request.
+- [x] Testar segredo ausente, inválido, payload excessivo e conteúdo malformado.
+- [ ] Persistir e deduplicar o update antes de responder com sucesso; até lá, retornar `503` para updates válidos.
 
 **Critério de conclusão:** somente updates autenticados e válidos são aceitos.
 
@@ -117,16 +124,18 @@ Decisões relacionadas:
 
 **Critério de conclusão:** regras funcionam isoladamente e mantêm paridade com a V1.
 
-### V2.7 — Azure SQL e isolamento
+### V2.7 — Supabase PostgreSQL e isolamento — PRÓXIMA
 
-- [ ] Configurar migrações e estratégia de testes com SQL Server.
-- [ ] Provisionar Azure SQL Database com proteção de custo.
-- [ ] Configurar identidade gerenciada para acesso sem senha.
+- [x] Substituir o ODBC Driver 18 por `psycopg` e remover dependências nativas do SQL Server.
+- [x] Configurar SQLAlchemy e migrações versionadas com Alembic.
+- [x] Criar a migração inicial de `processed_telegram_updates` e validar `upgrade`/`downgrade` em PostgreSQL 17 efêmero.
+- [ ] Criar um projeto Supabase no plano Free sem add-ons pagos.
+- [ ] Configurar conexão TLS com credencial de privilégio mínimo armazenada como segredo.
 - [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
 - [ ] Implementar repositórios e índices de propriedade.
 - [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.
 
-**Critério de conclusão:** migrações são reproduzíveis, acesso cloud não usa senha e isolamento é comprovado.
+**Critério de conclusão:** migrações são reproduzíveis, credenciais não são versionadas e isolamento é comprovado.
 
 ### V2.8 — Usuário, deduplicação e conversa
 
@@ -169,7 +178,7 @@ Decisões relacionadas:
 
 - [ ] Comparar preço atual, último preço válido e preço-alvo.
 - [ ] Criar comando de job separado da API.
-- [ ] Agendar produtos vencidos com Container Apps Jobs em UTC.
+- [ ] Agendar o comando de coleta externamente, inicialmente com GitHub Actions, em UTC.
 - [ ] Impedir coletas concorrentes e aplicar retentativas limitadas.
 - [ ] Enviar alerta pelo Telegram e deduplicar entregas.
 
@@ -178,11 +187,11 @@ Decisões relacionadas:
 ### V2.13 — Fechamento do MVP
 
 - [ ] Configurar métricas, logs sem dados sensíveis e prontidão.
-- [ ] Revisar permissões, backup, rollback e consumo da Azure.
+- [ ] Revisar permissões, backup, rollback e quotas do Render e Supabase.
 - [ ] Testar cold start, falhas do Telegram, bloqueio da loja e banco indisponível.
 - [ ] Executar teste de aceitação com dois usuários.
 
-**Critério de conclusão:** o usuário cadastra um link e recebe um alerta real sem acessar código ou Azure.
+**Critério de conclusão:** o usuário cadastra um link e recebe um alerta real sem acessar código ou infraestrutura cloud.
 
 ---
 

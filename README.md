@@ -7,7 +7,7 @@ O foco inicial do projeto são anúncios do **Mercado Livre** e da **Shopee**.
 ## Versões do projeto
 
 - **V1 — Chrome (concluída):** extensão local dedicada inicialmente ao Mercado Livre.
-- **V2 — MVP Telegram:** cadastro, monitoramento e alertas pelo Telegram, executados na Azure.
+- **V2 — MVP Telegram:** cadastro, monitoramento e alertas pelo Telegram, com API no Render e PostgreSQL no Supabase.
 - **V3 — Plataforma cloud:** autenticação OIDC, API de clientes e integração cloud da extensão.
 - **V4 — Back-end local:** edição autohospedada e distribuível para execução na máquina do usuário.
 - **V5 — Android:** aplicativo móvel integrado ao back-end cloud.
@@ -136,7 +136,7 @@ O domínio permanece no centro e não conhece IndexedDB, páginas HTML ou APIs d
 
 ### Organização da V2 Telegram
 
-O back-end Python está isolado em [`backend/`](backend/). Ele usa um layout `src` e mantém domínio, aplicação, API e infraestrutura em módulos distintos. Modelos de negócio ficam nos seus domínios; contratos de repositório ficam na aplicação; SQLAlchemy, Telegram, scrapers e Azure permanecem como adaptadores de infraestrutura.
+O back-end Python está isolado em [`backend/`](backend/). Ele usa um layout `src` e mantém domínio, aplicação, API e infraestrutura em módulos distintos. Modelos de negócio ficam nos seus domínios; contratos de repositório ficam na aplicação; SQLAlchemy, Telegram, scrapers e serviços cloud permanecem como adaptadores de infraestrutura.
 
 A estrutura detalhada e as regras de dependência estão em [`backend/README.md`](backend/README.md).
 
@@ -145,7 +145,7 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - o agendador e os coletores podem se tornar workers independentes;
 - notificações podem ser movidas para um serviço próprio;
 - novos marketplaces podem ser adicionados por meio de adaptadores;
-- Azure SQL Database atende à persistência do back-end cloud sem alterar o domínio;
+- PostgreSQL no Supabase atende à persistência do back-end cloud sem alterar o domínio;
 - API, extensão e aplicativo Android podem reutilizar os mesmos contratos por meio do back-end.
 
 ## Stack tecnológica
@@ -158,19 +158,19 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - **esbuild** para empacotamento
 - **Vitest** para testes
 
-### V2 — MVP Telegram na Azure
+### V2 — MVP Telegram em cloud
 
 - **Python**
 - **FastAPI**
-- **Azure SQL Database**
-- **SQLAlchemy** e ferramenta de migração — implementação ainda pendente
-- **Microsoft ODBC Driver 18 for SQL Server**
+- **PostgreSQL no Supabase Free**
+- **SQLAlchemy 2** e **Alembic** para persistência e migrações
+- **psycopg 3** como driver PostgreSQL
 - **Docker**
-- **Azure Container Apps**
-- **Azure Container Apps Jobs**
+- **Render Free** para a API
+- **GitHub Actions** como direção inicial para o agendamento
 - identidade do usuário baseada no `telegram_user_id`
 - Telegram Bot API com webhook autenticado
-- identidade gerenciada para acesso da aplicação ao banco sem senha
+- credencial PostgreSQL de privilégio mínimo armazenada somente como segredo
 
 ### V3 — Plataforma cloud e extensão
 

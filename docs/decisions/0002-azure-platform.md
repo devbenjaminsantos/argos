@@ -1,9 +1,11 @@
 # ADR 0002 — Azure como plataforma da V2
 
-**Status:** aceita  
+**Status:** substituída pelo ADR 0005
 **Data:** 16/07/2026
 
 ## Contexto
+
+> Decisão histórica: a Azure deixou de ser a plataforma primária da V2 após a assinatura apresentar quota zero para App Service e a alternativa por consumo não atender à restrição de custo estritamente zero. A decisão vigente está no [`ADR 0005`](0005-render-supabase-platform.md).
 
 O Argos precisa executar coletas mesmo quando o navegador e o computador do usuário estiverem desligados. O projeto possui acesso a uma conta Azure com free tier e busca minimizar custos durante o piloto.
 

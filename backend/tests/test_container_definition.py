@@ -7,13 +7,22 @@ def _read(name: str) -> str:
     return Path(name).read_text(encoding="utf-8")
 
 
-def test_container_pins_base_image_and_odbc_driver() -> None:
+def test_container_pins_base_image_and_uses_postgresql_driver() -> None:
     dockerfile = _read("Dockerfile")
+    lockfile = _read("requirements.runtime.lock")
 
     assert "python:3.14.6-slim-bookworm@sha256:" in dockerfile
-    assert "ARG MSODBCSQL_VERSION=18.6.1.1-1" in dockerfile
-    assert "msodbcsql18=${MSODBCSQL_VERSION}" in dockerfile
-    assert "[ODBC Driver 18 for SQL Server]" in dockerfile
+    assert "msodbcsql" not in dockerfile
+    assert "packages.microsoft.com" not in dockerfile
+    assert "psycopg-binary==" in lockfile
+    assert "sqlalchemy==" in lockfile.lower()
+
+
+def test_container_includes_versioned_migrations() -> None:
+    dockerfile = _read("Dockerfile")
+
+    assert "COPY alembic.ini ./" in dockerfile
+    assert "COPY migrations ./migrations" in dockerfile
 
 
 def test_container_runs_unprivileged_and_has_healthcheck() -> None:

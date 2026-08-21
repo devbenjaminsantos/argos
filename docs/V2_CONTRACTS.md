@@ -1,6 +1,6 @@
 # Contratos da V2 Telegram
 
-Este documento define as portas internas do monólito modular da V2. Ele descreve responsabilidades e dados trocados, sem escolher FastAPI, SQLAlchemy, Azure SQL ou a biblioteca do Telegram como dependências do domínio.
+Este documento define as portas internas do monólito modular da V2. Ele descreve responsabilidades e dados trocados, sem escolher FastAPI, SQLAlchemy, PostgreSQL ou a biblioteca do Telegram como dependências do domínio.
 
 ## Princípios
 
@@ -206,7 +206,7 @@ FastAPI / Job / Telegram
 Domínio + contratos (portas)
           ▲
           │
- Azure SQL / HTTP / Bot API
+PostgreSQL / HTTP / Bot API
       (adaptadores)
 ```
 

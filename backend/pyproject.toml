@@ -9,8 +9,11 @@ description = "Back-end modular do Argos para monitoramento de preços."
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
 dependencies = [
+    "alembic>=1.19.1,<1.20",
     "fastapi>=0.141.1,<0.142",
     "pydantic-settings>=2.15,<2.16",
+    "psycopg[binary]>=3.3.4,<3.4",
+    "SQLAlchemy>=2.0.52,<2.1",
     "uvicorn>=0.52.4,<0.53",
 ]
 

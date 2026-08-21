@@ -97,19 +97,19 @@ Inicialmente foram consideradas duas opções:
 1. SQLite no desenvolvimento local e PostgreSQL antes do primeiro deploy;
 2. PostgreSQL desde o início, localmente por contêiner e gerenciado na nuvem.
 
-Após a escolha da Azure, o projeto decidiu usar Azure SQL Database, e não PostgreSQL, na V2. A decisão posterior e prevalente está no [`ADR 0003`](0003-backend-stack-and-auth.md). SQLite permanece como alternativa a ser reavaliada para a edição local/autohospedada da V4.
+Após uma avaliação inicial da Azure, o projeto havia decidido usar Azure SQL Database. A restrição de custo e a quota disponível levaram à escolha posterior de PostgreSQL no Supabase. A decisão vigente está no [`ADR 0005`](0005-render-supabase-platform.md). SQLite permanece como alternativa a ser reavaliada para a edição local/autohospedada da V4.
 
 ## Avaliação inicial de provedores
 
 | Alternativa | Adequação ao piloto | Principal cuidado |
 |---|---|---|
-| [Azure Container Apps](https://azure.microsoft.com/en-us/pricing/details/container-apps/) | Alta — selecionada | Jobs agendados e escala para zero atendem ao piloto; franquias, banco, logs e tráfego precisam de limites de custo. |
+| [Azure Container Apps](https://azure.microsoft.com/en-us/pricing/details/container-apps/) | Alta — seleção inicial, substituída | Jobs agendados e escala para zero atendem ao piloto; franquias, banco, logs e tráfego precisam de limites de custo. |
 | [Railway](https://docs.railway.com/guides/cron-workers-queues) | Alta | Serviço, PostgreSQL e cron no mesmo projeto; há [cobrança baseada em plano e uso](https://docs.railway.com/pricing/plans). |
 | [Render](https://render.com/docs/free) | Média | Boa experiência de deploy, mas o serviço gratuito dorme e o filesystem é efêmero. |
 | [Google Cloud Run](https://docs.cloud.google.com/run/docs/configuring/min-instances) | Média/alta | Escala para zero e suporta execução em contêiner, mas exige mais configuração de IAM, billing e agendamento. Instâncias mínimas geram cobrança. |
 | [Fly.io](https://fly.io/docs/about/pricing/) | Média | Máquinas pequenas têm custo baixo, porém a operação e a persistência exigem mais decisões. |
 
-A Azure foi escolhida para o piloto. A decisão específica está registrada no [`ADR 0002`](0002-azure-platform.md).
+A Azure foi escolhida inicialmente, mas a decisão foi substituída por Render e Supabase no [`ADR 0005`](0005-render-supabase-platform.md).
 
 ## Impactos arquiteturais
 
@@ -124,9 +124,9 @@ A Azure foi escolhida para o piloto. A decisão específica está registrada no 
 ## Decisões resultantes
 
 - [x] Aprovar desenvolvimento local e execução cloud.
-- [x] Escolher a Azure para a V2.
+- [x] Escolher Render e Supabase para a V2, com Oracle como alternativa futura.
 - [x] Adiar a edição local/autohospedada para a V4.
 - [x] Escolher FastAPI.
-- [x] Escolher Azure SQL Database.
+- [x] Escolher PostgreSQL no Supabase.
 - [ ] Definir orçamento mensal máximo e alertas de custo.
 - [x] Incluir autenticação e isolamento multiusuário desde a V2.

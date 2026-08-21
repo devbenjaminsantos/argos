@@ -26,6 +26,11 @@ _APPLICATION_STATUS = MappingProxyType(
 
 _HTTP_ERRORS = MappingProxyType(
     {
+        HTTPStatus.BAD_REQUEST: ("invalid_json", "Corpo JSON inválido."),
+        HTTPStatus.UNAUTHORIZED: (
+            "unauthorized",
+            "Não foi possível autenticar a requisição.",
+        ),
         HTTPStatus.NOT_FOUND: ("not_found", "Recurso não encontrado."),
         HTTPStatus.METHOD_NOT_ALLOWED: (
             "method_not_allowed",
@@ -34,6 +39,18 @@ _HTTP_ERRORS = MappingProxyType(
         HTTPStatus.REQUEST_ENTITY_TOO_LARGE: (
             "payload_too_large",
             "A requisição excede o tamanho permitido.",
+        ),
+        HTTPStatus.UNSUPPORTED_MEDIA_TYPE: (
+            "unsupported_media_type",
+            "Tipo de conteúdo não suportado.",
+        ),
+        HTTPStatus.UNPROCESSABLE_ENTITY: (
+            "validation_error",
+            "Dados da requisição inválidos.",
+        ),
+        HTTPStatus.SERVICE_UNAVAILABLE: (
+            "service_unavailable",
+            "Serviço temporariamente indisponível.",
         ),
     }
 )

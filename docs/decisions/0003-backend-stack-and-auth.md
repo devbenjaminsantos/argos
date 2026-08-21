@@ -3,6 +3,8 @@
 **Status:** aceita  
 **Data:** 16/07/2026
 
+> **Refinamento:** FastAPI e as regras de identidade Telegram permanecem aceitos. A escolha de Azure SQL e identidade gerenciada foi substituída por PostgreSQL no Supabase e segredos de conexão no [`ADR 0005`](0005-render-supabase-platform.md).
+
 ## Contexto
 
 A V2 será um bot Telegram multiusuário executado em Azure Container Apps. Cada produto, observação, regra e notificação pertence a um usuário e não pode ser exposto a outro. A API OIDC para extensão e Android foi movida para a V3.
