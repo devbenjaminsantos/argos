@@ -74,7 +74,8 @@ Desvantagens:
 - utilizar uma API e um comando de job no mesmo monólito modular;
 - executar o job periodicamente, em vez de manter um worker ocioso 24/7;
 - utilizar banco persistente externo ao filesystem do contêiner;
-- manter a implantação independente do provedor escolhido.
+- manter a implantação independente do provedor escolhido;
+- não contratar grandes provedores de nuvem para hospedar o Argos, conforme o [ADR 0006](0006-fractionated-platform.md).
 - entregar a execução cloud na V2;
 - adiar a edição local/autohospedada, com instalação própria, para a V4.
 
@@ -88,28 +89,13 @@ Agendador cloud ──→ job de coleta ────┘
                          └──→ Mercado Livre / notificações
 ```
 
-## Persistência — decisão posteriormente refinada
+## Persistência
 
 Arquivos locais de contêineres cloud normalmente são efêmeros. Portanto, um arquivo SQLite dentro do contêiner não deve ser considerado armazenamento de produção.
 
-Inicialmente foram consideradas duas opções:
+PostgreSQL é escolhido desde o início para o backend cloud e para a validação de migrações. SQLite poderá ser reavaliado somente para a edição local/autohospedada da V4.
 
-1. SQLite no desenvolvimento local e PostgreSQL antes do primeiro deploy;
-2. PostgreSQL desde o início, localmente por contêiner e gerenciado na nuvem.
-
-Após uma avaliação inicial da Azure, o projeto havia decidido usar Azure SQL Database. A restrição de custo e a quota disponível levaram à escolha posterior de PostgreSQL no Supabase. A decisão vigente está no [`ADR 0005`](0005-render-supabase-platform.md). SQLite permanece como alternativa a ser reavaliada para a edição local/autohospedada da V4.
-
-## Avaliação inicial de provedores
-
-| Alternativa | Adequação ao piloto | Principal cuidado |
-|---|---|---|
-| [Azure Container Apps](https://azure.microsoft.com/en-us/pricing/details/container-apps/) | Alta — seleção inicial, substituída | Jobs agendados e escala para zero atendem ao piloto; franquias, banco, logs e tráfego precisam de limites de custo. |
-| [Railway](https://docs.railway.com/guides/cron-workers-queues) | Alta | Serviço, PostgreSQL e cron no mesmo projeto; há [cobrança baseada em plano e uso](https://docs.railway.com/pricing/plans). |
-| [Render](https://render.com/docs/free) | Média | Boa experiência de deploy, mas o serviço gratuito dorme e o filesystem é efêmero. |
-| [Google Cloud Run](https://docs.cloud.google.com/run/docs/configuring/min-instances) | Média/alta | Escala para zero e suporta execução em contêiner, mas exige mais configuração de IAM, billing e agendamento. Instâncias mínimas geram cobrança. |
-| [Fly.io](https://fly.io/docs/about/pricing/) | Média | Máquinas pequenas têm custo baixo, porém a operação e a persistência exigem mais decisões. |
-
-A Azure foi escolhida inicialmente, mas a decisão foi substituída por Render e Supabase no [`ADR 0005`](0005-render-supabase-platform.md).
+Os candidatos e requisitos de infraestrutura da V2 estão no [ADR 0006](0006-fractionated-platform.md). A comparação de provedores não é mantida neste ADR porque ela muda com mais frequência que a decisão arquitetural.
 
 ## Impactos arquiteturais
 
@@ -124,7 +110,8 @@ A Azure foi escolhida inicialmente, mas a decisão foi substituída por Render e
 ## Decisões resultantes
 
 - [x] Aprovar desenvolvimento local e execução cloud.
-- [x] Escolher Render e Supabase para a V2, com Oracle como alternativa futura.
+- [x] Definir API, banco e job como responsabilidades separadas para a V2.
+- [x] Restringir os destinos contratados a provedores especializados, sem grandes nuvens, no ADR 0006.
 - [x] Adiar a edição local/autohospedada para a V4.
 - [x] Escolher FastAPI.
 - [x] Escolher PostgreSQL no Supabase.

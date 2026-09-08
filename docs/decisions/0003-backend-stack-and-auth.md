@@ -1,15 +1,15 @@
-# ADR 0003 — FastAPI, Azure SQL e identidades
+# ADR 0003 — FastAPI e identidades da V2
 
-**Status:** aceita  
+**Status:** parcialmente substituída pelo ADR 0006
 **Data:** 16/07/2026
 
-> **Refinamento:** FastAPI e as regras de identidade Telegram permanecem aceitos. A escolha de Azure SQL e identidade gerenciada foi substituída por PostgreSQL no Supabase e segredos de conexão no [`ADR 0005`](0005-render-supabase-platform.md).
+> FastAPI e as regras de identidade Telegram permanecem aceitos. A infraestrutura e a persistência vigentes estão no [ADR 0006](0006-fractionated-platform.md).
 
 ## Contexto
 
-A V2 será um bot Telegram multiusuário executado em Azure Container Apps. Cada produto, observação, regra e notificação pertence a um usuário e não pode ser exposto a outro. A API OIDC para extensão e Android foi movida para a V3.
+A V2 será um bot Telegram multiusuário. Cada produto, observação, regra e notificação pertence a um usuário e não pode ser exposto a outro. A API OIDC para extensão e Android foi movida para a V3.
 
-O projeto busca uma API pequena, modular e adequada a processos orientados a I/O, além de uma persistência integrada ao ambiente Azure.
+O projeto busca uma API pequena, modular e adequada a processos orientados a I/O, além de persistência PostgreSQL separada da API.
 
 ## Decisões
 
@@ -19,20 +19,17 @@ FastAPI foi escolhido no lugar de Django porque a V2 é centrada em API e não d
 
 O framework deverá permanecer na camada de entrada. Entidades, regras, contratos de repositório e coletores não podem depender de FastAPI.
 
-### Azure SQL Database
+### Persistência
 
-Azure SQL Database foi escolhido como persistência cloud. A aplicação usará uma abstração de repositórios e uma camada de mapeamento para evitar SQL espalhado pelos casos de uso.
+PostgreSQL é a persistência da V2. A aplicação usa abstração de repositórios e camada de mapeamento para evitar SQL espalhado pelos casos de uso.
 
 Direção técnica inicial:
 
-- SQLAlchemy para mapeamento e unidades de trabalho;
-- migrações versionadas;
-- Microsoft ODBC Driver 18 e `pyodbc` dentro da imagem Linux;
+- SQLAlchemy, Alembic e `psycopg`;
+- migrações versionadas e unidades de trabalho;
 - valores monetários armazenados em tipo decimal fixo ou unidade inteira bem definida;
-- identidade gerenciada do Azure Container App para autenticação sem senha no banco;
-- credenciais locais separadas apenas para desenvolvimento, quando necessárias.
-
-O SQL Server adiciona uma dependência nativa: o driver ODBC precisa ser instalado e validado na imagem. Isso será tratado no primeiro bloco de persistência.
+- credenciais de migração e runtime distintas, com privilégios mínimos quando o provedor permitir;
+- conexão TLS com verificação de certificado e hostname.
 
 ### Identidade do usuário na V2 Telegram
 
@@ -58,9 +55,9 @@ OIDC/OAuth 2.0 permanece aprovado para a plataforma cloud da V3. Extensão e And
 O sistema terá duas categorias de identidade:
 
 1. **identidade humana:** na V2 vem do Telegram; na V3 também poderá vir do OIDC;
-2. **identidade da carga:** permite que API e job acessem Azure SQL e outros recursos sem senha.
+2. **identidade da carga:** permite que API e job acessem banco e integrações externas com credenciais próprias, sem representar um usuário final.
 
-Uma identidade gerenciada representa o serviço e não deve ser confundida com o usuário final.
+Uma credencial de carga representa o serviço e não deve ser confundida com o usuário final.
 
 ## V4 local
 
@@ -80,9 +77,8 @@ SmartScreen, Gatekeeper e mecanismos semelhantes ajudam a verificar ou restringi
 
 - o schema será multiusuário desde a primeira migração;
 - operações de repositório receberão o contexto do proprietário;
-- a imagem Docker incluirá dependências ODBC;
-- o pipeline deverá testar migrações e consultas contra SQL Server/Azure SQL;
-- API e job usarão identidade gerenciada com privilégio mínimo;
+- o pipeline deverá testar migrações e consultas contra PostgreSQL;
+- API e job usarão credenciais próprias com privilégio mínimo;
 - a escolha do provedor OIDC permanece pendente para a V3;
 - isolamento por `telegram_user_id` entra desde a primeira migração da V2;
 - a vinculação entre Telegram e OIDC deverá preservar a propriedade dos dados existentes.

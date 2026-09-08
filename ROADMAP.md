@@ -12,11 +12,11 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 ## Estado atual
 
-**Versão concluída:** V1 — Extensão Chrome
+**Versão implementada:** V1 — Extensão Chrome
 
 **Próximo item:** V2.7 — Criar o projeto Supabase Free e validar a conexão TLS
 
-**Última atualização:** 21/08/2026
+**Última atualização:** 08/09/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -52,14 +52,13 @@ A V2 entregará o primeiro Argos cloud utilizável. O Telegram será interface, 
 Decisões relacionadas:
 
 - [`ADR 0001 — Desenvolvimento local e execução em nuvem`](docs/decisions/0001-local-vs-cloud.md);
-- [`ADR 0002 — Azure como plataforma (histórica)`](docs/decisions/0002-azure-platform.md);
-- [`ADR 0003 — FastAPI e identidades; persistência refinada posteriormente`](docs/decisions/0003-backend-stack-and-auth.md);
+- [`ADR 0003 — FastAPI e identidades da V2`](docs/decisions/0003-backend-stack-and-auth.md);
 - [`ADR 0004 — Telegram como V2`](docs/decisions/0004-telegram-mvp.md);
-- [`ADR 0005 — Render e Supabase como plataforma primária`](docs/decisions/0005-render-supabase-platform.md).
+- [`ADR 0006 — Plataforma fracionada sem grandes nuvens`](docs/decisions/0006-fractionated-platform.md).
 
 ### V2.1 — Recorte e contratos do MVP Telegram — CONCLUÍDA
 
-- [x] Escolher FastAPI e uma arquitetura cloud portátil; Render e Supabase foram definidos posteriormente no ADR 0005.
+- [x] Escolher FastAPI e uma arquitetura cloud portátil; a infraestrutura vigente está no ADR 0006.
 - [x] Escolher Telegram como interface e canal do MVP.
 - [x] Limitar o MVP a conversas privadas e Mercado Livre.
 - [x] Identificar o proprietário por `telegram_user_id`, nunca por `username`.
@@ -74,23 +73,18 @@ Decisões relacionadas:
 - [x] Criar o monólito modular Python em [`backend/`](backend/).
 - [x] Criar `GET /health` e tratamento centralizado de erros.
 - [x] Configurar testes e variáveis sem segredos no repositório.
-- [x] Criar a definição reproduzível da imagem com Python fixado, dependências travadas, usuário sem privilégios e ODBC Driver 18.
-- [x] Validar build, presença do ODBC Driver 18, execução sem privilégios e `/health` dentro do contêiner.
+- [x] Criar a definição reproduzível da imagem com Python fixado, dependências travadas e usuário sem privilégios.
+- [x] Validar build, execução sem privilégios e `/health` dentro do contêiner.
 
 **Critério de conclusão:** API e testes passam localmente e a imagem inicia com `/health` funcional.
 
 ### V2.3 — Escolha da infraestrutura cloud — CONCLUÍDA
 
-- [x] Preparar a Azure CLI isolada, registrar `Microsoft.App` e criar o resource group de desenvolvimento.
-- [x] Documentar nomenclatura, estado e ordem de provisionamento em [`docs/AZURE_FOUNDATION.md`](docs/AZURE_FOUNDATION.md).
-- [x] Registrar a restrição temporária de custo estritamente zero.
-- [x] Avaliar App Service Linux F1 e confirmar custo publicado igual a zero.
-- [x] Confirmar que a assinatura possui quota zero para App Service e que a tentativa não criou recursos.
-- [x] Escolher Render Free para a API e Supabase Free para PostgreSQL.
-- [x] Manter Oracle Cloud Always Free como alternativa futura.
-- [x] Preservar a Azure sem provisionar novos recursos durante o piloto de custo zero.
+- [x] Definir API, PostgreSQL e job como responsabilidades independentes.
+- [x] Escolher Render, Supabase e GitHub Actions como candidatos iniciais do piloto.
+- [x] Registrar que grandes nuvens não serão destinos contratados e que não há infraestrutura cloud provisionada.
 
-**Critério de conclusão:** plataforma primária e contingência documentadas sem criar recurso sujeito a cobrança.
+**Critério de conclusão:** arquitetura, limites de custo e restrições de provedor documentados, sem recurso cloud provisionado.
 
 ### V2.4 — Bot de teste e segredos
 
@@ -126,11 +120,11 @@ Decisões relacionadas:
 
 ### V2.7 — Supabase PostgreSQL e isolamento — PRÓXIMA
 
-- [x] Substituir o ODBC Driver 18 por `psycopg` e remover dependências nativas do SQL Server.
+- [x] Adotar `psycopg` e remover dependências nativas de banco anteriores.
 - [x] Configurar SQLAlchemy e migrações versionadas com Alembic.
 - [x] Criar a migração inicial de `processed_telegram_updates` e validar `upgrade`/`downgrade` em PostgreSQL 17 efêmero.
 - [ ] Criar um projeto Supabase no plano Free sem add-ons pagos.
-- [ ] Configurar conexão TLS com credencial de privilégio mínimo armazenada como segredo.
+- [ ] Configurar conexão TLS com verificação de certificado e hostname, usando credencial mínima armazenada como segredo.
 - [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
 - [ ] Implementar repositórios e índices de propriedade.
 - [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.
@@ -141,7 +135,7 @@ Decisões relacionadas:
 
 - [ ] Implementar `/start`, `/ajuda` e `/cancelar`.
 - [ ] Persistir usuário por `telegram_user_id` e destino por `chat_id`.
-- [ ] Deduplicar updates por `update_id`.
+- [ ] Persistir inbox recuperável e deduplicar updates por `update_id`.
 - [ ] Implementar rate limit e máquina de estados persistente.
 
 **Critério de conclusão:** updates repetidos não duplicam ações e conversas sobrevivem a reinícios.
@@ -180,9 +174,9 @@ Decisões relacionadas:
 - [ ] Criar comando de job separado da API.
 - [ ] Agendar o comando de coleta externamente, inicialmente com GitHub Actions, em UTC.
 - [ ] Impedir coletas concorrentes e aplicar retentativas limitadas.
-- [ ] Enviar alerta pelo Telegram e deduplicar entregas.
+- [ ] Enviar alerta pelo Telegram, reservar entregas e tratar resultado externo incerto.
 
-**Critério de conclusão:** uma queda gera exatamente um alerta e o job continua após reinícios.
+**Critério de conclusão:** uma queda reserva uma entrega de alerta de forma idempotente e o job recupera trabalho após reinícios.
 
 ### V2.13 — Fechamento do MVP
 

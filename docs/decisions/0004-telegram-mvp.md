@@ -3,7 +3,7 @@
 **Status:** aceita  
 **Data:** 19/08/2026
 
-> **Refinamento:** o recorte Telegram permanece aceito. Render, Supabase e agendamento externo substituem os serviços Azure citados originalmente, conforme o [`ADR 0005`](0005-render-supabase-platform.md).
+> **Refinamento:** o recorte Telegram permanece aceito. A infraestrutura da V2 é definida pelo [ADR 0006](0006-fractionated-platform.md).
 
 ## Contexto
 
@@ -20,7 +20,7 @@ A V2 será o MVP Telegram do Argos:
 - até três produtos por usuário;
 - cadastro por etapas, coleta manual e periódica;
 - alertas enviados pelo próprio bot;
-- FastAPI com infraestrutura cloud definida separadamente no ADR 0005.
+- FastAPI com infraestrutura cloud definida separadamente no ADR 0006.
 
 OIDC e integração cloud da extensão passam para a V3. O modo local passa para a V4 e Android para a V5.
 

@@ -66,7 +66,7 @@ O limite padrão do corpo é 64 KiB e pode ser reduzido com `ARGOS_TELEGRAM_WEBH
 
 ## PostgreSQL e migrações
 
-A persistência usa SQLAlchemy 2, Alembic e `psycopg`. A URL deve usar `postgresql+psycopg`; em produção, a configuração recusa conexões sem `sslmode=require`, `verify-ca` ou `verify-full`.
+A persistência usa SQLAlchemy 2, Alembic e `psycopg`. A URL deve usar `postgresql+psycopg`; no estado atual, em produção a configuração recusa conexões sem `sslmode=require`, `verify-ca` ou `verify-full`. Antes de conectar a um banco remoto do piloto, a configuração deverá exigir `verify-full` com a CA apropriada para validar certificado e hostname.
 
 Depois de definir `ARGOS_DATABASE_URL` fora do Git, execute a partir de `backend/`:
 

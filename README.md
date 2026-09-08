@@ -2,12 +2,12 @@
 
 O **Argos** é um bot de monitoramento de preços que acompanha produtos em lojas on-line e avisa o usuário quando identifica uma queda relevante ou quando o valor desejado é atingido.
 
-O foco inicial do projeto são anúncios do **Mercado Livre** e da **Shopee**.
+O foco atual do projeto são anúncios do **Mercado Livre**. Shopee permanece fora do escopo implementado.
 
 ## Versões do projeto
 
-- **V1 — Chrome (concluída):** extensão local dedicada inicialmente ao Mercado Livre.
-- **V2 — MVP Telegram:** cadastro, monitoramento e alertas pelo Telegram, com API no Render e PostgreSQL no Supabase.
+- **V1 — Chrome (implementada):** extensão local dedicada ao Mercado Livre; a aceitação manual no Chrome ainda está pendente.
+- **V2 — MVP Telegram (em desenvolvimento):** bot, API e monitoramento remoto em construção.
 - **V3 — Plataforma cloud:** autenticação OIDC, API de clientes e integração cloud da extensão.
 - **V4 — Back-end local:** edição autohospedada e distribuível para execução na máquina do usuário.
 - **V5 — Android:** aplicativo móvel integrado ao back-end cloud.
@@ -64,7 +64,6 @@ Em cada verificação, o sistema:
 - extrai o preço atual;
 - registra o valor com data e hora;
 - compara o preço com o valor anterior e com o preço-alvo;
-- verifica se o preço é o menor dos últimos 30 ou 90 dias;
 - envia uma notificação quando identifica uma queda relevante;
 - impede o envio de notificações duplicadas.
 
@@ -74,9 +73,7 @@ O usuário poderá configurar regras como:
 
 - período entre verificações, por exemplo, a cada 12 ou 24 horas;
 - queda mínima em percentual, por exemplo, 10%;
-- queda mínima em valor absoluto, por exemplo, R$ 120,00;
 - notificação ao atingir ou ficar abaixo do preço-alvo;
-- notificação ao alcançar o menor preço dos últimos 30 ou 90 dias;
 - controle de notificações duplicadas;
 - limite inicial de 3 produtos monitorados.
 
@@ -122,7 +119,7 @@ argos/
 - **`popup/`**: apresenta a aba e os controles específicos de cada loja.
 - **`security/`**: concentra validação e normalização das URLs permitidas.
 - **`shared/`**: define o protocolo de mensagens entre os contextos da extensão.
-- **`tests/`**: contém testes unitários, de integração e de ponta a ponta.
+- **`tests/`**: contém testes automatizados de regras, entradas, URLs e extração.
 
 ### Direção das dependências
 
@@ -136,7 +133,7 @@ O domínio permanece no centro e não conhece IndexedDB, páginas HTML ou APIs d
 
 ### Organização da V2 Telegram
 
-O back-end Python está isolado em [`backend/`](backend/). Ele usa um layout `src` e mantém domínio, aplicação, API e infraestrutura em módulos distintos. Modelos de negócio ficam nos seus domínios; contratos de repositório ficam na aplicação; SQLAlchemy, Telegram, scrapers e serviços cloud permanecem como adaptadores de infraestrutura.
+O back-end Python está isolado em [`backend/`](backend/). Ele usa um layout `src` e mantém domínio, aplicação, API e infraestrutura em módulos distintos. A fundação atual expõe saúde e valida o webhook; domínio, comandos, repositórios, coleta e notificações da V2 ainda serão implementados.
 
 A estrutura detalhada e as regras de dependência estão em [`backend/README.md`](backend/README.md).
 
@@ -158,16 +155,16 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - **esbuild** para empacotamento
 - **Vitest** para testes
 
-### V2 — MVP Telegram em cloud
+### V2 — MVP Telegram em cloud (direção em implementação)
 
 - **Python**
 - **FastAPI**
-- **PostgreSQL no Supabase Free**
+- **PostgreSQL no Supabase**
 - **SQLAlchemy 2** e **Alembic** para persistência e migrações
 - **psycopg 3** como driver PostgreSQL
 - **Docker**
-- **Render Free** para a API
-- **GitHub Actions** como direção inicial para o agendamento
+- **Render** como candidato inicial para a API
+- **GitHub Actions** como candidato inicial para o agendamento
 - identidade do usuário baseada no `telegram_user_id`
 - Telegram Bot API com webhook autenticado
 - credencial PostgreSQL de privilégio mínimo armazenada somente como segredo
@@ -242,6 +239,6 @@ A coleta de preços deve considerar mudanças no HTML das lojas, páginas que ex
 
 ## Status
 
-V1 Chrome concluída, com suporte inicial ao Mercado Livre. Melhorias e regressões do adaptador continuam sendo tratadas conforme surgirem novos formatos de página.
+V1 Chrome implementada, com suporte inicial ao Mercado Livre. Melhorias e regressões do adaptador continuam sendo tratadas conforme surgirem novos formatos de página.
 
 > **Teste de aceitação pendente:** a extensão ainda será testada manualmente no Chrome para Windows. O desenvolvimento atual está sendo realizado em um ambiente com Safari, que não executa diretamente o pacote Manifest V3 preparado para o Chrome.
