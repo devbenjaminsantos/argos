@@ -50,11 +50,23 @@ def test_database_url_requires_tls_in_production() -> None:
         environment="production",
         database_url=SecretStr(
             "postgresql+psycopg://argos:secret@db.example/argos"
-            "?sslmode=require"
+            "?sslmode=verify-full"
         ),
     )
 
     with pytest.raises(DatabaseConfigurationError):
         build_database_url(without_tls)
 
-    assert build_database_url(with_tls).query["sslmode"] == "require"
+    assert build_database_url(with_tls).query["sslmode"] == "verify-full"
+
+    for sslmode in ("require", "verify-ca"):
+        without_hostname_verification = Settings(
+            environment="production",
+            database_url=SecretStr(
+                "postgresql+psycopg://argos:secret@db.example/argos"
+                f"?sslmode={sslmode}"
+            ),
+        )
+
+        with pytest.raises(DatabaseConfigurationError):
+            build_database_url(without_hostname_verification)

@@ -7,7 +7,7 @@ from sqlalchemy.exc import ArgumentError
 from argos.config import Settings
 
 _POSTGRESQL_DRIVERS = frozenset({"postgresql", "postgresql+psycopg"})
-_SECURE_SSL_MODES = frozenset({"require", "verify-ca", "verify-full"})
+_SECURE_SSL_MODES = frozenset({"verify-full"})
 
 
 class DatabaseConfigurationError(RuntimeError):
@@ -37,7 +37,7 @@ def build_database_url(settings: Settings) -> URL:
     sslmode = url.query.get("sslmode")
     if settings.environment == "production" and sslmode not in _SECURE_SSL_MODES:
         raise DatabaseConfigurationError(
-            "ARGOS_DATABASE_URL deve exigir TLS em produção."
+            "ARGOS_DATABASE_URL deve usar sslmode=verify-full em produção."
         )
 
     return url

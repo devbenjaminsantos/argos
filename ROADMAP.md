@@ -14,9 +14,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome
 
-**Próximo item:** V2.7 — Criar o projeto Supabase Free e validar a conexão TLS
+**Próximo item:** V2.7 — Validar a conexão remota do runtime com o Supabase
 
-**Última atualização:** 08/09/2026
+**Última atualização:** 09/09/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -123,13 +123,16 @@ Decisões relacionadas:
 - [x] Adotar `psycopg` e remover dependências nativas de banco anteriores.
 - [x] Configurar SQLAlchemy e migrações versionadas com Alembic.
 - [x] Criar a migração inicial de `processed_telegram_updates` e validar `upgrade`/`downgrade` em PostgreSQL 17 efêmero.
-- [ ] Criar um projeto Supabase no plano Free sem add-ons pagos.
-- [ ] Configurar conexão TLS com verificação de certificado e hostname, usando credencial mínima armazenada como segredo.
+- [x] Criar o projeto Supabase Argos em `sa-east-1` com estimativa de US$ 0/mês, sem add-ons solicitados.
+- [x] Aplicar a revisão Alembic `20260821_01` e confirmar `alembic_version` no PostgreSQL remoto.
+- [x] Desabilitar a Data API no Dashboard do Supabase (RLS será definido quando a estrutura estiver pronta).
+- [x] Exigir `sslmode=verify-full` na configuração de produção, validando certificado e hostname.
+- [ ] Validar a conexão remota com a CA apropriada e credencial mínima armazenada como segredo.
 - [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
 - [ ] Implementar repositórios e índices de propriedade.
 - [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.
 
-**Critério de conclusão:** migrações são reproduzíveis, credenciais não são versionadas e isolamento é comprovado.
+**Critério de conclusão:** migrações são reproduzíveis, schema público não está exposto indevidamente, credenciais não são versionadas e isolamento é comprovado.
 
 ### V2.8 — Usuário, deduplicação e conversa
 
