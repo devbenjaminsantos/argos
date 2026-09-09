@@ -167,7 +167,7 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - **GitHub Actions** como candidato inicial para o agendamento
 - identidade do usuário baseada no `telegram_user_id`
 - Telegram Bot API com webhook autenticado
-- credencial PostgreSQL de privilégio mínimo armazenada somente como segredo
+- credenciais PostgreSQL de runtime e migração, ambas de privilégio mínimo e armazenadas somente como segredo
 
 ### V3 — Plataforma cloud e extensão
 

@@ -9,6 +9,7 @@ from argos.config import Settings
 from argos.infrastructure.database.config import (
     DatabaseConfigurationError,
     build_database_url,
+    build_migration_database_url,
 )
 
 
@@ -55,7 +56,10 @@ def test_database_url_requires_tls_and_ca_in_production(tmp_path: Path) -> None:
             f"?sslmode=verify-full&sslrootcert={tmp_path / 'supabase-root.crt'}"
         ),
     )
-    (tmp_path / "supabase-root.crt").write_text("test certificate", encoding="utf-8")
+    (tmp_path / "supabase-root.crt").write_text(
+        "test certificate",
+        encoding="utf-8",
+    )
     without_ca = Settings(
         environment="production",
         database_url=SecretStr(
@@ -96,3 +100,46 @@ def test_database_url_requires_tls_and_ca_in_production(tmp_path: Path) -> None:
 
         with pytest.raises(DatabaseConfigurationError):
             build_database_url(without_hostname_verification)
+
+
+def test_migration_database_url_is_required_separately_in_production(
+    tmp_path: Path,
+) -> None:
+    cert_path = tmp_path / "supabase-root.crt"
+    cert_path.write_text("test certificate", encoding="utf-8")
+    runtime = (
+        "postgresql://runtime:secret@db.example/argos"
+        f"?sslmode=verify-full&sslrootcert={cert_path}"
+    )
+    migration = (
+        "postgresql://migrator:secret@db.example/argos"
+        f"?sslmode=verify-full&sslrootcert={cert_path}"
+    )
+
+    settings = Settings(
+        environment="production",
+        database_url=SecretStr(runtime),
+        migration_database_url=SecretStr(migration),
+    )
+    migration_url = build_migration_database_url(settings)
+
+    assert migration_url.username == "migrator"
+    assert migration_url.query["sslrootcert"] == str(cert_path)
+
+    without_migration_url = Settings(
+        environment="production",
+        database_url=SecretStr(runtime),
+    )
+    with pytest.raises(DatabaseConfigurationError):
+        build_migration_database_url(without_migration_url)
+
+
+def test_migration_database_url_falls_back_to_runtime_in_non_production() -> None:
+    settings = Settings(
+        environment="test",
+        database_url=SecretStr(
+            "postgresql://argos:secret@localhost:5432/argos"
+        ),
+    )
+
+    assert build_migration_database_url(settings).drivername == "postgresql+psycopg"

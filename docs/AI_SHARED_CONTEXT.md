@@ -17,7 +17,7 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 - O ADR 0006 define a plataforma fracionada: Render é candidato inicial para a API, Supabase para PostgreSQL, GitHub Actions para disparar o job e Telegram para entrada/notificações. Grandes nuvens não são destinos contratados do projeto.
 - API e job usam o mesmo monólito modular, em processos distintos. Estado, trabalho pendente, leases e entregas devem ficar no PostgreSQL; não no processo nem no filesystem da API.
-- Para um banco remoto, o runtime exige `sslmode=verify-full` e `sslrootcert` apontando para um arquivo existente. Em 09/09/2026, o endpoint direto do Supabase passou por handshake TLS com a CA Supabase Root 2021, rejeitou um hostname incorreto e `psycopg` alcançou a autenticação usando senha inválida descartável; a credencial mínima do runtime e a rede do provedor de execução continuam pendentes.
+- Para um banco remoto, o runtime exige `sslmode=verify-full` e `sslrootcert` apontando para um arquivo existente. Em 09/09/2026, o endpoint direto do Supabase passou por handshake TLS com a CA Supabase Root 2021, rejeitou um hostname incorreto e `psycopg` alcançou a autenticação usando senha inválida descartável; a credencial mínima do runtime e a rede do provedor de execução continuam pendentes. A configuração de produção agora exige `ARGOS_MIGRATION_DATABASE_URL` separado para o Alembic.
 - Supabase Auth e Data API não fazem parte da V2. O usuário informou em 09/09/2026 que desabilitou a Data API no Dashboard e decidiu adiar RLS até a estrutura de dados e as políticas estarem prontas; a sessão não consegue inspecionar diretamente esse toggle.
 
 ## Documentação recente

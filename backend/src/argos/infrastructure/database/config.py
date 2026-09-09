@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from pydantic import SecretStr
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.exc import ArgumentError
@@ -16,23 +17,27 @@ class DatabaseConfigurationError(RuntimeError):
     """Configuração de banco ausente, incompatível ou insegura."""
 
 
-def build_database_url(settings: Settings) -> URL:
-    """Normaliza a URL para psycopg sem expor a credencial em erros."""
+def _build_url(
+    configured: SecretStr | None,
+    *,
+    setting_name: str,
+    settings: Settings,
+) -> URL:
+    """Normaliza uma URL PostgreSQL sem expor a credencial em erros."""
 
-    configured = settings.database_url
     if configured is None:
-        raise DatabaseConfigurationError("ARGOS_DATABASE_URL não configurada.")
+        raise DatabaseConfigurationError(f"{setting_name} não configurada.")
 
     try:
         url = make_url(configured.get_secret_value())
     except ArgumentError as error:
         raise DatabaseConfigurationError(
-            "ARGOS_DATABASE_URL possui formato inválido."
+            f"{setting_name} possui formato inválido."
         ) from error
 
     if url.drivername not in _POSTGRESQL_DRIVERS:
         raise DatabaseConfigurationError(
-            "ARGOS_DATABASE_URL deve usar PostgreSQL com psycopg."
+            f"{setting_name} deve usar PostgreSQL com psycopg."
         )
 
     url = url.set(drivername="postgresql+psycopg")
@@ -40,22 +45,49 @@ def build_database_url(settings: Settings) -> URL:
     if settings.environment == "production":
         if sslmode not in _SECURE_SSL_MODES:
             raise DatabaseConfigurationError(
-                "ARGOS_DATABASE_URL deve usar sslmode=verify-full em produção."
+                f"{setting_name} deve usar sslmode=verify-full em produção."
             )
 
         sslrootcert = url.query.get("sslrootcert")
         if not sslrootcert:
             raise DatabaseConfigurationError(
-                "ARGOS_DATABASE_URL deve informar sslrootcert em produção."
+                f"{setting_name} deve informar sslrootcert em produção."
             )
 
         root_cert = Path(sslrootcert).expanduser()
         if not root_cert.is_file():
             raise DatabaseConfigurationError(
-                "O arquivo sslrootcert de ARGOS_DATABASE_URL não existe."
+                f"O arquivo sslrootcert de {setting_name} não existe."
             )
 
     return url
+
+
+def build_database_url(settings: Settings) -> URL:
+    """Normaliza a URL do runtime para psycopg."""
+
+    return _build_url(
+        settings.database_url,
+        setting_name="ARGOS_DATABASE_URL",
+        settings=settings,
+    )
+
+
+def build_migration_database_url(settings: Settings) -> URL:
+    """Normaliza a URL exclusiva das migrações para psycopg."""
+
+    configured = settings.migration_database_url
+    if configured is None:
+        if settings.environment == "production":
+            raise DatabaseConfigurationError(
+                "ARGOS_MIGRATION_DATABASE_URL deve ser configurada em produção."
+            )
+        configured = settings.database_url
+        setting_name = "ARGOS_DATABASE_URL (fallback de migração)"
+    else:
+        setting_name = "ARGOS_MIGRATION_DATABASE_URL"
+
+    return _build_url(configured, setting_name=setting_name, settings=settings)
 
 
 def create_database_engine(settings: Settings) -> Engine:

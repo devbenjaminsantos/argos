@@ -22,9 +22,10 @@ def test_initial_migration_compiles_for_postgresql(
     monkeypatch,
     capsys,
 ) -> None:
+    monkeypatch.setenv("ARGOS_ENVIRONMENT", "test")
     monkeypatch.setenv(
-        "ARGOS_DATABASE_URL",
-        "postgresql+psycopg://argos:secret@localhost:5432/argos",
+        "ARGOS_MIGRATION_DATABASE_URL",
+        "postgresql+psycopg://argos-migration:secret@localhost:5432/argos",
     )
 
     command.upgrade(_alembic_config(), "head", sql=True)

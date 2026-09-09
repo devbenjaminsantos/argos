@@ -1,4 +1,4 @@
-"""Ambiente Alembic configurado exclusivamente por ARGOS_DATABASE_URL."""
+"""Ambiente Alembic configurado por ARGOS_MIGRATION_DATABASE_URL."""
 
 from logging.config import fileConfig
 
@@ -6,7 +6,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from argos.config import Settings
-from argos.infrastructure.database.config import build_database_url
+from argos.infrastructure.database.config import build_migration_database_url
 from argos.infrastructure.database.models import Base
 
 config = context.config
@@ -18,7 +18,7 @@ target_metadata = Base.metadata
 
 
 def _configure_url() -> None:
-    database_url = build_database_url(Settings()).render_as_string(
+    database_url = build_migration_database_url(Settings()).render_as_string(
         hide_password=False
     )
     config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))

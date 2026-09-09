@@ -68,7 +68,7 @@ O limite padrão do corpo é 64 KiB e pode ser reduzido com `ARGOS_TELEGRAM_WEBH
 
 A persistência usa SQLAlchemy 2, Alembic e `psycopg`. A URL deve usar `postgresql+psycopg`; em produção a configuração exige `sslmode=verify-full` e um `sslrootcert` apontando para a CA do projeto. O arquivo da CA deve ser baixado no Dashboard do Supabase e montado no runtime; no Render, um Secret File fica disponível em `/etc/secrets/<nome>`. A credencial mínima permanece somente no secret store. O handshake do endpoint direto foi validado com a CA em 09/09/2026, um hostname incorreto foi rejeitado e `psycopg` alcançou a autenticação; ainda falta configurar e testar a credencial do processo no provedor de execução. Consulte as instruções oficiais de [conexão SSL](https://supabase.com/docs/guides/database/psql#connecting-with-ssl) e [Secret Files do Render](https://render.com/docs/configure-environment-variables#secret-files).
 
-Depois de definir `ARGOS_DATABASE_URL` fora do Git, execute a partir de `backend/`:
+Depois de definir `ARGOS_DATABASE_URL` fora do Git, execute a partir de `backend/`. Essa é a identidade do runtime. Em produção, defina também `ARGOS_MIGRATION_DATABASE_URL` com uma identidade separada e de uso pontual; o Alembic exige essa variável e não reutiliza a credencial do runtime.
 
 ```bash
 .venv/bin/alembic upgrade head
@@ -117,7 +117,7 @@ Valide as migrações incluídas sem conectar ao banco:
 
 ```bash
 docker run --rm \
-  --env ARGOS_DATABASE_URL=postgresql+psycopg://argos:local@localhost/argos?sslmode=require \
+  --env ARGOS_MIGRATION_DATABASE_URL=postgresql+psycopg://argos-migration:local@localhost/argos?sslmode=require \
   argos-backend:dev \
   alembic upgrade head --sql
 ```

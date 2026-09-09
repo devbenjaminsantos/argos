@@ -128,6 +128,7 @@ Decisões relacionadas:
 - [x] Desabilitar a Data API no Dashboard do Supabase (RLS será definido quando a estrutura estiver pronta).
 - [x] Exigir `sslmode=verify-full` e `sslrootcert` existente na configuração de produção.
 - [x] Validar o handshake remoto do endpoint direto com a CA Supabase Root 2021; `psycopg` alcançou a etapa de autenticação e um hostname incorreto foi rejeitado, sem expor senha.
+- [x] Separar a configuração `ARGOS_DATABASE_URL` (runtime) de `ARGOS_MIGRATION_DATABASE_URL` (migrações) e exigir a segunda em produção.
 - [ ] Configurar e validar credencial mínima no secret store do provedor de execução.
 - [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
 - [ ] Implementar repositórios e índices de propriedade.

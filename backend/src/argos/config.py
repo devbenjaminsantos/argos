@@ -26,6 +26,7 @@ class Settings(BaseSettings):
         le=1_048_576,
     )
     database_url: SecretStr | None = None
+    migration_database_url: SecretStr | None = None
 
 
 @lru_cache
