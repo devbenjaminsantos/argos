@@ -131,6 +131,9 @@ Decisões relacionadas:
 - [x] Separar a configuração `ARGOS_DATABASE_URL` (runtime) de `ARGOS_MIGRATION_DATABASE_URL` (migrações) e exigir a segunda em produção.
 - [x] Criar os grupos PostgreSQL `argos_runtime` e `argos_migrator` sem `LOGIN` ou senha; o runtime recebeu somente `SELECT`, `INSERT` e `UPDATE` na inbox, e os grants das roles padrão foram revogados nas tabelas existentes.
 - [x] Conceder `USAGE`/`CREATE` no schema `public` e ownership das tabelas atuais ao grupo `argos_migrator`, em operações administrativas separadas e validadas.
+- [ ] Revisar os privilégios padrão do provedor para novas tabelas, sequências e funções no schema `public`; a inspeção atual ainda mostra grants amplos quando o owner é `postgres` ou `supabase_admin`.
+- [x] Criar o projeto Render `Argos` (`prj-dagnkh67bikc73bvd220`), seu ambiente `Production` (`evm-dagnkh67bikc73bvd22g`) e associar somente o serviço `argos-api` (`srv-dagnegm7bikc73bulvig`).
+- [ ] Corrigir e confirmar a configuração do serviço web Docker do Argos no Render, com `devbenjaminsantos/argos`, diretório `backend`, health check `/health` e porta definida pelo serviço.
 - [ ] Configurar e validar credencial mínima no secret store do provedor de execução.
 - [ ] Associar uma identidade `LOGIN` sem privilégios próprios ao grupo de runtime depois de confirmar o serviço Argos no provedor de execução.
 - [ ] Criar uma identidade `LOGIN` de migração, vinculá-la ao grupo `argos_migrator` e validar uma migração estrutural em ambiente controlado.
