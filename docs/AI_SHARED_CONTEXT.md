@@ -17,7 +17,7 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 - O ADR 0006 define a plataforma fracionada: Render é candidato inicial para a API, Supabase para PostgreSQL, GitHub Actions para disparar o job e Telegram para entrada/notificações. Grandes nuvens não são destinos contratados do projeto.
 - API e job usam o mesmo monólito modular, em processos distintos. Estado, trabalho pendente, leases e entregas devem ficar no PostgreSQL; não no processo nem no filesystem da API.
-- Para um banco remoto, o runtime exige `sslmode=verify-full`, com validação de certificado e hostname. A validação da CA apropriada, da credencial mínima e da conectividade real ainda é uma pendência antes do piloto remoto.
+- Para um banco remoto, o runtime exige `sslmode=verify-full` e `sslrootcert` apontando para um arquivo existente. Em 09/09/2026, o endpoint direto do Supabase passou por handshake TLS com a CA Supabase Root 2021, rejeitou um hostname incorreto e `psycopg` alcançou a autenticação usando senha inválida descartável; a credencial mínima do runtime e a rede do provedor de execução continuam pendentes.
 - Supabase Auth e Data API não fazem parte da V2. O usuário informou em 09/09/2026 que desabilitou a Data API no Dashboard e decidiu adiar RLS até a estrutura de dados e as políticas estarem prontas; a sessão não consegue inspecionar diretamente esse toggle.
 
 ## Documentação recente
@@ -32,13 +32,13 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 - V1 não possui teste de aceitação em Chrome real.
 - V2 não processa updates válidos nem persiste usuários, produtos, conversas, observações ou entregas.
-- Não há API cloud, bot Telegram ou conexão da aplicação ao Supabase provisionados/verificados no repositório.
+- Não há API cloud, bot Telegram, credencial mínima ou conexão da aplicação ao Supabase configurados no provedor de execução; o endpoint e o handshake TLS foram verificados a partir do ambiente atual.
 - O advisor de segurança do Supabase aponta RLS desabilitado em `public.alembic_version` e `public.processed_telegram_updates`. A Data API foi desabilitada manualmente; RLS fica adiado até a estrutura e as políticas estarem prontas. Não aplicar RLS sem decidir as políticas: isso pode bloquear o runtime.
 - Não há configuração versionada de deploy Render nem workflow GitHub Actions.
 
 ### A verificar antes do piloto
 
-- Conectividade de Render e do executor com o endpoint PostgreSQL escolhido, pool de conexões, TLS `verify-full`, latência e limites dos planos.
+- Conectividade de Render e do executor com o endpoint PostgreSQL escolhido, credencial mínima, pool de conexões, latência e limites dos planos. O handshake direto com TLS `verify-full` e a CA do projeto já foi validado a partir do ambiente atual.
 - Recuperação de um update ou envio de alerta quando o processo cai depois de um efeito externo; “exatamente uma entrega” não é garantível sem política explícita para resultado incerto.
 
 ### Melhorias futuras, não bloqueantes agora
@@ -48,7 +48,7 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 ## Próximos passos prováveis
 
-1. Configurar e validar conexão remota com CA, TLS completo e credenciais mínimas.
+1. Criar a credencial mínima e validar a conexão do runtime a partir do provedor de execução escolhido.
 2. Antes de aceitar updates Telegram, definir e implementar inbox recuperável, transações, leases e deduplicação com testes em PostgreSQL real.
 3. Depois configurar o bot e o deploy da API em incrementos separados.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

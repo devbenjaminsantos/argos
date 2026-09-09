@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome
 
-**Próximo item:** V2.7 — Validar a conexão remota do runtime com o Supabase
+**Próximo item:** V2.7 — Configurar credencial mínima e validar o runtime
 
 **Última atualização:** 09/09/2026
 
@@ -126,8 +126,9 @@ Decisões relacionadas:
 - [x] Criar o projeto Supabase Argos em `sa-east-1` com estimativa de US$ 0/mês, sem add-ons solicitados.
 - [x] Aplicar a revisão Alembic `20260821_01` e confirmar `alembic_version` no PostgreSQL remoto.
 - [x] Desabilitar a Data API no Dashboard do Supabase (RLS será definido quando a estrutura estiver pronta).
-- [x] Exigir `sslmode=verify-full` na configuração de produção, validando certificado e hostname.
-- [ ] Validar a conexão remota com a CA apropriada e credencial mínima armazenada como segredo.
+- [x] Exigir `sslmode=verify-full` e `sslrootcert` existente na configuração de produção.
+- [x] Validar o handshake remoto do endpoint direto com a CA Supabase Root 2021; `psycopg` alcançou a etapa de autenticação e um hostname incorreto foi rejeitado, sem expor senha.
+- [ ] Configurar e validar credencial mínima no secret store do provedor de execução.
 - [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
 - [ ] Implementar repositórios e índices de propriedade.
 - [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.

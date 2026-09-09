@@ -46,7 +46,7 @@ Validação executada nesta revisão: `npm run check`, `npm test` (**17 passaram
 
 ### Alta — segurança planejada apresentada como garantia mais forte que o código
 
-`docs/V2_SECURITY.md` exige TLS e validação de certificado; `infrastructure/database/config.py` aceita `sslmode=require`, que não garante por si só verificação do hostname. A validação só é chamada ao criar o engine; iniciar a API e obter `/health` não comprova essa configuração. Para conexões entre provedores, adotar `verify-full` com CA configurada e testar certificado/hostname incorretos. [Referência PostgreSQL](https://www.postgresql.org/docs/current/libpq-ssl.html).
+Na data desta revisão, `docs/V2_SECURITY.md` exigia TLS e validação de certificado, mas `infrastructure/database/config.py` aceitava `sslmode=require`, que não garante por si só verificação do hostname. A validação só era chamada ao criar o engine; iniciar a API e obter `/health` não comprovava essa configuração. A correção de 09/09/2026 passou a exigir `verify-full` e `sslrootcert` existente; o handshake do endpoint Supabase foi validado separadamente com a CA do projeto e um hostname incorreto foi rejeitado. [Referência PostgreSQL](https://www.postgresql.org/docs/current/libpq-ssl.html).
 
 O documento também fala em schema fechado, mas `api/schemas.py` usa `extra="ignore"` e inteiros sem modo estrito. Isso pode ser uma escolha de compatibilidade com Telegram; documentar como subconjunto validado com campos extras ignorados, e testar tipos e limites dos identificadores.
 

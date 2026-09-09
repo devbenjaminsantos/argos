@@ -1,5 +1,7 @@
 """Validação e criação da conexão PostgreSQL."""
 
+from pathlib import Path
+
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.exc import ArgumentError
@@ -35,10 +37,23 @@ def build_database_url(settings: Settings) -> URL:
 
     url = url.set(drivername="postgresql+psycopg")
     sslmode = url.query.get("sslmode")
-    if settings.environment == "production" and sslmode not in _SECURE_SSL_MODES:
-        raise DatabaseConfigurationError(
-            "ARGOS_DATABASE_URL deve usar sslmode=verify-full em produção."
-        )
+    if settings.environment == "production":
+        if sslmode not in _SECURE_SSL_MODES:
+            raise DatabaseConfigurationError(
+                "ARGOS_DATABASE_URL deve usar sslmode=verify-full em produção."
+            )
+
+        sslrootcert = url.query.get("sslrootcert")
+        if not sslrootcert:
+            raise DatabaseConfigurationError(
+                "ARGOS_DATABASE_URL deve informar sslrootcert em produção."
+            )
+
+        root_cert = Path(sslrootcert).expanduser()
+        if not root_cert.is_file():
+            raise DatabaseConfigurationError(
+                "O arquivo sslrootcert de ARGOS_DATABASE_URL não existe."
+            )
 
     return url
 
