@@ -167,7 +167,7 @@ Essa separação simplifica o desenvolvimento e a implantação inicial, além d
 - **GitHub Actions** como candidato inicial para o agendamento
 - identidade do usuário baseada no `telegram_user_id`
 - Telegram Bot API com webhook autenticado
-- credenciais PostgreSQL de runtime e migração, ambas de privilégio mínimo e armazenadas somente como segredo
+- credenciais PostgreSQL de runtime e migração, ambas de privilégio mínimo e armazenadas somente como segredo; os grupos `argos_runtime` e `argos_migrator` já foram criados no Supabase sem `LOGIN`
 
 ### V3 — Plataforma cloud e extensão
 

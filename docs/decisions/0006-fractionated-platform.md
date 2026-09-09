@@ -35,6 +35,7 @@ GitHub Actions ──> comando de job Python ──┘
 
 - credenciais de runtime, migração e Telegram ficam somente em secret stores dos respectivos serviços;
 - `ARGOS_DATABASE_URL` identifica o runtime; o Alembic usa `ARGOS_MIGRATION_DATABASE_URL` em produção, com identidade separada;
+- papéis PostgreSQL de carga devem ser grupos `NOLOGIN`; a identidade `LOGIN` do runtime herda apenas os grants DML necessários, e a identidade de migração só recebe DDL/ownership depois de validação explícita do papel administrativo do provedor;
 - o runtime usa PostgreSQL por TLS com verificação de certificado e hostname;
 - migrações são aplicadas explicitamente, com credencial distinta e mínima quando disponível;
 - o job seleciona trabalho vencido no banco, usa leases e tolera atraso, duplicação ou ausência de um disparo;

@@ -82,9 +82,9 @@ Decisões relacionadas:
 
 - [x] Definir API, PostgreSQL e job como responsabilidades independentes.
 - [x] Escolher Render, Supabase e GitHub Actions como candidatos iniciais do piloto.
-- [x] Registrar que grandes nuvens não serão destinos contratados e que não há infraestrutura cloud provisionada.
+- [x] Registrar que grandes nuvens não serão destinos contratados; nesta etapa não foram provisionados API ou job cloud (o PostgreSQL foi provisionado posteriormente em V2.7).
 
-**Critério de conclusão:** arquitetura, limites de custo e restrições de provedor documentados, sem recurso cloud provisionado.
+**Critério de conclusão:** arquitetura, limites de custo e restrições de provedor documentados, sem API ou job cloud provisionados nesta etapa.
 
 ### V2.4 — Bot de teste e segredos
 
@@ -129,7 +129,11 @@ Decisões relacionadas:
 - [x] Exigir `sslmode=verify-full` e `sslrootcert` existente na configuração de produção.
 - [x] Validar o handshake remoto do endpoint direto com a CA Supabase Root 2021; `psycopg` alcançou a etapa de autenticação e um hostname incorreto foi rejeitado, sem expor senha.
 - [x] Separar a configuração `ARGOS_DATABASE_URL` (runtime) de `ARGOS_MIGRATION_DATABASE_URL` (migrações) e exigir a segunda em produção.
+- [x] Criar os grupos PostgreSQL `argos_runtime` e `argos_migrator` sem `LOGIN` ou senha; o runtime recebeu somente `SELECT`, `INSERT` e `UPDATE` na inbox, e os grants das roles padrão foram revogados nas tabelas existentes.
+- [x] Conceder `USAGE`/`CREATE` no schema `public` e ownership das tabelas atuais ao grupo `argos_migrator`, em operações administrativas separadas e validadas.
 - [ ] Configurar e validar credencial mínima no secret store do provedor de execução.
+- [ ] Associar uma identidade `LOGIN` sem privilégios próprios ao grupo de runtime depois de confirmar o serviço Argos no provedor de execução.
+- [ ] Criar uma identidade `LOGIN` de migração, vinculá-la ao grupo `argos_migrator` e validar uma migração estrutural em ambiente controlado.
 - [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
 - [ ] Implementar repositórios e índices de propriedade.
 - [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.
