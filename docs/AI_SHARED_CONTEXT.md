@@ -4,7 +4,7 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-O próximo incremento é a persistência da identidade Telegram. A configuração real do bot foi deliberadamente adiada até que identidade, caso de uso `/start`, worker e porta de saída estejam testados sem credenciais externas. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+O próximo incremento é o caso de uso isolado de `/start`. A identidade Telegram já está persistida. A configuração real do bot foi deliberadamente adiada até que caso de uso, worker e porta de saída estejam testados sem credenciais externas. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
@@ -32,6 +32,8 @@ O próximo incremento é a persistência da identidade Telegram. A configuraçã
 - O usuário confirmou em 10/09/2026 que ainda não criou nem configurou `ARGOS_TELEGRAM_BOT_TOKEN`. A Bot API não deve ser chamada e o webhook do bot não deve ser registrado antes da criação explícita dessa identidade.
 - `/health/ready` retornou `200` pelo endpoint público e o catálogo PostgreSQL confirmou uma sessão de `argos_runtime_login` via Supavisor. `pg_stat_ssl.ssl=false` descreve a conexão interna Supavisor → PostgreSQL e não o trecho cliente Render → pooler, no qual o `psycopg` exige CA e hostname por `verify-full`. `/health` permanece uma verificação de liveness sem consulta ao banco.
 - O GitHub Actions é o executor administrativo inicial. O workflow manual `Migrate production database` possui somente `contents: read`, concorrência única e timeout de dez minutos. A execução `34491082455` aplicou `20260910_02` em 10/09/2026. Uma consulta independente confirmou a remoção da tabela legada vazia, a presença da inbox vazia sob ownership de `argos_migrator` e somente `SELECT`/`INSERT`/`UPDATE` para `argos_runtime_login`.
+- A execução administrativa `34528124844` aplicou `20260910_03`. Uma consulta independente confirmou `telegram_users` vazia, sob ownership de `argos_migrator`; `argos_runtime_login` possui somente `SELECT`/`INSERT`/`UPDATE`, sem `DELETE`, e `anon`/`authenticated` não possuem leitura. O CI `34527506778` concluiu 44 testes, incluindo upsert concorrente e proteção contra destino obsoleto.
+- Os advisors após a migration não apontaram falhas de segurança. O advisor de desempenho informou que os dois índices parciais da inbox ainda não foram usados, resultado esperado enquanto o worker não existe; não removê-los antes de validar o padrão real de claims.
 
 ## Documentação recente
 
@@ -67,7 +69,7 @@ O próximo incremento é a persistência da identidade Telegram. A configuraçã
 
 ## Próximos passos prováveis
 
-1. Criar a tabela e o repositório de identidade Telegram, separando propriedade (`telegram_user_id`) de destino (`chat_id`) e validando concorrência, isolamento e grants mínimos.
-2. Implementar `/start` como caso de uso independente de FastAPI, PostgreSQL e Telegram, com uma porta de envio falsa nos testes.
-3. Criar o worker da inbox e o adaptador de saída da Bot API; somente depois criar/configurar o bot real e executar o fluxo ponta a ponta.
+1. Implementar `/start` como caso de uso independente de FastAPI, PostgreSQL e Telegram, com uma porta de envio falsa nos testes.
+2. Criar o worker da inbox e o adaptador de saída da Bot API.
+3. Somente depois criar/configurar o bot real e executar o fluxo ponta a ponta.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

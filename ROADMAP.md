@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Persistir a identidade Telegram por `telegram_user_id` e o destino por `chat_id`
+**Próximo item:** V2.8 — Implementar o caso de uso isolado de `/start`
 
 **Última atualização:** 10/09/2026
 
@@ -26,7 +26,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 | --- | --- | --- |
 | Runtime e migrações | Logins mínimos separados, TLS `verify-full`, readiness com consulta e Alembic administrativo validados | Revisar privilégios padrão do provedor para objetos criados fora de `argos_migrator` |
 | Webhook e inbox | Autenticação, limites, persistência, deduplicação, concorrência e recuperação validados; revisão `9a9eb20` implantada | Teste autenticado na inbox de produção, adiado pelo usuário |
-| Identidade e `/start` | Contratos e texto da resposta documentados | Tabela, repositório, caso de uso e worker |
+| Identidade e `/start` | Tabela e repositório de identidade validados em PostgreSQL; contratos e texto da resposta documentados | Caso de uso e worker |
 | Bot Telegram | Segredo do webhook configurado | Criar bot, armazenar token, confirmar identidade e registrar webhook |
 | Domínio do monitoramento | Regras da V1 disponíveis como referência | Usuários, produtos, preços, conversas, coleta e notificações da V2 |
 
@@ -154,7 +154,8 @@ Decisões relacionadas:
 - [x] Criar `argos_migrator_login` sem privilégios próprios e vinculá-lo somente ao grupo `argos_migrator`.
 - [x] Configurar `argos_migrator_login` somente no GitHub Actions, assumir `argos_migrator` e validar DDL transacional reversível mais `alembic upgrade head` pelo workflow manual.
 - [x] Criar a inbox de updates Telegram com deduplicação, disponibilidade, tentativas e leases.
-- [ ] Criar usuários, conversas, produtos, preços e notificações.
+- [x] Criar a identidade Telegram com ownership por `telegram_user_id`, destino separado por `chat_id`, upsert monotônico e grants mínimos.
+- [ ] Criar conversas, produtos, preços e notificações.
 - [x] Implementar o repositório da inbox e seus índices operacionais.
 - [ ] Implementar os repositórios restantes e índices de propriedade.
 - [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.
@@ -165,7 +166,7 @@ Decisões relacionadas:
 
 - [x] Definir a inbox durável com payload, estados, tentativas, disponibilidade, lease, conclusão, erro e índices de recuperação; a migração recusa substituir tabelas que contenham dados.
 - [ ] Implementar `/start`, `/ajuda` e `/cancelar`.
-- [ ] Persistir usuário por `telegram_user_id` e destino por `chat_id`.
+- [x] Persistir usuário por `telegram_user_id` e destino por `chat_id`; a revisão `20260910_03` e o repositório foram validados com concorrência em PostgreSQL 17 e aplicados em produção.
 - [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases, retry e ligação ao webhook validados em PostgreSQL 17 no GitHub Actions.
 - [ ] Implementar rate limit e máquina de estados persistente.
 
@@ -173,11 +174,11 @@ Decisões relacionadas:
 
 #### Curso de ação atual
 
-1. Criar a tabela e o repositório de identidade Telegram, mantendo `telegram_user_id` como proprietário e `chat_id` somente como destino; validar upsert concorrente e grants mínimos.
-2. Implementar o caso de uso isolado de `/start`, que cria ou atualiza a identidade e produz a resposta definida, usando um adaptador Telegram falso nos testes.
-3. Criar o worker que reivindica a inbox com lease, executa `/start` e conclui ou reagenda o update sem manter transação aberta durante chamadas externas.
-4. Implementar o adaptador da Bot API com timeout e classificação segura de falhas, ainda sem configurar credenciais reais.
-5. Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
+1. [x] Criar a tabela e o repositório de identidade Telegram, mantendo `telegram_user_id` como proprietário e `chat_id` somente como destino; validar upsert concorrente e grants mínimos.
+2. [ ] Implementar o caso de uso isolado de `/start`, que cria ou atualiza a identidade e produz a resposta definida, usando um adaptador Telegram falso nos testes.
+3. [ ] Criar o worker que reivindica a inbox com lease, executa `/start` e conclui ou reagenda o update sem manter transação aberta durante chamadas externas.
+4. [ ] Implementar o adaptador da Bot API com timeout e classificação segura de falhas, ainda sem configurar credenciais reais.
+5. [ ] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
