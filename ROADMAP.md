@@ -137,6 +137,7 @@ Decisões relacionadas:
 - [x] Corrigir e confirmar o serviço web Docker do Argos no Render, com `devbenjaminsantos/argos`, diretório `backend`, health check `/health` e deploy `live` do commit `9e33b85`.
 - [x] Configurar e validar o segredo mínimo do webhook no secret store do provedor de execução.
 - [x] Criar `argos_runtime_login` sem privilégios próprios, vinculá-lo somente ao grupo `argos_runtime` e validar seus atributos e privilégios efetivos no PostgreSQL remoto.
+- [x] Configurar `ARGOS_DATABASE_URL` no Render pelo session pooler IPv4, com `sslmode=verify-full`, CA Supabase Root 2021 e pool limitado; `/health/ready` executou `SELECT 1` e o PostgreSQL confirmou a sessão de `argos_runtime_login`.
 - [ ] Criar uma identidade `LOGIN` de migração, vinculá-la ao grupo `argos_migrator` e validar uma migração estrutural em ambiente controlado.
 - [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
 - [ ] Implementar repositórios e índices de propriedade.
