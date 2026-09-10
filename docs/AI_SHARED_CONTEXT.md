@@ -8,8 +8,8 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 - A V1 implementa monitoramento local de até três produtos do Mercado Livre: IndexedDB, alarmes aproximados de 12/24 horas, extração, preço-alvo, queda percentual e notificações Chrome. A aceitação manual no Chrome ainda não foi executada.
 - A V2 possui uma fundação FastAPI em `backend/`: `GET /health`, middleware de correlação, tratamento seguro de erros e `POST /webhooks/telegram` com segredo em tempo constante, corpo limitado e somente mensagens privadas de texto.
-- O webhook retorna `503` para um update válido de propósito. Ainda não há inbox durável, deduplicação efetiva, comandos Telegram, envio de mensagens, domínio V2, repositórios, coletor Python ou job executável.
-- PostgreSQL usa SQLAlchemy, Alembic e psycopg. O projeto Supabase Argos existe em `sa-east-1` (`mkpziasjjfnwvtvuorig`), está saudável e tem a revisão Alembic `20260821_01` aplicada. A revisão cria `processed_telegram_updates`; ela não basta para retomar processamento após uma queda entre reserva e conclusão.
+- O webhook retorna `503` para um update válido de propósito. O schema da inbox durável já existe, mas ainda não há repositório, deduplicação efetiva ligada ao HTTP, comandos Telegram, envio de mensagens, domínio V2, coletor Python ou job executável.
+- PostgreSQL usa SQLAlchemy, Alembic e psycopg. O projeto Supabase Argos existe em `sa-east-1` (`mkpziasjjfnwvtvuorig`), está saudável e tem a revisão Alembic `20260910_02` aplicada. `telegram_update_inbox` preserva o payload e modela disponibilidade, tentativas, lease, conclusão e dead letter; o comportamento transacional ainda será implementado no repositório.
 - A última validação automatizada registrada executou `backend/.venv/bin/python -m pytest` a partir de `backend/` (27 testes passando). A execução a partir da raiz ainda falha em seis testes que assumem o diretório de trabalho `backend/`; isso é uma pendência de ergonomia da suíte. A releitura remota de 09/09/2026 consultou catálogos PostgreSQL, serviço/deploy Render e HTTP público; não repetiu a suíte nem alterou infraestrutura.
 - O último commit é `9e33b85` (2026-09-09), que configurou a API no Render; há ajustes de documentação locais posteriores ainda não commitados. Revise `git status` antes de editar documentação ou criar o próximo commit.
 
@@ -29,7 +29,7 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 - `ARGOS_DATABASE_URL` e `ARGOS_TELEGRAM_WEBHOOK_SECRET` estão no secret store do serviço. A senha de `argos_runtime_login` foi rotacionada em memória e sincronizada com o Render sem ser exibida, gravada localmente ou incluída no histórico de migrações. `ARGOS_TELEGRAM_BOT_TOKEN` e `ARGOS_MIGRATION_DATABASE_URL` continuam ausentes do runtime HTTP, sendo que a segunda deve permanecer fora desse serviço.
 - O usuário confirmou em 10/09/2026 que ainda não criou nem configurou `ARGOS_TELEGRAM_BOT_TOKEN`. A Bot API não deve ser chamada e o webhook do bot não deve ser registrado antes da criação explícita dessa identidade.
 - `/health/ready` retornou `200` pelo endpoint público e o catálogo PostgreSQL confirmou uma sessão de `argos_runtime_login` via Supavisor. `pg_stat_ssl.ssl=false` descreve a conexão interna Supavisor → PostgreSQL e não o trecho cliente Render → pooler, no qual o `psycopg` exige CA e hostname por `verify-full`. `/health` permanece uma verificação de liveness sem consulta ao banco.
-- O GitHub Actions é o executor administrativo inicial. O workflow manual `Migrate production database` possui somente `contents: read`, concorrência única e timeout de dez minutos. A execução `34485990355` passou em 10/09/2026: assumiu `argos_migrator`, validou `CREATE`/`DROP TABLE` dentro de uma transação revertida, executou `alembic upgrade head` e confirmou `20260821_01`. Uma consulta independente confirmou ausência da tabela de prova e ownership das tabelas atuais por `argos_migrator`.
+- O GitHub Actions é o executor administrativo inicial. O workflow manual `Migrate production database` possui somente `contents: read`, concorrência única e timeout de dez minutos. A execução `34491082455` aplicou `20260910_02` em 10/09/2026. Uma consulta independente confirmou a remoção da tabela legada vazia, a presença da inbox vazia sob ownership de `argos_migrator` e somente `SELECT`/`INSERT`/`UPDATE` para `argos_runtime_login`.
 
 ## Documentação recente
 
@@ -65,5 +65,5 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 ## Próximos passos prováveis
 
 1. Conferir se o bot de teste e `ARGOS_TELEGRAM_BOT_TOKEN` já existem; configurar somente o que faltar e confirmar a identidade do bot sem expor o token.
-2. Aplicar a revisão da inbox durável e implementar o repositório com testes de repetição, concorrência, lease expirado e recuperação em PostgreSQL real antes de conectar o webhook.
+2. Implementar o repositório da inbox com testes de repetição, concorrência, lease expirado e recuperação em PostgreSQL real antes de conectar o webhook.
 3. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
