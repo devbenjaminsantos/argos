@@ -64,6 +64,27 @@ def test_concurrent_claim_reserves_an_update_once(
     assert sum(item is not None for item in claims) == 1
 
 
+def test_concurrent_enqueue_persists_an_update_once(
+    inbox: PostgreSQLTelegramInbox,
+) -> None:
+    now = datetime.now(UTC)
+
+    def enqueue(index: int) -> bool:
+        return inbox.enqueue(
+            update_id=104,
+            payload={"attempt": index},
+            received_at=now,
+        )
+
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        insertions = list(executor.map(enqueue, range(4)))
+
+    assert sum(insertions) == 1
+    claimed = inbox.claim_next(now=now, lease_duration=timedelta(seconds=30))
+    assert claimed is not None
+    assert claimed.payload["attempt"] in range(4)
+
+
 def test_expired_lease_is_recovered_and_rejects_stale_completion(
     inbox: PostgreSQLTelegramInbox,
 ) -> None:
