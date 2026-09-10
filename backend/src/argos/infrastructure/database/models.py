@@ -22,6 +22,31 @@ class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=_NAMING_CONVENTION)
 
 
+class TelegramUserRecord(Base):
+    """Identidade proprietária e destino atual de mensagens."""
+
+    __tablename__ = "telegram_users"
+    __table_args__ = (
+        CheckConstraint("telegram_user_id > 0", name="positive_user_id"),
+        CheckConstraint("chat_id > 0", name="positive_chat_id"),
+    )
+
+    telegram_user_id: Mapped[int] = mapped_column(
+        BigInteger,
+        primary_key=True,
+        autoincrement=False,
+    )
+    chat_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+
+
 class TelegramUpdateInbox(Base):
     """Update persistido antes de qualquer efeito externo."""
 
