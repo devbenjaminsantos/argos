@@ -3,7 +3,7 @@
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, text
 
 from argos.config import Settings
 from argos.infrastructure.database.config import build_migration_database_url
@@ -43,6 +43,7 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     """Executa migrações usando uma conexão PostgreSQL curta."""
 
+    settings = Settings()
     _configure_url()
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
@@ -51,6 +52,10 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        if settings.environment == "production":
+            connection.execute(text("SET ROLE argos_migrator"))
+            connection.commit()
+
         context.configure(
             connection=connection,
             target_metadata=target_metadata,

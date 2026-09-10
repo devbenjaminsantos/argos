@@ -1,0 +1,48 @@
+name: Migrate production database
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: argos-production-migration
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      ARGOS_ENVIRONMENT: production
+      ARGOS_MIGRATION_DATABASE_URL: ${{ secrets.ARGOS_MIGRATION_DATABASE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: backend/requirements.runtime.lock
+
+      - name: Install locked runtime dependencies
+        run: python -m pip install --requirement requirements.runtime.lock
+
+      - name: Install Supabase root CA
+        run: cp certs/prod-ca-2021.crt /tmp/argos-supabase-root.crt
+
+      - name: Validate migrator DDL in a rolled-back transaction
+        run: python scripts/validate_migrator.py
+
+      - name: Apply pending Alembic migrations
+        run: alembic upgrade head
+
+      - name: Report current Alembic revision
+        run: alembic current
