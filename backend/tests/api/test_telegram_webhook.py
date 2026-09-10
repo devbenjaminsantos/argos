@@ -1,8 +1,12 @@
 """Testes da fronteira HTTP do webhook Telegram."""
 
+from datetime import datetime
+
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
+from sqlalchemy.exc import OperationalError
 
+from argos.application.ports.telegram_inbox import ClaimedTelegramUpdate
 from argos.config import Settings
 from argos.main import create_app
 
@@ -22,13 +26,46 @@ _VALID_UPDATE = {
 }
 
 
-def _client(*, maximum_bytes: int = 65_536) -> TestClient:
+class _InboxStub:
+    def __init__(self, *, error: bool = False) -> None:
+        self.error = error
+        self.enqueued: list[tuple[int, dict[str, object], datetime]] = []
+
+    def enqueue(
+        self,
+        *,
+        update_id: int,
+        payload: dict[str, object],
+        received_at: datetime,
+    ) -> bool:
+        if self.error:
+            raise OperationalError("INSERT", {}, Exception("unavailable"))
+        is_new = not any(item[0] == update_id for item in self.enqueued)
+        if is_new:
+            self.enqueued.append((update_id, payload, received_at))
+        return is_new
+
+    def claim_next(self, **_kwargs: object) -> ClaimedTelegramUpdate | None:
+        raise NotImplementedError
+
+    def complete(self, **_kwargs: object) -> bool:
+        raise NotImplementedError
+
+    def retry(self, **_kwargs: object) -> bool:
+        raise NotImplementedError
+
+
+def _client(
+    *,
+    maximum_bytes: int = 65_536,
+    inbox: _InboxStub | None = None,
+) -> TestClient:
     settings = Settings(
         environment="test",
         telegram_webhook_secret=SecretStr(_SECRET),
         telegram_webhook_max_body_bytes=maximum_bytes,
     )
-    return TestClient(create_app(settings))
+    return TestClient(create_app(settings, telegram_inbox=inbox))
 
 
 def test_webhook_fails_closed_when_secret_is_not_configured() -> None:
@@ -126,7 +163,7 @@ def test_webhook_accepts_only_private_text_messages() -> None:
     assert edited_response.json()["error"]["code"] == "validation_error"
 
 
-def test_valid_update_is_not_acknowledged_before_persistence_exists() -> None:
+def test_valid_update_is_not_acknowledged_without_persistence() -> None:
     response = _client().post(
         "/webhooks/telegram",
         headers=_HEADERS,
@@ -136,3 +173,43 @@ def test_valid_update_is_not_acknowledged_before_persistence_exists() -> None:
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "service_unavailable"
     assert response.headers["X-Correlation-ID"]
+
+
+def test_valid_update_is_persisted_before_acknowledgement() -> None:
+    inbox = _InboxStub()
+
+    response = _client(inbox=inbox).post(
+        "/webhooks/telegram",
+        headers=_HEADERS,
+        json=_VALID_UPDATE,
+    )
+
+    assert response.status_code == 200
+    assert len(inbox.enqueued) == 1
+    assert inbox.enqueued[0][0] == _VALID_UPDATE["update_id"]
+    assert inbox.enqueued[0][1] == _VALID_UPDATE
+
+
+def test_repeated_update_is_acknowledged_without_duplicate_persistence() -> None:
+    inbox = _InboxStub()
+    client = _client(inbox=inbox)
+
+    first = client.post("/webhooks/telegram", headers=_HEADERS, json=_VALID_UPDATE)
+    repeated = client.post(
+        "/webhooks/telegram", headers=_HEADERS, json=_VALID_UPDATE
+    )
+
+    assert first.status_code == 200
+    assert repeated.status_code == 200
+    assert len(inbox.enqueued) == 1
+
+
+def test_database_failure_is_not_acknowledged() -> None:
+    response = _client(inbox=_InboxStub(error=True)).post(
+        "/webhooks/telegram",
+        headers=_HEADERS,
+        json=_VALID_UPDATE,
+    )
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "service_unavailable"

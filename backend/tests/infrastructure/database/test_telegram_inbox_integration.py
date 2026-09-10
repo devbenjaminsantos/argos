@@ -5,9 +5,13 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from fastapi.testclient import TestClient
+from pydantic import SecretStr
 from sqlalchemy import create_engine, text
 
+from argos.config import Settings
 from argos.infrastructure.database.telegram_inbox import PostgreSQLTelegramInbox
+from argos.main import create_app
 
 _DATABASE_URL = os.getenv("ARGOS_TEST_DATABASE_URL")
 pytestmark = pytest.mark.skipif(
@@ -143,3 +147,49 @@ def test_retry_waits_until_next_attempt(
     )
     assert retried is not None
     assert retried.attempt_count == 2
+
+
+def test_webhook_acknowledges_only_after_postgresql_persistence() -> None:
+    assert _DATABASE_URL is not None
+    engine = create_engine(_DATABASE_URL)
+    with engine.begin() as connection:
+        connection.execute(text("TRUNCATE TABLE telegram_update_inbox"))
+
+    settings = Settings(
+        environment="test",
+        database_url=SecretStr(_DATABASE_URL),
+        telegram_webhook_secret=SecretStr("integration-webhook-secret"),
+    )
+    update = {
+        "update_id": 105,
+        "message": {
+            "message_id": 1,
+            "from": {"id": 789},
+            "chat": {"id": 789, "type": "private"},
+            "text": "/start",
+        },
+    }
+
+    with TestClient(create_app(settings)) as client:
+        response = client.post(
+            "/webhooks/telegram",
+            headers={
+                "X-Telegram-Bot-Api-Secret-Token": "integration-webhook-secret"
+            },
+            json=update,
+        )
+
+    with engine.begin() as connection:
+        persisted = connection.execute(
+            text(
+                "SELECT payload, status, attempt_count "
+                "FROM telegram_update_inbox WHERE update_id = 105"
+            )
+        ).one()
+        connection.execute(text("TRUNCATE TABLE telegram_update_inbox"))
+    engine.dispose()
+
+    assert response.status_code == 200
+    assert persisted.payload == update
+    assert persisted.status == "pending"
+    assert persisted.attempt_count == 0

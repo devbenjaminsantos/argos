@@ -1,18 +1,25 @@
 """Entrada HTTP autenticada para updates do Telegram."""
 
 import json
+import logging
 import secrets
+from datetime import UTC, datetime
 from http import HTTPStatus
+from typing import cast
 
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
+from starlette.concurrency import run_in_threadpool
 
 from argos.api.schemas import TelegramUpdateInput
+from argos.application.ports.telegram_inbox import TelegramInbox
 from argos.config import Settings
 
 router = APIRouter(prefix="/webhooks", tags=["telegram"])
 
 _SECRET_HEADER = "X-Telegram-Bot-Api-Secret-Token"
+logger = logging.getLogger(__name__)
 
 
 def _authenticate(request: Request, settings: Settings) -> None:
@@ -51,9 +58,9 @@ async def _read_limited_json(request: Request, maximum_bytes: int) -> object:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST) from error
 
 
-@router.post("/telegram", status_code=HTTPStatus.SERVICE_UNAVAILABLE)
+@router.post("/telegram", status_code=HTTPStatus.OK)
 async def receive_telegram_update(request: Request) -> Response:
-    """Valida a entrega sem confirmá-la antes de existir persistência."""
+    """Confirma a entrega somente após persistência durável."""
 
     settings: Settings = request.app.state.settings
     _authenticate(request, settings)
@@ -63,10 +70,30 @@ async def receive_telegram_update(request: Request) -> Response:
     )
 
     try:
-        TelegramUpdateInput.model_validate(payload)
+        update = TelegramUpdateInput.model_validate(payload)
     except ValidationError as error:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY
         ) from error
 
-    raise HTTPException(status_code=HTTPStatus.SERVICE_UNAVAILABLE)
+    inbox: TelegramInbox | None = request.app.state.telegram_inbox
+    if inbox is None:
+        raise HTTPException(status_code=HTTPStatus.SERVICE_UNAVAILABLE)
+
+    try:
+        await run_in_threadpool(
+            inbox.enqueue,
+            update_id=update.update_id,
+            payload=cast(dict[str, object], payload),
+            received_at=datetime.now(UTC),
+        )
+    except SQLAlchemyError:
+        logger.exception(
+            "Failed to persist Telegram update correlation_id=%s",
+            request.state.correlation_id,
+        )
+        raise HTTPException(
+            status_code=HTTPStatus.SERVICE_UNAVAILABLE
+        ) from None
+
+    return Response(status_code=HTTPStatus.OK)
