@@ -10,6 +10,7 @@ from argos.infrastructure.database.config import (
     DatabaseConfigurationError,
     build_database_url,
     build_migration_database_url,
+    create_database_engine,
 )
 
 
@@ -27,6 +28,25 @@ def test_database_url_uses_psycopg_and_masks_password() -> None:
     assert url.drivername == "postgresql+psycopg"
     assert url.password == password
     assert password not in str(url)
+
+
+def test_runtime_engine_uses_a_bounded_pool(tmp_path: Path) -> None:
+    cert_path = tmp_path / "supabase-root.crt"
+    cert_path.write_text("certificate", encoding="utf-8")
+    settings = Settings(
+        environment="production",
+        database_url=SecretStr(
+            "postgresql+psycopg://runtime:secret@db.example.com/postgres"
+            f"?sslmode=verify-full&sslrootcert={cert_path}"
+        ),
+    )
+
+    engine = create_database_engine(settings)
+
+    assert engine.pool.size() == 5
+    assert engine.pool._max_overflow == 0
+    assert engine.pool._timeout == 5
+    engine.dispose()
 
 
 def test_database_url_rejects_non_postgresql_driver() -> None:

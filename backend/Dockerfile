@@ -51,6 +51,7 @@ RUN python -m pip install \
 WORKDIR /app
 COPY alembic.ini ./
 COPY migrations ./migrations
+COPY --chown=10001:10001 certs/prod-ca-2021.crt ./certs/prod-ca-2021.crt
 USER 10001:10001
 
 EXPOSE 8000

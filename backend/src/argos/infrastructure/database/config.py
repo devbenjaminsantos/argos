@@ -95,5 +95,8 @@ def create_database_engine(settings: Settings) -> Engine:
 
     return create_engine(
         build_database_url(settings),
+        pool_size=5,
+        max_overflow=0,
+        pool_timeout=5,
         pool_pre_ping=True,
     )
