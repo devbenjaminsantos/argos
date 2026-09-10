@@ -11,8 +11,10 @@ from pydantic import SecretStr
 from sqlalchemy import create_engine, text
 
 from argos.config import Settings
+from argos.application.ports.telegram_messages import TelegramMessage
 from argos.infrastructure.database.telegram_inbox import PostgreSQLTelegramInbox
 from argos.main import create_app
+from argos.telegram_worker import run_once
 
 _DATABASE_URL = os.getenv("ARGOS_TEST_DATABASE_URL")
 pytestmark = pytest.mark.skipif(
@@ -218,3 +220,64 @@ def test_webhook_acknowledges_only_after_postgresql_persistence() -> None:
     assert persisted.payload == update
     assert persisted.status == "pending"
     assert persisted.attempt_count == 0
+
+
+def test_one_shot_worker_persists_owner_sends_start_and_completes() -> None:
+    assert _DATABASE_URL is not None
+    engine = create_engine(_DATABASE_URL)
+    with engine.begin() as connection:
+        connection.execute(text("TRUNCATE TABLE telegram_update_inbox"))
+        connection.execute(text("TRUNCATE TABLE telegram_users"))
+
+    now = datetime.now(UTC)
+    inbox = PostgreSQLTelegramInbox(engine)
+    update = {
+        "update_id": 107,
+        "message": {
+            "message_id": 2,
+            "from": {"id": 900},
+            "chat": {"id": 901, "type": "private"},
+            "text": "/start",
+        },
+    }
+    inbox.enqueue(update_id=107, payload=update, received_at=now)
+
+    class Sender:
+        def __init__(self) -> None:
+            self.messages: list[TelegramMessage] = []
+
+        def send(self, message: TelegramMessage) -> None:
+            self.messages.append(message)
+
+    sender = Sender()
+    settings = Settings(
+        environment="test",
+        database_url=SecretStr(_DATABASE_URL),
+    )
+
+    processed = run_once(settings, sender=sender, now=now)
+
+    with engine.begin() as connection:
+        inbox_status = connection.execute(
+            text(
+                "SELECT status, attempt_count FROM telegram_update_inbox "
+                "WHERE update_id = 107"
+            )
+        ).one()
+        user = connection.execute(
+            text(
+                "SELECT telegram_user_id, chat_id FROM telegram_users "
+                "WHERE telegram_user_id = 900"
+            )
+        ).one()
+        connection.execute(text("TRUNCATE TABLE telegram_update_inbox"))
+        connection.execute(text("TRUNCATE TABLE telegram_users"))
+    engine.dispose()
+
+    assert processed is True
+    assert inbox_status.status == "completed"
+    assert inbox_status.attempt_count == 1
+    assert (user.telegram_user_id, user.chat_id) == (900, 901)
+    assert len(sender.messages) == 1
+    assert sender.messages[0].chat_id == 901
+    assert "Eu sou o Argos" in sender.messages[0].text

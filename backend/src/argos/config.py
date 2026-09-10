@@ -25,6 +25,13 @@ class Settings(BaseSettings):
         ge=1_024,
         le=1_048_576,
     )
+    telegram_request_timeout_seconds: float = Field(
+        default=5.0,
+        gt=0,
+        le=30,
+    )
+    telegram_worker_lease_seconds: int = Field(default=30, ge=5, le=300)
+    telegram_worker_retry_seconds: int = Field(default=30, ge=1, le=3_600)
     database_url: SecretStr | None = None
     migration_database_url: SecretStr | None = None
 

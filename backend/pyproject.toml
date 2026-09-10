@@ -17,6 +17,9 @@ dependencies = [
     "uvicorn>=0.52.4,<0.53",
 ]
 
+[project.scripts]
+argos-telegram-worker = "argos.telegram_worker:main"
+
 [project.optional-dependencies]
 dev = [
     "httpx2>=2.12,<2.13",
