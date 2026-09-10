@@ -54,6 +54,8 @@ Os modelos ficam dentro dos respectivos módulos de domínio, em vez de um diret
 
 A aplicação é criada por uma factory e expõe `GET /health` e a fronteira inicial `POST /webhooks/telegram`. A documentação interativa permanece desabilitada por padrão e os erros usam um envelope seguro com identificador de correlação.
 
+`GET /health` é uma verificação de liveness: confirma apenas que o processo HTTP responde e não deve consultar serviços externos. `GET /health/ready` é a verificação de readiness e atualmente executa uma consulta mínima no PostgreSQL. Novas dependências indispensáveis para receber tráfego podem entrar na readiness; dependências auxiliares devem expor diagnósticos ou métricas próprios, para que uma falha parcial não provoque reinícios do processo saudável.
+
 O webhook:
 
 - compara `X-Telegram-Bot-Api-Secret-Token` em tempo constante;
@@ -70,7 +72,7 @@ A persistência usa SQLAlchemy 2, Alembic e `psycopg`. A URL deve usar `postgres
 
 Depois de definir `ARGOS_DATABASE_URL` fora do Git, execute a partir de `backend/`. Essa é a identidade do runtime. Em produção, defina também `ARGOS_MIGRATION_DATABASE_URL` com uma identidade separada e de uso pontual; o Alembic exige essa variável e não reutiliza a credencial do runtime.
 
-No projeto Supabase do Argos, as operações [`ops/supabase/20260909_argos_roles.sql`](../ops/supabase/20260909_argos_roles.sql), [`ops/supabase/20260909_argos_migrator_schema.sql`](../ops/supabase/20260909_argos_migrator_schema.sql) e [`ops/supabase/20260909_argos_migrator_ownership.sql`](../ops/supabase/20260909_argos_migrator_ownership.sql) criaram os grupos `argos_runtime` e `argos_migrator` sem `LOGIN` e sem senha, concederam DDL ao migrador e transferiram a ownership das tabelas atuais. O runtime recebeu somente `SELECT`, `INSERT` e `UPDATE` em `processed_telegram_updates`; não use `postgres`, `service_role` ou `argos_migrator` como credencial da API. Ainda falta criar uma identidade `LOGIN` de cada carga e validar uma migração estrutural com a identidade de migração. Os privilégios padrão do provedor para objetos criados por `postgres` ou `supabase_admin` no schema `public` continuam amplos; até essa revisão, novas migrações devem usar a identidade de migração e grants explícitos.
+No projeto Supabase do Argos, as operações em `ops/supabase/` criaram os grupos `argos_runtime` e `argos_migrator` sem `LOGIN`, suas identidades de login separadas, os grants mínimos e a ownership das tabelas atuais. O runtime recebeu somente `SELECT`, `INSERT` e `UPDATE` em `processed_telegram_updates`; não use `postgres`, `service_role` ou `argos_migrator` como credencial da API. `argos_migrator_login` pertence ao grupo proprietário, mas operações que dependem de ownership devem executar `SET ROLE argos_migrator`; isso será validado junto da primeira migração estrutural pelo executor administrativo. Os privilégios padrão do provedor para objetos criados por `postgres` ou `supabase_admin` no schema `public` continuam amplos; até essa revisão, novas migrações devem usar a identidade de migração e grants explícitos.
 
 ```bash
 .venv/bin/alembic upgrade head

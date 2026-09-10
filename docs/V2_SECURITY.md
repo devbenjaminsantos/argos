@@ -264,6 +264,15 @@ Segredos locais eventualmente usados no desenvolvimento ficam em arquivo ignorad
 - usar processo de produção, nunca servidor com reload;
 - aplicar atualizações de segurança por imagem reproduzível e rollback conhecido.
 
+## Saúde e dependências operacionais
+
+- `/health` é somente liveness e confirma que o processo HTTP responde;
+- `/health` não consulta banco, Telegram, marketplaces ou jobs e não deve provocar reinícios por uma falha externa;
+- `/health/ready` confirma as dependências indispensáveis para receber tráfego e atualmente executa uma consulta mínima no PostgreSQL;
+- novas dependências críticas podem compor a readiness com timeouts curtos e respostas sem detalhes internos;
+- dependências auxiliares devem usar diagnósticos, métricas e circuit breakers próprios, preservando a disponibilidade parcial da API;
+- a confirmação de liveness nunca deve ser tratada como prova de processamento completo, entrega externa ou integridade de todas as dependências.
+
 ## Logs e privacidade
 
 Podem ser registrados:
