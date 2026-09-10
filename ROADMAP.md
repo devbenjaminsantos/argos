@@ -106,7 +106,7 @@ Decisões relacionadas:
 - [x] Recusar grupos e aceitar apenas conversas privadas.
 - [x] Responder rapidamente sem executar scraping no request.
 - [x] Testar segredo ausente, inválido, payload excessivo e conteúdo malformado.
-- [ ] Persistir e deduplicar o update antes de responder com sucesso; até lá, retornar `503` para updates válidos.
+- [x] Persistir e deduplicar o update antes de responder `200`; ausência da inbox ou falha SQL retorna `503` para permitir nova entrega.
 
 **Critério de conclusão:** somente updates autenticados e válidos são aceitos.
 
