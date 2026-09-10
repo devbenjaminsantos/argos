@@ -4,7 +4,7 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-O próximo incremento é o worker que processará `/start` a partir da inbox. A identidade Telegram e o caso de uso isolado já existem. A configuração real do bot foi deliberadamente adiada até que worker e porta de saída estejam testados sem credenciais externas. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+O próximo incremento é o adaptador de saída da Bot API sem credencial real. Identidade, caso de uso `/start` e núcleo do worker já existem. A configuração real do bot foi deliberadamente adiada até que o adaptador e o comando executável estejam testados sem credenciais externas. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
@@ -34,6 +34,7 @@ O próximo incremento é o worker que processará `/start` a partir da inbox. A 
 - O GitHub Actions é o executor administrativo inicial. O workflow manual `Migrate production database` possui somente `contents: read`, concorrência única e timeout de dez minutos. A execução `34491082455` aplicou `20260910_02` em 10/09/2026. Uma consulta independente confirmou a remoção da tabela legada vazia, a presença da inbox vazia sob ownership de `argos_migrator` e somente `SELECT`/`INSERT`/`UPDATE` para `argos_runtime_login`.
 - A execução administrativa `34528124844` aplicou `20260910_03`. Uma consulta independente confirmou `telegram_users` vazia, sob ownership de `argos_migrator`; `argos_runtime_login` possui somente `SELECT`/`INSERT`/`UPDATE`, sem `DELETE`, e `anon`/`authenticated` não possuem leitura. O CI `34527506778` concluiu 44 testes, incluindo upsert concorrente e proteção contra destino obsoleto.
 - O commit `c25488e` implementou `/start` como caso de uso de aplicação independente de FastAPI, SQLAlchemy e Bot API. Ele valida comando, identidade e timestamp UTC, atualiza o destino e produz a resposta em texto simples. O CI `34528613256` concluiu 49 testes.
+- O commit `ed29274` implementou o núcleo do worker. Ele processa uma entrega por vez, não mantém transação durante o envio, conclui somente depois da porta de saída, reagenda apenas falhas transitórias com resultado conhecido, envia falhas permanentes ou ambíguas para dead letter e deixa exceções inesperadas para recuperação após o lease. O CI `34532088167` concluiu 57 testes.
 - Os advisors após a migration não apontaram falhas de segurança. O advisor de desempenho informou que os dois índices parciais da inbox ainda não foram usados, resultado esperado enquanto o worker não existe; não removê-los antes de validar o padrão real de claims.
 
 ## Documentação recente
@@ -70,7 +71,7 @@ O próximo incremento é o worker que processará `/start` a partir da inbox. A 
 
 ## Próximos passos prováveis
 
-1. Criar o worker da inbox, compondo claim, `/start`, envio por uma porta falsa e conclusão ou retry.
-2. Implementar o adaptador de saída da Bot API e sua classificação de falhas sem configurar token real.
+1. Implementar o adaptador de saída da Bot API e sua classificação de falhas sem configurar token real.
+2. Criar o comando executável do worker e validar o fluxo completo com HTTP e PostgreSQL locais, substituindo apenas a Bot API.
 3. Somente depois criar/configurar o bot real e executar o fluxo ponta a ponta.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
