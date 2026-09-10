@@ -107,6 +107,7 @@ Decisões relacionadas:
 - [x] Responder rapidamente sem executar scraping no request.
 - [x] Testar segredo ausente, inválido, payload excessivo e conteúdo malformado.
 - [x] Persistir e deduplicar o update antes de responder `200`; ausência da inbox ou falha SQL retorna `503` para permitir nova entrega.
+- [ ] Validar manualmente em produção uma chamada autenticada e confirmar a nova linha no PostgreSQL; adiado em 10/09/2026 porque o usuário não consegue executar essa validação no momento.
 
 **Critério de conclusão:** somente updates autenticados e válidos são aceitos.
 

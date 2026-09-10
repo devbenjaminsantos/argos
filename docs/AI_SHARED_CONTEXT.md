@@ -53,6 +53,7 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 ### A verificar antes do piloto
 
+- A chamada autenticada ao webhook implantado e a respectiva linha na inbox de produção ainda não foram verificadas ponta a ponta. O usuário informou em 10/09/2026 que não consegue fazer essa validação manual agora; mantê-la pendente sem recuperar ou expor o segredo existente.
 - Ao configurar o que falta, preservar `ARGOS_TELEGRAM_WEBHOOK_SECRET` já existente. Confirmar identidade do bot e estado do webhook pela Bot API quando houver acesso ao token; existência do segredo de webhook não comprova existência do bot.
 - Conectividade de Render e do executor com o endpoint PostgreSQL escolhido, credencial mínima, pool de conexões, latência e limites dos planos. O handshake direto com TLS `verify-full` e a CA do projeto já foi validado a partir do ambiente atual.
 - Recuperação de um update ou envio de alerta quando o processo cai depois de um efeito externo; “exatamente uma entrega” não é garantível sem política explícita para resultado incerto.

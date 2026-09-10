@@ -62,7 +62,7 @@ O webhook:
 - limita o corpo antes de interpretar JSON;
 - aceita somente mensagens de texto em chats privados;
 - não registra corpo, token ou segredo nos erros;
-- responde `503` para um update válido enquanto ainda não existir persistência e deduplicação, permitindo que o Telegram tente entregá-lo novamente.
+- persiste e deduplica o update antes de responder `200`; retorna `503` quando a inbox ou o PostgreSQL estiver indisponível, permitindo que o Telegram tente entregá-lo novamente.
 
 O limite padrão do corpo é 64 KiB e pode ser reduzido com `ARGOS_TELEGRAM_WEBHOOK_MAX_BODY_BYTES`. O segredo deve existir somente em `ARGOS_TELEGRAM_WEBHOOK_SECRET` fora do Git.
 
