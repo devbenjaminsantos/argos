@@ -139,7 +139,7 @@ Decisões relacionadas:
 - [x] Criar `argos_runtime_login` sem privilégios próprios, vinculá-lo somente ao grupo `argos_runtime` e validar seus atributos e privilégios efetivos no PostgreSQL remoto.
 - [x] Configurar `ARGOS_DATABASE_URL` no Render pelo session pooler IPv4, com `sslmode=verify-full`, CA Supabase Root 2021 e pool limitado; `/health/ready` executou `SELECT 1` e o PostgreSQL confirmou a sessão de `argos_runtime_login`.
 - [x] Criar `argos_migrator_login` sem privilégios próprios e vinculá-lo somente ao grupo `argos_migrator`.
-- [ ] Configurar a credencial de `argos_migrator_login` fora do runtime HTTP, assumir `argos_migrator` e validar uma migração estrutural em ambiente controlado.
+- [x] Configurar `argos_migrator_login` somente no GitHub Actions, assumir `argos_migrator` e validar DDL transacional reversível mais `alembic upgrade head` pelo workflow manual.
 - [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
 - [ ] Implementar repositórios e índices de propriedade.
 - [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.

@@ -70,7 +70,7 @@ O limite padrão do corpo é 64 KiB e pode ser reduzido com `ARGOS_TELEGRAM_WEBH
 
 A persistência usa SQLAlchemy 2, Alembic e `psycopg`. A URL deve usar `postgresql+psycopg`; em produção a configuração exige `sslmode=verify-full` e um `sslrootcert` apontando para a CA do projeto. A CA pública Supabase Root 2021 fica versionada em `certs/prod-ca-2021.crt` e é copiada para `/app/certs/prod-ca-2021.crt` na imagem; credenciais permanecem somente no secret store. O Render usa o session pooler IPv4 do Supabase na porta 5432, porque o endpoint direto do plano atual expõe somente IPv6. `GET /health/ready` executa `SELECT 1` pelo engine com pool limitado; `GET /health` continua verificando apenas o processo HTTP. Consulte as instruções oficiais de [conexão SSL](https://supabase.com/docs/guides/database/psql#connecting-with-ssl).
 
-Depois de definir `ARGOS_DATABASE_URL` fora do Git, execute a partir de `backend/`. Essa é a identidade do runtime. Em produção, defina também `ARGOS_MIGRATION_DATABASE_URL` com uma identidade separada e de uso pontual; o Alembic exige essa variável e não reutiliza a credencial do runtime.
+Depois de definir `ARGOS_DATABASE_URL` fora do Git, execute a partir de `backend/`. Essa é a identidade do runtime. Em produção, `ARGOS_MIGRATION_DATABASE_URL` existe somente como secret do GitHub Actions e usa a identidade separada `argos_migrator_login`; o Alembic exige essa variável, assume explicitamente `argos_migrator` e não reutiliza a credencial do runtime HTTP.
 
 No projeto Supabase do Argos, as operações em `ops/supabase/` criaram os grupos `argos_runtime` e `argos_migrator` sem `LOGIN`, suas identidades de login separadas, os grants mínimos e a ownership das tabelas atuais. O runtime recebeu somente `SELECT`, `INSERT` e `UPDATE` em `processed_telegram_updates`; não use `postgres`, `service_role` ou `argos_migrator` como credencial da API. `argos_migrator_login` pertence ao grupo proprietário, mas operações que dependem de ownership devem executar `SET ROLE argos_migrator`; isso será validado junto da primeira migração estrutural pelo executor administrativo. Os privilégios padrão do provedor para objetos criados por `postgres` ou `supabase_admin` no schema `public` continuam amplos; até essa revisão, novas migrações devem usar a identidade de migração e grants explícitos.
 
@@ -84,7 +84,7 @@ Para reverter a última migração durante desenvolvimento:
 .venv/bin/alembic downgrade -1
 ```
 
-As migrações não são executadas automaticamente ao iniciar a API. O deploy deverá aplicá-las explicitamente uma única vez antes de liberar uma versão que dependa do novo schema.
+As migrações não são executadas automaticamente ao iniciar a API. O workflow manual `Migrate production database` valida primeiro uma operação DDL dentro de uma transação sempre revertida, aplica `alembic upgrade head` e informa a revisão resultante. Execute-o uma única vez antes de liberar uma versão que dependa do novo schema.
 
 Crie o ambiente e instale também as dependências de desenvolvimento:
 
