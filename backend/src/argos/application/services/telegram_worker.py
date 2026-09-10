@@ -67,7 +67,8 @@ class TelegramInboxWorker:
                 transitioned = self._inbox.retry(
                     update_id=claimed.update_id,
                     lease_token=claimed.lease_token,
-                    next_attempt_at=now + self._retry_delay,
+                    next_attempt_at=now
+                    + (error.retry_after or self._retry_delay),
                     error_code=error.code,
                 )
             else:

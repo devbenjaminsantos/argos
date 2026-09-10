@@ -1,0 +1,1 @@
+"""Testes dos adaptadores Telegram."""

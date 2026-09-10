@@ -159,6 +159,23 @@ def test_worker_retries_only_definite_transient_failure() -> None:
     assert inbox.dead_letters == []
 
 
+def test_worker_honors_provider_retry_after() -> None:
+    inbox = _InboxStub()
+    sender = _SenderStub(
+        TelegramDeliveryError(
+            "telegram_rate_limited",
+            retryable=True,
+            retry_after=timedelta(seconds=45),
+        )
+    )
+
+    assert _worker(inbox, sender).process_next(now=_NOW) is True
+
+    assert inbox.retried == [
+        (10, _LEASE_TOKEN, _NOW + timedelta(seconds=45), "telegram_rate_limited")
+    ]
+
+
 @pytest.mark.parametrize(
     "error",
     [
