@@ -4,7 +4,7 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-O próximo incremento é o caso de uso isolado de `/start`. A identidade Telegram já está persistida. A configuração real do bot foi deliberadamente adiada até que caso de uso, worker e porta de saída estejam testados sem credenciais externas. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+O próximo incremento é o worker que processará `/start` a partir da inbox. A identidade Telegram e o caso de uso isolado já existem. A configuração real do bot foi deliberadamente adiada até que worker e porta de saída estejam testados sem credenciais externas. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
@@ -33,6 +33,7 @@ O próximo incremento é o caso de uso isolado de `/start`. A identidade Telegra
 - `/health/ready` retornou `200` pelo endpoint público e o catálogo PostgreSQL confirmou uma sessão de `argos_runtime_login` via Supavisor. `pg_stat_ssl.ssl=false` descreve a conexão interna Supavisor → PostgreSQL e não o trecho cliente Render → pooler, no qual o `psycopg` exige CA e hostname por `verify-full`. `/health` permanece uma verificação de liveness sem consulta ao banco.
 - O GitHub Actions é o executor administrativo inicial. O workflow manual `Migrate production database` possui somente `contents: read`, concorrência única e timeout de dez minutos. A execução `34491082455` aplicou `20260910_02` em 10/09/2026. Uma consulta independente confirmou a remoção da tabela legada vazia, a presença da inbox vazia sob ownership de `argos_migrator` e somente `SELECT`/`INSERT`/`UPDATE` para `argos_runtime_login`.
 - A execução administrativa `34528124844` aplicou `20260910_03`. Uma consulta independente confirmou `telegram_users` vazia, sob ownership de `argos_migrator`; `argos_runtime_login` possui somente `SELECT`/`INSERT`/`UPDATE`, sem `DELETE`, e `anon`/`authenticated` não possuem leitura. O CI `34527506778` concluiu 44 testes, incluindo upsert concorrente e proteção contra destino obsoleto.
+- O commit `c25488e` implementou `/start` como caso de uso de aplicação independente de FastAPI, SQLAlchemy e Bot API. Ele valida comando, identidade e timestamp UTC, atualiza o destino e produz a resposta em texto simples. O CI `34528613256` concluiu 49 testes.
 - Os advisors após a migration não apontaram falhas de segurança. O advisor de desempenho informou que os dois índices parciais da inbox ainda não foram usados, resultado esperado enquanto o worker não existe; não removê-los antes de validar o padrão real de claims.
 
 ## Documentação recente
@@ -69,7 +70,7 @@ O próximo incremento é o caso de uso isolado de `/start`. A identidade Telegra
 
 ## Próximos passos prováveis
 
-1. Implementar `/start` como caso de uso independente de FastAPI, PostgreSQL e Telegram, com uma porta de envio falsa nos testes.
-2. Criar o worker da inbox e o adaptador de saída da Bot API.
+1. Criar o worker da inbox, compondo claim, `/start`, envio por uma porta falsa e conclusão ou retry.
+2. Implementar o adaptador de saída da Bot API e sua classificação de falhas sem configurar token real.
 3. Somente depois criar/configurar o bot real e executar o fluxo ponta a ponta.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

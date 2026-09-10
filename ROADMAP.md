@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Implementar o caso de uso isolado de `/start`
+**Próximo item:** V2.8 — Criar o worker que processa `/start` a partir da inbox
 
 **Última atualização:** 10/09/2026
 
@@ -26,7 +26,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 | --- | --- | --- |
 | Runtime e migrações | Logins mínimos separados, TLS `verify-full`, readiness com consulta e Alembic administrativo validados | Revisar privilégios padrão do provedor para objetos criados fora de `argos_migrator` |
 | Webhook e inbox | Autenticação, limites, persistência, deduplicação, concorrência e recuperação validados; revisão `9a9eb20` implantada | Teste autenticado na inbox de produção, adiado pelo usuário |
-| Identidade e `/start` | Tabela e repositório de identidade validados em PostgreSQL; contratos e texto da resposta documentados | Caso de uso e worker |
+| Identidade e `/start` | Tabela, repositório e caso de uso isolado validados; contratos e texto da resposta documentados | Worker e adaptador da Bot API |
 | Bot Telegram | Segredo do webhook configurado | Criar bot, armazenar token, confirmar identidade e registrar webhook |
 | Domínio do monitoramento | Regras da V1 disponíveis como referência | Usuários, produtos, preços, conversas, coleta e notificações da V2 |
 
@@ -165,7 +165,8 @@ Decisões relacionadas:
 ### V2.8 — Usuário, deduplicação e conversa — PRÓXIMA
 
 - [x] Definir a inbox durável com payload, estados, tentativas, disponibilidade, lease, conclusão, erro e índices de recuperação; a migração recusa substituir tabelas que contenham dados.
-- [ ] Implementar `/start`, `/ajuda` e `/cancelar`.
+- [x] Implementar o caso de uso isolado de `/start`, com validação do comando e identidade, upsert do proprietário e resposta em texto simples.
+- [ ] Integrar `/start` ao worker; `/ajuda` e `/cancelar` permanecem para incrementos posteriores.
 - [x] Persistir usuário por `telegram_user_id` e destino por `chat_id`; a revisão `20260910_03` e o repositório foram validados com concorrência em PostgreSQL 17 e aplicados em produção.
 - [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases, retry e ligação ao webhook validados em PostgreSQL 17 no GitHub Actions.
 - [ ] Implementar rate limit e máquina de estados persistente.
@@ -175,7 +176,7 @@ Decisões relacionadas:
 #### Curso de ação atual
 
 1. [x] Criar a tabela e o repositório de identidade Telegram, mantendo `telegram_user_id` como proprietário e `chat_id` somente como destino; validar upsert concorrente e grants mínimos.
-2. [ ] Implementar o caso de uso isolado de `/start`, que cria ou atualiza a identidade e produz a resposta definida, usando um adaptador Telegram falso nos testes.
+2. [x] Implementar o caso de uso isolado de `/start`, que cria ou atualiza a identidade e produz a resposta definida sem depender de FastAPI, PostgreSQL ou da Bot API.
 3. [ ] Criar o worker que reivindica a inbox com lease, executa `/start` e conclui ou reagenda o update sem manter transação aberta durante chamadas externas.
 4. [ ] Implementar o adaptador da Bot API com timeout e classificação segura de falhas, ainda sem configurar credenciais reais.
 5. [ ] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
