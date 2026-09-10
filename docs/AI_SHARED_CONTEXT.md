@@ -8,10 +8,10 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 - A V1 implementa monitoramento local de até três produtos do Mercado Livre: IndexedDB, alarmes aproximados de 12/24 horas, extração, preço-alvo, queda percentual e notificações Chrome. A aceitação manual no Chrome ainda não foi executada.
 - A V2 possui uma fundação FastAPI em `backend/`: `GET /health`, middleware de correlação, tratamento seguro de erros e `POST /webhooks/telegram` com segredo em tempo constante, corpo limitado e somente mensagens privadas de texto.
-- O webhook retorna `503` para um update válido de propósito. O schema da inbox durável já existe, mas ainda não há repositório, deduplicação efetiva ligada ao HTTP, comandos Telegram, envio de mensagens, domínio V2, coletor Python ou job executável.
-- PostgreSQL usa SQLAlchemy, Alembic e psycopg. O projeto Supabase Argos existe em `sa-east-1` (`mkpziasjjfnwvtvuorig`), está saudável e tem a revisão Alembic `20260910_02` aplicada. `telegram_update_inbox` preserva o payload e modela disponibilidade, tentativas, lease, conclusão e dead letter; o comportamento transacional ainda será implementado no repositório.
-- A última validação automatizada registrada executou `backend/.venv/bin/python -m pytest` a partir de `backend/` (27 testes passando). A execução a partir da raiz ainda falha em seis testes que assumem o diretório de trabalho `backend/`; isso é uma pendência de ergonomia da suíte. A releitura remota de 09/09/2026 consultou catálogos PostgreSQL, serviço/deploy Render e HTTP público; não repetiu a suíte nem alterou infraestrutura.
-- O último commit é `9e33b85` (2026-09-09), que configurou a API no Render; há ajustes de documentação locais posteriores ainda não commitados. Revise `git status` antes de editar documentação ou criar o próximo commit.
+- O webhook retorna `503` para um update válido de propósito. A inbox durável e seu repositório PostgreSQL existem, mas ainda não estão ligados ao HTTP; também faltam comandos Telegram, envio de mensagens, domínio V2, coletor Python e job executável.
+- PostgreSQL usa SQLAlchemy, Alembic e psycopg. O projeto Supabase Argos existe em `sa-east-1` (`mkpziasjjfnwvtvuorig`), está saudável e tem a revisão Alembic `20260910_02` aplicada. `telegram_update_inbox` preserva o payload e modela disponibilidade, tentativas, lease, conclusão e dead letter. O repositório usa conflito de chave para deduplicação e `FOR UPDATE SKIP LOCKED` com lease para concorrência e recuperação.
+- A execução GitHub Actions `34509144950`, no commit `d81a5a3`, aplicou as migrations em PostgreSQL 17 descartável e concluiu os 36 testes. A integração cobre update repetido, inserção e claim concorrentes, lease expirado, rejeição de conclusão obsoleta e retry agendado.
+- O commit `d81a5a3` (2026-09-10) ajustou o banco do CI para criar as roles exigidas pelas migrations e ampliou a prova de concorrência da inbox.
 
 ## Decisões atuais
 
@@ -45,11 +45,11 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 - V1 não possui teste de aceitação em Chrome real.
 - V2 não processa updates válidos nem persiste usuários, produtos, conversas, observações ou entregas.
-- A API cloud está ativa e o segredo do webhook está em uso. O login mínimo `argos_runtime_login` e os grupos PostgreSQL já existem; falta criar somente o login dedicado de migração. A associação administrativa dos grupos com `postgres` permanece para operações do provedor.
-- Falta no Render somente o token do bot entre as credenciais previstas para o runtime HTTP. A credencial de migração deverá ficar no executor administrativo escolhido e não deve ser colocada nesse serviço.
+- A API cloud está ativa e o segredo do webhook está em uso. Os logins mínimos `argos_runtime_login` e `argos_migrator_login`, assim como seus grupos PostgreSQL, já existem. A associação administrativa dos grupos com `postgres` permanece para operações do provedor.
+- Falta no Render somente o token do bot entre as credenciais previstas para o runtime HTTP. A credencial de migração está no GitHub Actions e deve permanecer fora desse serviço.
 - As ACLs das duas tabelas atuais estão restritas, mas os privilégios padrão futuros de `public` ainda precisam de revisão manual antes de ampliar o schema ou reativar qualquer API de dados.
 - Os advisors de segurança e desempenho do Supabase não retornaram lints após a criação do login. A Data API foi desabilitada manualmente; RLS fica adiado até a estrutura e as políticas estarem prontas. Não aplicar RLS sem decidir as políticas: isso pode bloquear o runtime.
-- Não há configuração versionada de deploy Render nem workflow GitHub Actions.
+- Não há Blueprint versionado do Render. Os workflows de teste e migração administrativa estão versionados no GitHub Actions.
 
 ### A verificar antes do piloto
 
@@ -64,6 +64,6 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 ## Próximos passos prováveis
 
-1. Conferir se o bot de teste e `ARGOS_TELEGRAM_BOT_TOKEN` já existem; configurar somente o que faltar e confirmar a identidade do bot sem expor o token.
-2. Implementar o repositório da inbox com testes de repetição, concorrência, lease expirado e recuperação em PostgreSQL real antes de conectar o webhook.
+1. Ligar o webhook ao repositório da inbox, persistindo o update antes de responder sucesso e mantendo `503` quando a persistência falhar.
+2. Criar o bot de teste, guardar `ARGOS_TELEGRAM_BOT_TOKEN` no Render e confirmar a identidade sem expor o token.
 3. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

@@ -152,7 +152,7 @@ Decisões relacionadas:
 - [x] Definir a inbox durável com payload, estados, tentativas, disponibilidade, lease, conclusão, erro e índices de recuperação; a migração recusa substituir tabelas que contenham dados.
 - [ ] Implementar `/start`, `/ajuda` e `/cancelar`.
 - [ ] Persistir usuário por `telegram_user_id` e destino por `chat_id`.
-- [ ] Persistir inbox recuperável e deduplicar updates por `update_id`.
+- [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases e retry validados em PostgreSQL 17 no GitHub Actions; a ligação ao webhook permanece na V2.3.
 - [ ] Implementar rate limit e máquina de estados persistente.
 
 **Critério de conclusão:** updates repetidos não duplicam ações e conversas sobrevivem a reinícios.
