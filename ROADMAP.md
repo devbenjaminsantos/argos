@@ -12,13 +12,23 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 ## Estado atual
 
-**Versão implementada:** V1 — Extensão Chrome
+**Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.7 — Configurar credencial mínima e validar o runtime
+**Próximo item:** V2.8 — Persistir a identidade Telegram por `telegram_user_id` e o destino por `chat_id`
 
-**Última atualização:** 09/09/2026
+**Última atualização:** 10/09/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
+
+### Leitura da V2 em 10/09/2026
+
+| Bloco | Estado comprovado | Falta |
+| --- | --- | --- |
+| Runtime e migrações | Logins mínimos separados, TLS `verify-full`, readiness com consulta e Alembic administrativo validados | Revisar privilégios padrão do provedor para objetos criados fora de `argos_migrator` |
+| Webhook e inbox | Autenticação, limites, persistência, deduplicação, concorrência e recuperação validados; revisão `9a9eb20` implantada | Teste autenticado na inbox de produção, adiado pelo usuário |
+| Identidade e `/start` | Contratos e texto da resposta documentados | Tabela, repositório, caso de uso e worker |
+| Bot Telegram | Segredo do webhook configurado | Criar bot, armazenar token, confirmar identidade e registrar webhook |
+| Domínio do monitoramento | Regras da V1 disponíveis como referência | Usuários, produtos, preços, conversas, coleta e notificações da V2 |
 
 ---
 
@@ -86,14 +96,15 @@ Decisões relacionadas:
 
 **Critério de conclusão:** arquitetura, limites de custo e restrições de provedor documentados, sem API ou job cloud provisionados nesta etapa.
 
-### V2.4 — Bot de teste e segredos
+### V2.4 — Bot de teste e segredos — ADIADA ATÉ O FLUXO INTERNO
 
 - [ ] Criar um bot exclusivo de desenvolvimento no BotFather.
 - [x] Guardar e validar `ARGOS_TELEGRAM_WEBHOOK_SECRET` somente no secret store do Render; o endpoint público rejeita segredo ausente ou inválido com `401`.
 - [ ] Guardar `ARGOS_TELEGRAM_BOT_TOKEN` somente no secret store do Render e registrar o webhook do bot após criar sua identidade.
-- [ ] O usuário confirmou em 10/09/2026 que ainda não criou nem configurou `ARGOS_TELEGRAM_BOT_TOKEN`; não chamar a Bot API antes dessa etapa.
 - [ ] Confirmar a identidade do bot com a Bot API.
 - [ ] Garantir que tokens nunca apareçam em código, erros ou logs.
+
+> Em 10/09/2026, o bot e `ARGOS_TELEGRAM_BOT_TOKEN` ainda não existiam. Não chamar a Bot API antes da criação explícita dessa identidade.
 
 **Critério de conclusão:** a API consulta a identidade do bot sem expor credenciais.
 
@@ -121,7 +132,7 @@ Decisões relacionadas:
 
 **Critério de conclusão:** regras funcionam isoladamente e mantêm paridade com a V1.
 
-### V2.7 — Supabase PostgreSQL e isolamento — PRÓXIMA
+### V2.7 — Supabase PostgreSQL e isolamento
 
 - [x] Adotar `psycopg` e remover dependências nativas de banco anteriores.
 - [x] Configurar SQLAlchemy e migrações versionadas com Alembic.
@@ -136,27 +147,39 @@ Decisões relacionadas:
 - [x] Conceder `USAGE`/`CREATE` no schema `public` e ownership das tabelas atuais ao grupo `argos_migrator`, em operações administrativas separadas e validadas.
 - [ ] Revisar os privilégios padrão do provedor para novas tabelas, sequências e funções no schema `public`; a inspeção atual ainda mostra grants amplos quando o owner é `postgres` ou `supabase_admin`.
 - [x] Criar o projeto Render `Argos` (`prj-dagnkh67bikc73bvd220`), seu ambiente `Production` (`evm-dagnkh67bikc73bvd22g`) e associar somente o serviço `argos-api` (`srv-dagnegm7bikc73bulvig`).
-- [x] Corrigir e confirmar o serviço web Docker do Argos no Render, com `devbenjaminsantos/argos`, diretório `backend`, health check `/health` e deploy `live` do commit `9e33b85`.
+- [x] Corrigir e confirmar o serviço web Docker do Argos no Render, com `devbenjaminsantos/argos`, diretório `backend`, health check `/health` e deploy `live` do commit `9a9eb20`.
 - [x] Configurar e validar o segredo mínimo do webhook no secret store do provedor de execução.
 - [x] Criar `argos_runtime_login` sem privilégios próprios, vinculá-lo somente ao grupo `argos_runtime` e validar seus atributos e privilégios efetivos no PostgreSQL remoto.
 - [x] Configurar `ARGOS_DATABASE_URL` no Render pelo session pooler IPv4, com `sslmode=verify-full`, CA Supabase Root 2021 e pool limitado; `/health/ready` executou `SELECT 1` e o PostgreSQL confirmou a sessão de `argos_runtime_login`.
 - [x] Criar `argos_migrator_login` sem privilégios próprios e vinculá-lo somente ao grupo `argos_migrator`.
 - [x] Configurar `argos_migrator_login` somente no GitHub Actions, assumir `argos_migrator` e validar DDL transacional reversível mais `alembic upgrade head` pelo workflow manual.
-- [ ] Criar usuários, updates processados, conversas, produtos, preços e notificações.
-- [ ] Implementar repositórios e índices de propriedade.
+- [x] Criar a inbox de updates Telegram com deduplicação, disponibilidade, tentativas e leases.
+- [ ] Criar usuários, conversas, produtos, preços e notificações.
+- [x] Implementar o repositório da inbox e seus índices operacionais.
+- [ ] Implementar os repositórios restantes e índices de propriedade.
 - [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.
 
 **Critério de conclusão:** migrações são reproduzíveis, schema público não está exposto indevidamente, credenciais não são versionadas e isolamento é comprovado.
 
-### V2.8 — Usuário, deduplicação e conversa
+### V2.8 — Usuário, deduplicação e conversa — PRÓXIMA
 
 - [x] Definir a inbox durável com payload, estados, tentativas, disponibilidade, lease, conclusão, erro e índices de recuperação; a migração recusa substituir tabelas que contenham dados.
 - [ ] Implementar `/start`, `/ajuda` e `/cancelar`.
 - [ ] Persistir usuário por `telegram_user_id` e destino por `chat_id`.
-- [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases e retry validados em PostgreSQL 17 no GitHub Actions; a ligação ao webhook permanece na V2.3.
+- [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases, retry e ligação ao webhook validados em PostgreSQL 17 no GitHub Actions.
 - [ ] Implementar rate limit e máquina de estados persistente.
 
 **Critério de conclusão:** updates repetidos não duplicam ações e conversas sobrevivem a reinícios.
+
+#### Curso de ação atual
+
+1. Criar a tabela e o repositório de identidade Telegram, mantendo `telegram_user_id` como proprietário e `chat_id` somente como destino; validar upsert concorrente e grants mínimos.
+2. Implementar o caso de uso isolado de `/start`, que cria ou atualiza a identidade e produz a resposta definida, usando um adaptador Telegram falso nos testes.
+3. Criar o worker que reivindica a inbox com lease, executa `/start` e conclui ou reagenda o update sem manter transação aberta durante chamadas externas.
+4. Implementar o adaptador da Bot API com timeout e classificação segura de falhas, ainda sem configurar credenciais reais.
+5. Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
+
+O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
 ### V2.9 — Cadastro de produtos pelo Telegram
 

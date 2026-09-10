@@ -4,6 +4,8 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
+O próximo incremento é a persistência da identidade Telegram. A configuração real do bot foi deliberadamente adiada até que identidade, caso de uso `/start`, worker e porta de saída estejam testados sem credenciais externas. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+
 ## Estado atual
 
 - A V1 implementa monitoramento local de até três produtos do Mercado Livre: IndexedDB, alarmes aproximados de 12/24 horas, extração, preço-alvo, queda percentual e notificações Chrome. A aceitação manual no Chrome ainda não foi executada.
@@ -65,6 +67,7 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 
 ## Próximos passos prováveis
 
-1. Criar o bot de teste, guardar `ARGOS_TELEGRAM_BOT_TOKEN` no Render e confirmar a identidade sem expor o token.
-2. Implementar um worker inicial que reserve updates da inbox e entregue `/start`, com política explícita de retry para resultado incerto no envio ao Telegram.
-3. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
+1. Criar a tabela e o repositório de identidade Telegram, separando propriedade (`telegram_user_id`) de destino (`chat_id`) e validando concorrência, isolamento e grants mínimos.
+2. Implementar `/start` como caso de uso independente de FastAPI, PostgreSQL e Telegram, com uma porta de envio falsa nos testes.
+3. Criar o worker da inbox e o adaptador de saída da Bot API; somente depois criar/configurar o bot real e executar o fluxo ponta a ponta.
+4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
