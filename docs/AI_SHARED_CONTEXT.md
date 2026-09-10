@@ -27,6 +27,7 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 - Em 09/09/2026, `/health` respondeu `200` publicamente; rota inexistente, documentação desabilitada e método inválido responderam `404`, `404` e `405` com envelope seguro e ID de correlação. Os 27 testes locais passaram no mesmo commit implantado.
 - `ARGOS_TELEGRAM_WEBHOOK_SECRET` já foi configurado no secret store do Render. Na releitura de 09/09/2026, `/health` retornou `200` e o webhook sem segredo retornou `401`. No código implantado, segredo não configurado retornaria `503`; o `401` comprova que a autenticação está configurada no runtime, sem revelar o valor. O código ainda retorna `503` para update válido até existir inbox durável e deduplicação efetiva.
 - `ARGOS_DATABASE_URL` e `ARGOS_TELEGRAM_WEBHOOK_SECRET` estão no secret store do serviço. A senha de `argos_runtime_login` foi rotacionada em memória e sincronizada com o Render sem ser exibida, gravada localmente ou incluída no histórico de migrações. `ARGOS_TELEGRAM_BOT_TOKEN` e `ARGOS_MIGRATION_DATABASE_URL` continuam ausentes do runtime HTTP, sendo que a segunda deve permanecer fora desse serviço.
+- O usuário confirmou em 10/09/2026 que ainda não criou nem configurou `ARGOS_TELEGRAM_BOT_TOKEN`. A Bot API não deve ser chamada e o webhook do bot não deve ser registrado antes da criação explícita dessa identidade.
 - `/health/ready` retornou `200` pelo endpoint público e o catálogo PostgreSQL confirmou uma sessão de `argos_runtime_login` via Supavisor. `pg_stat_ssl.ssl=false` descreve a conexão interna Supavisor → PostgreSQL e não o trecho cliente Render → pooler, no qual o `psycopg` exige CA e hostname por `verify-full`. `/health` permanece uma verificação de liveness sem consulta ao banco.
 - O GitHub Actions é o executor administrativo inicial. O workflow manual `Migrate production database` possui somente `contents: read`, concorrência única e timeout de dez minutos. A execução `34485990355` passou em 10/09/2026: assumiu `argos_migrator`, validou `CREATE`/`DROP TABLE` dentro de uma transação revertida, executou `alembic upgrade head` e confirmou `20260821_01`. Uma consulta independente confirmou ausência da tabela de prova e ownership das tabelas atuais por `argos_migrator`.
 
@@ -64,5 +65,5 @@ Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução 
 ## Próximos passos prováveis
 
 1. Conferir se o bot de teste e `ARGOS_TELEGRAM_BOT_TOKEN` já existem; configurar somente o que faltar e confirmar a identidade do bot sem expor o token.
-2. Antes de registrar o webhook do bot para receber mensagens, definir e implementar inbox recuperável, transações, leases e deduplicação com testes em PostgreSQL real.
+2. Aplicar a revisão da inbox durável e implementar o repositório com testes de repetição, concorrência, lease expirado e recuperação em PostgreSQL real antes de conectar o webhook.
 3. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

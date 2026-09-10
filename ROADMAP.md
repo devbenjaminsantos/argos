@@ -91,6 +91,7 @@ Decisões relacionadas:
 - [ ] Criar um bot exclusivo de desenvolvimento no BotFather.
 - [x] Guardar e validar `ARGOS_TELEGRAM_WEBHOOK_SECRET` somente no secret store do Render; o endpoint público rejeita segredo ausente ou inválido com `401`.
 - [ ] Guardar `ARGOS_TELEGRAM_BOT_TOKEN` somente no secret store do Render e registrar o webhook do bot após criar sua identidade.
+- [ ] O usuário confirmou em 10/09/2026 que ainda não criou nem configurou `ARGOS_TELEGRAM_BOT_TOKEN`; não chamar a Bot API antes dessa etapa.
 - [ ] Confirmar a identidade do bot com a Bot API.
 - [ ] Garantir que tokens nunca apareçam em código, erros ou logs.
 
@@ -148,6 +149,7 @@ Decisões relacionadas:
 
 ### V2.8 — Usuário, deduplicação e conversa
 
+- [x] Definir a inbox durável com payload, estados, tentativas, disponibilidade, lease, conclusão, erro e índices de recuperação; a migração recusa substituir tabelas que contenham dados.
 - [ ] Implementar `/start`, `/ajuda` e `/cancelar`.
 - [ ] Persistir usuário por `telegram_user_id` e destino por `chat_id`.
 - [ ] Persistir inbox recuperável e deduplicar updates por `update_id`.
