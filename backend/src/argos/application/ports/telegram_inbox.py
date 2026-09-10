@@ -51,3 +51,11 @@ class TelegramInbox(Protocol):
         next_attempt_at: datetime,
         error_code: str,
     ) -> bool: ...
+
+    def dead_letter(
+        self,
+        *,
+        update_id: int,
+        lease_token: UUID,
+        error_code: str,
+    ) -> bool: ...

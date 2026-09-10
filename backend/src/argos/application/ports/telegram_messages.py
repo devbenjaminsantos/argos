@@ -16,3 +16,21 @@ class TelegramMessageSender(Protocol):
     """Porta de saída implementada posteriormente pela Bot API."""
 
     def send(self, message: TelegramMessage) -> None: ...
+
+
+class TelegramDeliveryError(Exception):
+    """Falha classificada sem carregar resposta ou credencial do provedor."""
+
+    def __init__(
+        self,
+        code: str,
+        *,
+        retryable: bool,
+        outcome_unknown: bool = False,
+    ) -> None:
+        if not code or len(code) > 64:
+            raise ValueError("code deve ter entre 1 e 64 caracteres.")
+        super().__init__(code)
+        self.code = code
+        self.retryable = retryable
+        self.outcome_unknown = outcome_unknown

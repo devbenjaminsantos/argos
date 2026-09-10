@@ -162,3 +162,31 @@ class PostgreSQLTelegramInbox:
         )
         with self._engine.begin() as connection:
             return connection.scalar(statement) is not None
+
+    def dead_letter(
+        self,
+        *,
+        update_id: int,
+        lease_token: UUID,
+        error_code: str,
+    ) -> bool:
+        if not error_code or len(error_code) > 64:
+            raise ValueError("error_code deve ter entre 1 e 64 caracteres.")
+
+        statement = (
+            update(TelegramUpdateInbox)
+            .where(
+                TelegramUpdateInbox.update_id == update_id,
+                TelegramUpdateInbox.status == "processing",
+                TelegramUpdateInbox.lease_token == lease_token,
+            )
+            .values(
+                status="dead_letter",
+                lease_token=None,
+                lease_expires_at=None,
+                last_error_code=error_code,
+            )
+            .returning(TelegramUpdateInbox.update_id)
+        )
+        with self._engine.begin() as connection:
+            return connection.scalar(statement) is not None

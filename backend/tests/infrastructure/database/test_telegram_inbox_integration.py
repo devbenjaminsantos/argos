@@ -3,6 +3,7 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
@@ -147,6 +148,30 @@ def test_retry_waits_until_next_attempt(
     )
     assert retried is not None
     assert retried.attempt_count == 2
+
+
+def test_dead_letter_rejects_stale_lease_and_is_not_reclaimed(
+    inbox: PostgreSQLTelegramInbox,
+) -> None:
+    now = datetime.now(UTC)
+    inbox.enqueue(update_id=106, payload={"text": "/bad"}, received_at=now)
+    claimed = inbox.claim_next(now=now, lease_duration=timedelta(seconds=10))
+    assert claimed is not None
+
+    assert inbox.dead_letter(
+        update_id=claimed.update_id,
+        lease_token=UUID("00000000-0000-0000-0000-000000000002"),
+        error_code="invalid_update",
+    ) is False
+    assert inbox.dead_letter(
+        update_id=claimed.update_id,
+        lease_token=claimed.lease_token,
+        error_code="invalid_update",
+    ) is True
+    assert inbox.claim_next(
+        now=now + timedelta(seconds=11),
+        lease_duration=timedelta(seconds=10),
+    ) is None
 
 
 def test_webhook_acknowledges_only_after_postgresql_persistence() -> None:
