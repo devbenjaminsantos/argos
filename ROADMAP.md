@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Validar recuperação após reinício no ambiente implantado
+**Próximo item:** V2.8 — Validar retry transitório no ambiente implantado
 
 **Última atualização:** 11/09/2026
 
@@ -173,6 +173,7 @@ Decisões relacionadas:
 - [x] Integrar `/start` ao núcleo do worker com claim, conclusão, retry apenas para falha transitória confirmada, dead letter para falha permanente ou resultado incerto e recuperação por lease para exceção inesperada.
 - [x] Persistir usuário por `telegram_user_id` e destino por `chat_id`; a revisão `20260910_03` e o repositório foram validados com concorrência em PostgreSQL 17 e aplicados em produção.
 - [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases, retry e ligação ao webhook validados em PostgreSQL 17 no GitHub Actions.
+- [x] Validar em produção a recuperação após reinício: a nova instância retomou um lease sintético expirado, incrementou a tentativa, liberou o lease e encerrou o comando inválido sem chamar a Bot API; o registro de teste foi removido.
 - [ ] Implementar rate limit e máquina de estados persistente.
 
 **Critério de conclusão:** updates repetidos não duplicam ações e conversas sobrevivem a reinícios.

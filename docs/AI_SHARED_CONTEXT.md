@@ -64,6 +64,7 @@ O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/s
 ### A verificar antes do piloto
 
 - Em 11/09/2026, a aceitação real de `/start` confirmou uma inbox `completed`, `attempt_count=1`, zero dead letter e uma identidade persistida. A consulta exibiu somente contagens, estado e tempos, sem IDs Telegram ou payload.
+- Em 11/09/2026, o deploy `dep-dai3gte1egvs73daiamg` validou recuperação após reinício. Um registro sintético com lease ativo foi persistido antes do redeploy; após a nova instância ficar `live`, o lease foi expirado e o runner o recuperou, elevou `attempt_count` de 1 para 2, liberou o lease e encerrou o comando inválido em `dead_letter` sem envio externo. O registro sintético foi removido e não houve acesso a IDs ou payloads reais.
 - Ao configurar o que falta, preservar `ARGOS_TELEGRAM_WEBHOOK_SECRET` já existente. Confirmar identidade do bot e estado do webhook pela Bot API quando houver acesso ao token; existência do segredo de webhook não comprova existência do bot.
 - Conectividade de Render e do executor com o endpoint PostgreSQL escolhido, credencial mínima, pool de conexões, latência e limites dos planos. O handshake direto com TLS `verify-full` e a CA do projeto já foi validado a partir do ambiente atual.
 - Recuperação de um update ou envio de alerta quando o processo cai depois de um efeito externo; “exatamente uma entrega” não é garantível sem política explícita para resultado incerto.
@@ -75,6 +76,6 @@ O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/s
 
 ## Próximos passos prováveis
 
-1. Validar reinício, retry confirmado e resultado incerto no ambiente implantado.
+1. Validar retry transitório confirmado no ambiente implantado sem enviar mensagens duplicadas.
 2. Implementar `/ajuda` e `/cancelar` em incrementos posteriores.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
