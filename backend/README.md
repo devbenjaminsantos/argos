@@ -111,7 +111,7 @@ Para executar os testes:
 
 `argos-telegram-worker` processa no máximo uma entrega por execução. Ele reserva a inbox com lease, executa `/start`, envia texto simples pela Bot API e somente então conclui o update. Falhas transitórias confirmadas são reagendadas; falhas permanentes ou com resultado incerto vão para dead letter para evitar reenvio cego.
 
-O comando one-shot está validado, mas ainda não possui um acionador implantado. Antes de registrar o bot real, o piloto integrará um runner ao ciclo de vida da API para consumir a inbox enquanto a instância gratuita estiver ativa. A inbox permanece durável e permite recuperar leases após reinícios; o job periódico de coleta continua separado do processo HTTP.
+Além do comando one-shot, a API compõe um runner quando banco e token estão configurados. O runner acorda depois que o webhook persiste um update, drena a inbox fora do event loop e usa polling para recuperar trabalho após falhas ou reinícios. Sem token ele não inicia. O job periódico de coleta continua separado do processo HTTP.
 
 O comando exige `ARGOS_DATABASE_URL` e `ARGOS_TELEGRAM_BOT_TOKEN` fora do Git:
 

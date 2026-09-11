@@ -4,7 +4,7 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-Identidade, caso de uso `/start`, worker, adaptador da Bot API e comando one-shot já estão testados sem credencial externa. Ainda falta um runner que acione o worker depois que o webhook persistir o update. No piloto gratuito, esse runner será integrado ao ciclo de vida do processo HTTP e continuará usando a inbox e os leases como fonte durável; o job de coleta permanece separado. O bot real só será configurado depois desse incremento. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+Identidade, caso de uso `/start`, worker, adaptador da Bot API, comando one-shot e runner do webhook estão testados sem credencial externa. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O próximo incremento é criar e configurar o bot exclusivo de teste. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
@@ -37,6 +37,7 @@ Identidade, caso de uso `/start`, worker, adaptador da Bot API e comando one-sho
 - O commit `ed29274` implementou o núcleo do worker. Ele processa uma entrega por vez, não mantém transação durante o envio, conclui somente depois da porta de saída, reagenda apenas falhas transitórias com resultado conhecido, envia falhas permanentes ou ambíguas para dead letter e deixa exceções inesperadas para recuperação após o lease. O CI `34532088167` concluiu 57 testes.
 - O commit `e194d46` implementou o adaptador da Bot API com host fixo, texto simples, timeout, limite de resposta, `retry_after` limitado e erros sem token. O CI `34533252572` foi aprovado.
 - O commit `dfb8525` criou `argos-telegram-worker`, um comando one-shot que compõe banco, inbox, identidade, `/start` e saída. O CI `34533540182` concluiu com sucesso o fluxo usando PostgreSQL real e somente a saída Telegram falsa.
+- O commit `ba63204` integrou o runner recuperável ao lifespan da API. Ele fica desativado sem token, acorda após o webhook persistir, drena a fila fora do event loop e encerra de forma controlada. Uma única consulta confirmou o CI `34593684038` como concluído com sucesso.
 - Os advisors após a migration não apontaram falhas de segurança. O advisor de desempenho informou que os dois índices parciais da inbox ainda não foram usados, resultado esperado enquanto o worker não existe; não removê-los antes de validar o padrão real de claims.
 
 ## Documentação recente
@@ -73,7 +74,7 @@ Identidade, caso de uso `/start`, worker, adaptador da Bot API e comando one-sho
 
 ## Próximos passos prováveis
 
-1. Integrar o runner recuperável do worker ao processo HTTP do piloto e testar inicialização, encerramento, ausência de token e processamento após o webhook.
-2. Criar o bot exclusivo de teste no BotFather e armazenar `ARGOS_TELEGRAM_BOT_TOKEN` diretamente no secret store do Render, sem enviá-lo pelo chat ou gravá-lo no repositório.
-3. Confirmar a identidade com `getMe`, registrar o webhook e executar a aceitação ponta a ponta, conferindo inbox, usuário, conclusão e logs sem segredos.
+1. Criar o bot exclusivo de teste no BotFather e armazenar `ARGOS_TELEGRAM_BOT_TOKEN` diretamente no secret store do Render, sem enviá-lo pelo chat ou gravá-lo no repositório.
+2. Confirmar a identidade com `getMe`, registrar o webhook e executar a aceitação ponta a ponta, conferindo inbox, usuário, conclusão e logs sem segredos.
+3. Validar reinício, retry confirmado, resultado incerto e ausência de token no log do ambiente implantado.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
