@@ -4,7 +4,7 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/start`, o webhook persistiu o update, o runner registrou a identidade, enviou a resposta esperada e concluiu a inbox em uma tentativa. O bot permanece limitado a conversas privadas e anuncia somente `/start`. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O próximo incremento é restringir explicitamente os comandos aceitos na fronteira do webhook. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/start`, o webhook persistiu o update, o runner registrou a identidade, enviou a resposta esperada e concluiu a inbox em uma tentativa. O bot permanece limitado a conversas privadas e anuncia somente `/start`. A fronteira persiste apenas esse comando; texto ou comandos desconhecidos são confirmados sem persistência para evitar retries do Telegram. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
@@ -75,7 +75,6 @@ O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/s
 
 ## Próximos passos prováveis
 
-1. Restringir explicitamente os comandos aceitos na fronteira do webhook, mantendo `/start` como único comando ativo.
-2. Validar reinício, retry confirmado e resultado incerto no ambiente implantado.
-3. Implementar `/ajuda` e `/cancelar` em incrementos posteriores.
+1. Validar reinício, retry confirmado e resultado incerto no ambiente implantado.
+2. Implementar `/ajuda` e `/cancelar` em incrementos posteriores.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

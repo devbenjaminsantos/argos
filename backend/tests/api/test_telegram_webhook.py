@@ -211,6 +211,45 @@ def test_valid_update_is_persisted_before_acknowledgement() -> None:
     assert inbox.enqueued[0][1] == _VALID_UPDATE
 
 
+def test_webhook_accepts_normalized_start_command() -> None:
+    inbox = _InboxStub()
+    update = {
+        **_VALID_UPDATE,
+        "message": {**_VALID_UPDATE["message"], "text": "  /START  "},
+    }
+
+    response = _client(inbox=inbox).post(
+        "/webhooks/telegram",
+        headers=_HEADERS,
+        json=update,
+    )
+
+    assert response.status_code == 200
+    assert len(inbox.enqueued) == 1
+
+
+def test_webhook_acknowledges_unsupported_text_without_persisting_or_waking_worker() -> None:
+    inbox = _InboxStub()
+    runner = _RunnerStub()
+    client = _client(inbox=inbox, runner=runner)
+
+    for text in ("/ajuda", "/start@outro_bot", "olá"):
+        update = {
+            **_VALID_UPDATE,
+            "update_id": _VALID_UPDATE["update_id"] + len(inbox.enqueued) + 1,
+            "message": {**_VALID_UPDATE["message"], "text": text},
+        }
+        response = client.post(
+            "/webhooks/telegram",
+            headers=_HEADERS,
+            json=update,
+        )
+        assert response.status_code == 200
+
+    assert inbox.enqueued == []
+    assert runner.notifications == 0
+
+
 def test_repeated_update_is_acknowledged_without_duplicate_persistence() -> None:
     inbox = _InboxStub()
     client = _client(inbox=inbox)

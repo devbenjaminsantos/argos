@@ -23,6 +23,10 @@ _SECRET_HEADER = "X-Telegram-Bot-Api-Secret-Token"
 logger = logging.getLogger(__name__)
 
 
+def _is_supported_command(text: str) -> bool:
+    return text.strip().casefold() == "/start"
+
+
 def _authenticate(request: Request, settings: Settings) -> None:
     configured = settings.telegram_webhook_secret
     if configured is None:
@@ -76,6 +80,9 @@ async def receive_telegram_update(request: Request) -> Response:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY
         ) from error
+
+    if not _is_supported_command(update.message.text):
+        return Response(status_code=HTTPStatus.OK)
 
     inbox: TelegramInbox | None = request.app.state.telegram_inbox
     if inbox is None:

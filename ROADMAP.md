@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.5 — Restringir explicitamente os comandos aceitos
+**Próximo item:** V2.8 — Validar recuperação após reinício no ambiente implantado
 
 **Última atualização:** 11/09/2026
 
@@ -111,12 +111,12 @@ Decisões relacionadas:
 
 **Critério de conclusão:** a API consulta a identidade do bot sem expor credenciais.
 
-### V2.5 — Webhook seguro
+### V2.5 — Webhook seguro — CONCLUÍDA
 
 - [x] Criar `POST /webhooks/telegram`.
 - [x] Validar `X-Telegram-Bot-Api-Secret-Token` em tempo constante.
 - [x] Limitar o corpo antes do parsing e aceitar somente updates de mensagem de texto.
-- [ ] Restringir os comandos aceitos.
+- [x] Restringir a persistência a `/start`; texto e comandos desconhecidos recebem `200` sem entrar na inbox nem provocar retries do Telegram.
 - [x] Recusar grupos e aceitar apenas conversas privadas.
 - [x] Responder rapidamente sem executar scraping no request.
 - [x] Testar segredo ausente, inválido, payload excessivo e conteúdo malformado.
