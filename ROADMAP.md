@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Implementar `/cancelar` como caso de uso isolado
+**Próximo item:** V2.8 — Persistir rascunhos e integrar `/cancelar`
 
 **Última atualização:** 11/09/2026
 
@@ -172,7 +172,7 @@ Decisões relacionadas:
 - [x] Implementar o caso de uso isolado de `/start`, com validação do comando e identidade, upsert do proprietário e resposta em texto simples.
 - [x] Implementar `/ajuda` como caso de uso isolado, integrá-lo ao worker e liberá-lo na lista fechada do webhook, listando somente comandos disponíveis.
 - [x] Validar `/ajuda` em produção: nova entrega concluída em uma tentativa, zero dead letter e total de identidades preservado em um.
-- [ ] Implementar `/cancelar` em incremento posterior.
+- [x] Implementar `/cancelar` como caso de uso isolado e contrato de repositório por proprietário; persistência e integração ficam para o próximo incremento.
 - [x] Integrar `/start` ao núcleo do worker com claim, conclusão, retry apenas para falha transitória confirmada, dead letter para falha permanente ou resultado incerto e recuperação por lease para exceção inesperada.
 - [x] Persistir usuário por `telegram_user_id` e destino por `chat_id`; a revisão `20260910_03` e o repositório foram validados com concorrência em PostgreSQL 17 e aplicados em produção.
 - [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases, retry e ligação ao webhook validados em PostgreSQL 17 no GitHub Actions.

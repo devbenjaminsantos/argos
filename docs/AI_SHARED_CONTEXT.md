@@ -76,7 +76,7 @@ Os fluxos reais de `/start` e `/ajuda` estão validados no `@argos_teste_bot`. O
 
 ## Próximos passos prováveis
 
-1. Implementar `/cancelar` como caso de uso isolado, sem liberá-lo no webhook antes da integração.
-2. Integrar e validar `/cancelar` em incremento posterior.
+1. Modelar e persistir o rascunho conversacional por `telegram_user_id`, com expiração e cancelamento atômico.
+2. Integrar `/cancelar` ao worker e liberá-lo no webhook somente depois da migração e dos testes de isolamento.
 3. Reservar testes de falha da Bot API real para staging isolado ou para uma injeção de falhas que não possa enviar mensagens duplicadas.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
