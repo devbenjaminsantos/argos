@@ -23,12 +23,22 @@ def repository() -> PostgreSQLTelegramUserRepository:
     assert _DATABASE_URL is not None
     engine = create_engine(_DATABASE_URL, pool_size=5, max_overflow=0)
     with engine.begin() as connection:
-        connection.execute(text("TRUNCATE TABLE telegram_users"))
+        connection.execute(
+            text(
+                "TRUNCATE TABLE telegram_conversation_drafts, "
+                "telegram_users"
+            )
+        )
     try:
         yield PostgreSQLTelegramUserRepository(engine)
     finally:
         with engine.begin() as connection:
-            connection.execute(text("TRUNCATE TABLE telegram_users"))
+            connection.execute(
+                text(
+                    "TRUNCATE TABLE telegram_conversation_drafts, "
+                    "telegram_users"
+                )
+            )
         engine.dispose()
 
 

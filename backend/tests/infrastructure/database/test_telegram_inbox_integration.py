@@ -227,7 +227,12 @@ def test_one_shot_worker_persists_owner_sends_start_and_completes() -> None:
     engine = create_engine(_DATABASE_URL)
     with engine.begin() as connection:
         connection.execute(text("TRUNCATE TABLE telegram_update_inbox"))
-        connection.execute(text("TRUNCATE TABLE telegram_users"))
+        connection.execute(
+            text(
+                "TRUNCATE TABLE telegram_conversation_drafts, "
+                "telegram_users"
+            )
+        )
 
     now = datetime.now(UTC)
     inbox = PostgreSQLTelegramInbox(engine)
@@ -271,7 +276,12 @@ def test_one_shot_worker_persists_owner_sends_start_and_completes() -> None:
             )
         ).one()
         connection.execute(text("TRUNCATE TABLE telegram_update_inbox"))
-        connection.execute(text("TRUNCATE TABLE telegram_users"))
+        connection.execute(
+            text(
+                "TRUNCATE TABLE telegram_conversation_drafts, "
+                "telegram_users"
+            )
+        )
     engine.dispose()
 
     assert processed is True
