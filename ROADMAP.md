@@ -105,6 +105,8 @@ Decisões relacionadas:
 - [x] Mascarar o token na configuração e no adaptador, substituir erros de transporte por códigos seguros e testar que a credencial não aparece nas exceções ou representações.
 - [ ] Confirmar após a configuração real que logs do Render e do executor não contêm token.
 
+> O plano Free não oferece shell neste serviço. A aplicação configura o webhook de forma idempotente na inicialização quando recebe a URL e o username esperados: valida `getMe`, recusa outra identidade, consulta `getWebhookInfo` e chama `setWebhook` somente quando necessário.
+
 > Em 11/09/2026, o bot `@argos_teste_bot` foi criado e configurado. O token ainda deve ser armazenado diretamente no Render antes de confirmar a identidade pela Bot API; não enviar ou versionar a credencial.
 
 **Critério de conclusão:** a API consulta a identidade do bot sem expor credenciais.

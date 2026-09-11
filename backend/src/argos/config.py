@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import Field, HttpUrl, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     telegram_bot_token: SecretStr | None = None
     telegram_webhook_secret: SecretStr | None = None
+    telegram_webhook_url: HttpUrl | None = None
+    telegram_expected_username: str | None = None
     telegram_webhook_max_body_bytes: int = Field(
         default=65_536,
         ge=1_024,

@@ -2,6 +2,8 @@
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+import asyncio
+import logging
 
 from fastapi import FastAPI
 from sqlalchemy import Engine
@@ -17,7 +19,10 @@ from argos.config import Settings, get_settings
 from argos.infrastructure.database.config import create_database_engine
 from argos.infrastructure.database.telegram_inbox import PostgreSQLTelegramInbox
 from argos.infrastructure.telegram.worker_runner import AsyncTelegramWorkerRunner
+from argos.infrastructure.telegram.webhook_configurator import TelegramWebhookConfigurator
 from argos.telegram_worker import build_worker
+
+logger = logging.getLogger(__name__)
 
 
 def create_app(
@@ -45,6 +50,23 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        if resolved_settings.telegram_webhook_url is not None:
+            if (
+                resolved_settings.telegram_bot_token is None
+                or resolved_settings.telegram_webhook_secret is None
+                or resolved_settings.telegram_expected_username is None
+            ):
+                raise RuntimeError("Configuração Telegram incompleta.")
+            identity = await asyncio.to_thread(
+                TelegramWebhookConfigurator(
+                    resolved_settings.telegram_bot_token,
+                    timeout_seconds=resolved_settings.telegram_request_timeout_seconds,
+                ).configure,
+                expected_username=resolved_settings.telegram_expected_username,
+                webhook_url=str(resolved_settings.telegram_webhook_url),
+                webhook_secret=resolved_settings.telegram_webhook_secret,
+            )
+            logger.info("Telegram webhook configurado para @%s.", identity.username)
         if telegram_worker_runner is not None:
             await telegram_worker_runner.start()
         try:
