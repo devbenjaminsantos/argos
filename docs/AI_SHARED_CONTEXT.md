@@ -4,7 +4,7 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/start`, o webhook persistiu o update, o runner registrou a identidade, enviou a resposta esperada e concluiu a inbox em uma tentativa. O bot permanece limitado a conversas privadas e anuncia somente `/start`. A fronteira persiste apenas esse comando; texto ou comandos desconhecidos são confirmados sem persistência para evitar retries do Telegram. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+Os fluxos reais de `/start` e `/ajuda` estão validados no `@argos_teste_bot`. O bot permanece limitado a conversas privadas e anuncia os dois comandos no BotFather. A fronteira persiste somente esses comandos; texto ou comandos desconhecidos são confirmados sem persistência para evitar retries do Telegram. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
@@ -29,7 +29,7 @@ O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/s
 - Em 09/09/2026, `/health` respondeu `200` publicamente; rota inexistente, documentação desabilitada e método inválido responderam `404`, `404` e `405` com envelope seguro e ID de correlação. Os 27 testes locais passaram no mesmo commit implantado.
 - `ARGOS_TELEGRAM_WEBHOOK_SECRET` já foi configurado no secret store do Render. Após o deploy de `9a9eb20`, `/health` e `/health/ready` retornaram `200`, e o webhook sem segredo retornou `401`. Isso comprova liveness, consulta ao banco e autenticação configurada sem revelar o segredo. A persistência autenticada em produção ainda requer validação manual com o segredo existente; o caminho completo foi comprovado no PostgreSQL real do CI.
 - `ARGOS_DATABASE_URL` e `ARGOS_TELEGRAM_WEBHOOK_SECRET` estão no secret store do serviço. A senha de `argos_runtime_login` foi rotacionada em memória e sincronizada com o Render sem ser exibida, gravada localmente ou incluída no histórico de migrações. `ARGOS_TELEGRAM_BOT_TOKEN` ainda está ausente do runtime HTTP. `ARGOS_MIGRATION_DATABASE_URL` também está ausente e deve permanecer fora desse serviço.
-- O bot de teste `@argos_teste_bot` foi criado e configurado no BotFather em 11/09/2026. Seu token não foi compartilhado nem versionado; ele ainda deve ser inserido diretamente no secret store do Render antes de chamar a Bot API ou registrar o webhook.
+- O bot de teste `@argos_teste_bot` foi criado e configurado no BotFather em 11/09/2026. Seu token foi inserido diretamente no secret store do Render, sem ser compartilhado ou versionado; a identidade e o webhook foram validados pela aplicação durante o startup.
 - O plano Free do serviço não disponibiliza shell. Para manter os segredos somente no Render, a aplicação possui configuração idempotente de startup: valida `getMe` contra `argos_teste_bot`, consulta `getWebhookInfo` e registra somente updates de `message` quando a URL ainda não corresponde ao endpoint esperado.
 - `/health/ready` retornou `200` pelo endpoint público e o catálogo PostgreSQL confirmou uma sessão de `argos_runtime_login` via Supavisor. `pg_stat_ssl.ssl=false` descreve a conexão interna Supavisor → PostgreSQL e não o trecho cliente Render → pooler, no qual o `psycopg` exige CA e hostname por `verify-full`. `/health` permanece uma verificação de liveness sem consulta ao banco.
 - O GitHub Actions é o executor administrativo inicial. O workflow manual `Migrate production database` possui somente `contents: read`, concorrência única e timeout de dez minutos. A execução `34491082455` aplicou `20260910_02` em 10/09/2026. Uma consulta independente confirmou a remoção da tabela legada vazia, a presença da inbox vazia sob ownership de `argos_migrator` e somente `SELECT`/`INSERT`/`UPDATE` para `argos_runtime_login`.
@@ -56,7 +56,7 @@ O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/s
 - V1 não possui teste de aceitação em Chrome real.
 - V2 não processa updates válidos nem persiste usuários, produtos, conversas, observações ou entregas.
 - A API cloud está ativa e o segredo do webhook está em uso. Os logins mínimos `argos_runtime_login` e `argos_migrator_login`, assim como seus grupos PostgreSQL, já existem. A associação administrativa dos grupos com `postgres` permanece para operações do provedor.
-- Falta no Render somente o token do bot entre as credenciais previstas para o runtime HTTP. A credencial de migração está no GitHub Actions e deve permanecer fora desse serviço.
+- As credenciais previstas para o runtime HTTP estão configuradas no Render. A credencial de migração está no GitHub Actions e deve permanecer fora desse serviço.
 - As ACLs das duas tabelas atuais estão restritas, mas os privilégios padrão futuros de `public` ainda precisam de revisão manual antes de ampliar o schema ou reativar qualquer API de dados.
 - Os advisors de segurança e desempenho do Supabase não retornaram lints após a criação do login. A Data API foi desabilitada manualmente; RLS fica adiado até a estrutura e as políticas estarem prontas. Não aplicar RLS sem decidir as políticas: isso pode bloquear o runtime.
 - Não há Blueprint versionado do Render. Os workflows de teste e migração administrativa estão versionados no GitHub Actions.
@@ -76,7 +76,7 @@ O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/s
 
 ## Próximos passos prováveis
 
-1. Atualizar a lista de comandos no BotFather para anunciar também `ajuda - Mostrar os comandos disponíveis`.
-2. Implementar `/cancelar` em incremento posterior.
+1. Implementar `/cancelar` como caso de uso isolado, sem liberá-lo no webhook antes da integração.
+2. Integrar e validar `/cancelar` em incremento posterior.
 3. Reservar testes de falha da Bot API real para staging isolado ou para uma injeção de falhas que não possa enviar mensagens duplicadas.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

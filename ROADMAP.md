@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.4 — Anunciar `/ajuda` no menu do bot de teste
+**Próximo item:** V2.8 — Implementar `/cancelar` como caso de uso isolado
 
 **Última atualização:** 11/09/2026
 
@@ -98,17 +98,17 @@ Decisões relacionadas:
 
 ### V2.4 — Bot de teste e segredos — CONCLUÍDA
 
-- [x] Criar e configurar o bot exclusivo de desenvolvimento `@argos_teste_bot` no BotFather, limitado a conversas privadas e com somente `/start` anunciado.
+- [x] Criar e configurar o bot exclusivo de desenvolvimento `@argos_teste_bot` no BotFather, limitado a conversas privadas e com `/start` e `/ajuda` anunciados.
 - [x] Guardar e validar `ARGOS_TELEGRAM_WEBHOOK_SECRET` somente no secret store do Render; o endpoint público rejeita segredo ausente ou inválido com `401`.
 - [x] Guardar `ARGOS_TELEGRAM_BOT_TOKEN` somente no secret store do Render e registrar o webhook do bot após criar sua identidade.
 - [x] Confirmar a identidade `@argos_teste_bot` com a Bot API durante a inicialização segura.
 - [x] Mascarar o token na configuração e no adaptador, substituir erros de transporte por códigos seguros e testar que a credencial não aparece nas exceções ou representações.
 - [x] Confirmar após a configuração real que logs do Render e do executor não contêm token.
-- [ ] Atualizar os comandos públicos no BotFather para anunciar `/start` e `/ajuda` conforme a implementação implantada.
+- [x] Atualizar os comandos públicos no BotFather para anunciar `/start` e `/ajuda` conforme a implementação implantada.
 
 > O plano Free não oferece shell neste serviço. A aplicação configura o webhook de forma idempotente na inicialização quando recebe a URL e o username esperados: valida `getMe`, recusa outra identidade, consulta `getWebhookInfo` e chama `setWebhook` somente quando necessário.
 
-> Em 11/09/2026, o bot `@argos_teste_bot` foi criado e configurado. O token ainda deve ser armazenado diretamente no Render antes de confirmar a identidade pela Bot API; não enviar ou versionar a credencial.
+> Em 11/09/2026, o bot `@argos_teste_bot`, sua identidade e o webhook foram validados. O token permanece somente no secret store do Render; não enviar ou versionar a credencial.
 
 **Critério de conclusão:** a API consulta a identidade do bot sem expor credenciais.
 
