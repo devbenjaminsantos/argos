@@ -14,9 +14,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Implementar o adaptador de saída da Bot API sem credencial real
+**Próximo item:** V2.8 — Integrar o runner recuperável do worker ao processo HTTP do piloto
 
-**Última atualização:** 10/09/2026
+**Última atualização:** 11/09/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -26,7 +26,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 | --- | --- | --- |
 | Runtime e migrações | Logins mínimos separados, TLS `verify-full`, readiness com consulta e Alembic administrativo validados | Revisar privilégios padrão do provedor para objetos criados fora de `argos_migrator` |
 | Webhook e inbox | Autenticação, limites, persistência, deduplicação, concorrência e recuperação validados; revisão `9a9eb20` implantada | Teste autenticado na inbox de produção, adiado pelo usuário |
-| Identidade e `/start` | Tabela, repositório, caso de uso e núcleo recuperável do worker validados | Adaptador da Bot API e comando executável do worker |
+| Identidade e `/start` | Tabela, repositório, caso de uso, worker, adaptador Bot API e comando one-shot validados sem credencial real | Runner que aciona o worker após o webhook e aceitação com o bot real |
 | Bot Telegram | Segredo do webhook configurado | Criar bot, armazenar token, confirmar identidade e registrar webhook |
 | Domínio do monitoramento | Regras da V1 disponíveis como referência | Usuários, produtos, preços, conversas, coleta e notificações da V2 |
 
@@ -96,13 +96,14 @@ Decisões relacionadas:
 
 **Critério de conclusão:** arquitetura, limites de custo e restrições de provedor documentados, sem API ou job cloud provisionados nesta etapa.
 
-### V2.4 — Bot de teste e segredos — ADIADA ATÉ O FLUXO INTERNO
+### V2.4 — Bot de teste e segredos — ADIADA ATÉ O RUNNER
 
 - [ ] Criar um bot exclusivo de desenvolvimento no BotFather.
 - [x] Guardar e validar `ARGOS_TELEGRAM_WEBHOOK_SECRET` somente no secret store do Render; o endpoint público rejeita segredo ausente ou inválido com `401`.
 - [ ] Guardar `ARGOS_TELEGRAM_BOT_TOKEN` somente no secret store do Render e registrar o webhook do bot após criar sua identidade.
 - [ ] Confirmar a identidade do bot com a Bot API.
-- [ ] Garantir que tokens nunca apareçam em código, erros ou logs.
+- [x] Mascarar o token na configuração e no adaptador, substituir erros de transporte por códigos seguros e testar que a credencial não aparece nas exceções ou representações.
+- [ ] Confirmar após a configuração real que logs do Render e do executor não contêm token.
 
 > Em 10/09/2026, o bot e `ARGOS_TELEGRAM_BOT_TOKEN` ainda não existiam. Não chamar a Bot API antes da criação explícita dessa identidade.
 
@@ -179,8 +180,10 @@ Decisões relacionadas:
 1. [x] Criar a tabela e o repositório de identidade Telegram, mantendo `telegram_user_id` como proprietário e `chat_id` somente como destino; validar upsert concorrente e grants mínimos.
 2. [x] Implementar o caso de uso isolado de `/start`, que cria ou atualiza a identidade e produz a resposta definida sem depender de FastAPI, PostgreSQL ou da Bot API.
 3. [x] Criar o núcleo do worker que reivindica a inbox com lease, executa `/start` e conclui ou reagenda o update sem manter transação aberta durante chamadas externas.
-4. [ ] Implementar o adaptador da Bot API com timeout e classificação segura de falhas, ainda sem configurar credenciais reais.
-5. [ ] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
+4. [x] Implementar o adaptador da Bot API com host fixo, texto simples, timeout, limite de resposta e classificação segura de falhas, sem configurar credenciais reais.
+5. [x] Criar o comando one-shot do worker e validar PostgreSQL → claim → `/start` → usuário → saída falsa → conclusão.
+6. [ ] Integrar um runner recuperável ao processo HTTP do piloto gratuito, despertado pelo ciclo de vida da API e sem manter trabalho apenas em memória; o job de coleta permanece um processo separado.
+7. [ ] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 

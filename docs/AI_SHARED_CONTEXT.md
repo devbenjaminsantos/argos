@@ -4,14 +4,14 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-O próximo incremento é o adaptador de saída da Bot API sem credencial real. Identidade, caso de uso `/start` e núcleo do worker já existem. A configuração real do bot foi deliberadamente adiada até que o adaptador e o comando executável estejam testados sem credenciais externas. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+Identidade, caso de uso `/start`, worker, adaptador da Bot API e comando one-shot já estão testados sem credencial externa. Ainda falta um runner que acione o worker depois que o webhook persistir o update. No piloto gratuito, esse runner será integrado ao ciclo de vida do processo HTTP e continuará usando a inbox e os leases como fonte durável; o job de coleta permanece separado. O bot real só será configurado depois desse incremento. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
 - A V1 implementa monitoramento local de até três produtos do Mercado Livre: IndexedDB, alarmes aproximados de 12/24 horas, extração, preço-alvo, queda percentual e notificações Chrome. A aceitação manual no Chrome ainda não foi executada.
 - A V2 possui uma fundação FastAPI em `backend/`: `GET /health`, middleware de correlação, tratamento seguro de erros e `POST /webhooks/telegram` com segredo em tempo constante, corpo limitado e somente mensagens privadas de texto.
-- O webhook persiste cada update autenticado e válido na inbox antes de responder `200`; updates repetidos recebem `200` sem nova linha. Ausência da inbox ou falha SQL retorna `503`. Ainda faltam comandos Telegram, envio de mensagens, domínio V2, coletor Python e job executável.
-- PostgreSQL usa SQLAlchemy, Alembic e psycopg. O projeto Supabase Argos existe em `sa-east-1` (`mkpziasjjfnwvtvuorig`), está saudável e tem a revisão Alembic `20260910_02` aplicada. `telegram_update_inbox` preserva o payload e modela disponibilidade, tentativas, lease, conclusão e dead letter. O repositório usa conflito de chave para deduplicação e `FOR UPDATE SKIP LOCKED` com lease para concorrência e recuperação.
+- O webhook persiste cada update autenticado e válido na inbox antes de responder `200`; updates repetidos recebem `200` sem nova linha. Ausência da inbox ou falha SQL retorna `503`. O `/start`, worker one-shot e adaptador de envio existem, mas ainda não foram executados contra um bot real. Também faltam os demais comandos, domínio V2 e coletor Python.
+- PostgreSQL usa SQLAlchemy, Alembic e psycopg. O projeto Supabase Argos existe em `sa-east-1` (`mkpziasjjfnwvtvuorig`), está saudável e tem a revisão Alembic `20260910_03` aplicada. `telegram_update_inbox` preserva o payload e modela disponibilidade, tentativas, lease, conclusão e dead letter. `telegram_users` separa propriedade e destino. Os repositórios tratam deduplicação, concorrência e atualização monotônica do destino.
 - A execução GitHub Actions `34510894628`, no commit `9a9eb20`, aplicou as migrations em PostgreSQL 17 descartável e concluiu os 40 testes. A integração cobre o caminho HTTP até a linha persistida, update repetido, inserção e claim concorrentes, lease expirado, rejeição de conclusão obsoleta e retry agendado.
 - O commit `9a9eb20` (2026-09-10) ligou o webhook à inbox. O deploy Render `dep-daheu5ifngtc7397e490` ficou `live` com essa revisão.
 
@@ -35,6 +35,8 @@ O próximo incremento é o adaptador de saída da Bot API sem credencial real. I
 - A execução administrativa `34528124844` aplicou `20260910_03`. Uma consulta independente confirmou `telegram_users` vazia, sob ownership de `argos_migrator`; `argos_runtime_login` possui somente `SELECT`/`INSERT`/`UPDATE`, sem `DELETE`, e `anon`/`authenticated` não possuem leitura. O CI `34527506778` concluiu 44 testes, incluindo upsert concorrente e proteção contra destino obsoleto.
 - O commit `c25488e` implementou `/start` como caso de uso de aplicação independente de FastAPI, SQLAlchemy e Bot API. Ele valida comando, identidade e timestamp UTC, atualiza o destino e produz a resposta em texto simples. O CI `34528613256` concluiu 49 testes.
 - O commit `ed29274` implementou o núcleo do worker. Ele processa uma entrega por vez, não mantém transação durante o envio, conclui somente depois da porta de saída, reagenda apenas falhas transitórias com resultado conhecido, envia falhas permanentes ou ambíguas para dead letter e deixa exceções inesperadas para recuperação após o lease. O CI `34532088167` concluiu 57 testes.
+- O commit `e194d46` implementou o adaptador da Bot API com host fixo, texto simples, timeout, limite de resposta, `retry_after` limitado e erros sem token. O CI `34533252572` foi aprovado.
+- O commit `dfb8525` criou `argos-telegram-worker`, um comando one-shot que compõe banco, inbox, identidade, `/start` e saída. O CI `34533540182` concluiu com sucesso o fluxo usando PostgreSQL real e somente a saída Telegram falsa.
 - Os advisors após a migration não apontaram falhas de segurança. O advisor de desempenho informou que os dois índices parciais da inbox ainda não foram usados, resultado esperado enquanto o worker não existe; não removê-los antes de validar o padrão real de claims.
 
 ## Documentação recente
@@ -71,7 +73,7 @@ O próximo incremento é o adaptador de saída da Bot API sem credencial real. I
 
 ## Próximos passos prováveis
 
-1. Implementar o adaptador de saída da Bot API e sua classificação de falhas sem configurar token real.
-2. Criar o comando executável do worker e validar o fluxo completo com HTTP e PostgreSQL locais, substituindo apenas a Bot API.
-3. Somente depois criar/configurar o bot real e executar o fluxo ponta a ponta.
+1. Integrar o runner recuperável do worker ao processo HTTP do piloto e testar inicialização, encerramento, ausência de token e processamento após o webhook.
+2. Criar o bot exclusivo de teste no BotFather e armazenar `ARGOS_TELEGRAM_BOT_TOKEN` diretamente no secret store do Render, sem enviá-lo pelo chat ou gravá-lo no repositório.
+3. Confirmar a identidade com `getMe`, registrar o webhook e executar a aceitação ponta a ponta, conferindo inbox, usuário, conclusão e logs sem segredos.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

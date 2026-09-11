@@ -72,7 +72,7 @@ A persistência usa SQLAlchemy 2, Alembic e `psycopg`. A URL deve usar `postgres
 
 Depois de definir `ARGOS_DATABASE_URL` fora do Git, execute a partir de `backend/`. Essa é a identidade do runtime. Em produção, `ARGOS_MIGRATION_DATABASE_URL` existe somente como secret do GitHub Actions e usa a identidade separada `argos_migrator_login`; o Alembic exige essa variável, assume explicitamente `argos_migrator` e não reutiliza a credencial do runtime HTTP.
 
-No projeto Supabase do Argos, as operações em `ops/supabase/` criaram os grupos `argos_runtime` e `argos_migrator` sem `LOGIN`, suas identidades de login separadas, os grants mínimos e a ownership das tabelas atuais. O runtime recebeu somente `SELECT`, `INSERT` e `UPDATE` em `telegram_update_inbox`; não use `postgres`, `service_role` ou `argos_migrator` como credencial da API. `argos_migrator_login` pertence ao grupo proprietário e o Alembic executa `SET ROLE argos_migrator` antes das migrações. Os privilégios padrão do provedor para objetos criados por `postgres` ou `supabase_admin` no schema `public` continuam amplos; novas migrações devem criar objetos como `argos_migrator` e conceder DML explicitamente ao runtime.
+No projeto Supabase do Argos, as operações em `ops/supabase/` criaram os grupos `argos_runtime` e `argos_migrator` sem `LOGIN`, suas identidades de login separadas, os grants mínimos e a ownership das tabelas atuais. O runtime recebeu somente `SELECT`, `INSERT` e `UPDATE` em `telegram_update_inbox` e `telegram_users`; não use `postgres`, `service_role` ou `argos_migrator` como credencial da API. `argos_migrator_login` pertence ao grupo proprietário e o Alembic executa `SET ROLE argos_migrator` antes das migrações. Os privilégios padrão do provedor para objetos criados por `postgres` ou `supabase_admin` no schema `public` continuam amplos; novas migrações devem criar objetos como `argos_migrator` e conceder DML explicitamente ao runtime.
 
 ```bash
 .venv/bin/alembic upgrade head
@@ -106,6 +106,20 @@ Para executar os testes:
 ```bash
 .venv/bin/python -m pytest
 ```
+
+## Worker Telegram
+
+`argos-telegram-worker` processa no máximo uma entrega por execução. Ele reserva a inbox com lease, executa `/start`, envia texto simples pela Bot API e somente então conclui o update. Falhas transitórias confirmadas são reagendadas; falhas permanentes ou com resultado incerto vão para dead letter para evitar reenvio cego.
+
+O comando one-shot está validado, mas ainda não possui um acionador implantado. Antes de registrar o bot real, o piloto integrará um runner ao ciclo de vida da API para consumir a inbox enquanto a instância gratuita estiver ativa. A inbox permanece durável e permite recuperar leases após reinícios; o job periódico de coleta continua separado do processo HTTP.
+
+O comando exige `ARGOS_DATABASE_URL` e `ARGOS_TELEGRAM_BOT_TOKEN` fora do Git:
+
+```bash
+.venv/bin/argos-telegram-worker
+```
+
+O timeout, lease e intervalo padrão de retry podem ser ajustados por `ARGOS_TELEGRAM_REQUEST_TIMEOUT_SECONDS`, `ARGOS_TELEGRAM_WORKER_LEASE_SECONDS` e `ARGOS_TELEGRAM_WORKER_RETRY_SECONDS`. O worker permanece um processo separado da API HTTP.
 
 ## Contêiner
 
