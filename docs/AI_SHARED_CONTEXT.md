@@ -76,8 +76,7 @@ Os fluxos reais de `/start` e `/ajuda` estão validados no `@argos_teste_bot`. O
 
 ## Próximos passos prováveis
 
-1. Validar a revisão `20260911_04` e o repositório de rascunhos em PostgreSQL real pelo CI.
-2. Aplicar a revisão em produção pela identidade `argos_migrator` e confirmar grants mínimos.
-3. Integrar `/cancelar` ao worker e liberá-lo no webhook somente depois da migração e dos testes de isolamento.
+1. Integrar `/cancelar` ao worker usando o repositório de rascunhos aplicado em produção.
+2. Liberar `/cancelar` na lista fechada do webhook e validar os resultados com e sem rascunho.
 3. Reservar testes de falha da Bot API real para staging isolado ou para uma injeção de falhas que não possa enviar mensagens duplicadas.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
