@@ -15,7 +15,7 @@ def _alembic_config() -> Config:
 def test_migrations_have_a_single_head() -> None:
     scripts = ScriptDirectory.from_config(_alembic_config())
 
-    assert scripts.get_heads() == ["20260910_03"]
+    assert scripts.get_heads() == ["20260911_04"]
 
 
 def test_initial_migration_compiles_for_postgresql(
@@ -44,6 +44,8 @@ def test_initial_migration_compiles_for_postgresql(
     assert "GRANT SELECT, INSERT, UPDATE" in sql
     assert "REVOKE ALL PRIVILEGES" in sql
     assert "CREATE TABLE telegram_users" in sql
+    assert "CREATE TABLE telegram_conversation_drafts" in sql
+    assert "GRANT SELECT, INSERT, UPDATE, DELETE" in sql
     assert "telegram_user_id BIGINT NOT NULL" in sql
     assert "chat_id BIGINT NOT NULL" in sql
     assert "ck_telegram_users_positive_user_id" in sql
@@ -88,3 +90,19 @@ def test_model_separates_telegram_owner_from_destination() -> None:
         "ck_telegram_users_positive_chat_id",
         "ck_telegram_users_positive_user_id",
     }
+
+
+def test_model_scopes_one_expiring_conversation_draft_per_owner() -> None:
+    table = Base.metadata.tables["telegram_conversation_drafts"]
+    check_names = {
+        constraint.name
+        for constraint in table.constraints
+        if isinstance(constraint, CheckConstraint)
+    }
+
+    assert table.primary_key.columns.keys() == ["telegram_user_id"]
+    assert check_names == {
+        "ck_telegram_conversation_drafts_valid_expiry",
+        "ck_telegram_conversation_drafts_valid_state",
+    }
+    assert {"state", "data", "expires_at"}.issubset(table.columns.keys())
