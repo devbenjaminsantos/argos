@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Validar `/ajuda` com o bot de teste
+**Próximo item:** V2.4 — Anunciar `/ajuda` no menu do bot de teste
 
 **Última atualização:** 11/09/2026
 
@@ -104,6 +104,7 @@ Decisões relacionadas:
 - [x] Confirmar a identidade `@argos_teste_bot` com a Bot API durante a inicialização segura.
 - [x] Mascarar o token na configuração e no adaptador, substituir erros de transporte por códigos seguros e testar que a credencial não aparece nas exceções ou representações.
 - [x] Confirmar após a configuração real que logs do Render e do executor não contêm token.
+- [ ] Atualizar os comandos públicos no BotFather para anunciar `/start` e `/ajuda` conforme a implementação implantada.
 
 > O plano Free não oferece shell neste serviço. A aplicação configura o webhook de forma idempotente na inicialização quando recebe a URL e o username esperados: valida `getMe`, recusa outra identidade, consulta `getWebhookInfo` e chama `setWebhook` somente quando necessário.
 
@@ -170,6 +171,7 @@ Decisões relacionadas:
 - [x] Definir a inbox durável com payload, estados, tentativas, disponibilidade, lease, conclusão, erro e índices de recuperação; a migração recusa substituir tabelas que contenham dados.
 - [x] Implementar o caso de uso isolado de `/start`, com validação do comando e identidade, upsert do proprietário e resposta em texto simples.
 - [x] Implementar `/ajuda` como caso de uso isolado, integrá-lo ao worker e liberá-lo na lista fechada do webhook, listando somente comandos disponíveis.
+- [x] Validar `/ajuda` em produção: nova entrega concluída em uma tentativa, zero dead letter e total de identidades preservado em um.
 - [ ] Implementar `/cancelar` em incremento posterior.
 - [x] Integrar `/start` ao núcleo do worker com claim, conclusão, retry apenas para falha transitória confirmada, dead letter para falha permanente ou resultado incerto e recuperação por lease para exceção inesperada.
 - [x] Persistir usuário por `telegram_user_id` e destino por `chat_id`; a revisão `20260910_03` e o repositório foram validados com concorrência em PostgreSQL 17 e aplicados em produção.
