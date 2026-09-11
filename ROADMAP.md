@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Integrar `/ajuda` ao worker sem ampliar outros comandos
+**Próximo item:** V2.8 — Validar `/ajuda` com o bot de teste
 
 **Última atualização:** 11/09/2026
 
@@ -169,7 +169,7 @@ Decisões relacionadas:
 
 - [x] Definir a inbox durável com payload, estados, tentativas, disponibilidade, lease, conclusão, erro e índices de recuperação; a migração recusa substituir tabelas que contenham dados.
 - [x] Implementar o caso de uso isolado de `/start`, com validação do comando e identidade, upsert do proprietário e resposta em texto simples.
-- [x] Implementar `/ajuda` como caso de uso isolado, listando somente comandos disponíveis; integração ao worker fica no próximo incremento.
+- [x] Implementar `/ajuda` como caso de uso isolado, integrá-lo ao worker e liberá-lo na lista fechada do webhook, listando somente comandos disponíveis.
 - [ ] Implementar `/cancelar` em incremento posterior.
 - [x] Integrar `/start` ao núcleo do worker com claim, conclusão, retry apenas para falha transitória confirmada, dead letter para falha permanente ou resultado incerto e recuperação por lease para exceção inesperada.
 - [x] Persistir usuário por `telegram_user_id` e destino por `chat_id`; a revisão `20260910_03` e o repositório foram validados com concorrência em PostgreSQL 17 e aplicados em produção.

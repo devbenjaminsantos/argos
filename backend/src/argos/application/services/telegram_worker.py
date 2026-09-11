@@ -9,6 +9,7 @@ from argos.application.ports.telegram_messages import (
     TelegramDeliveryError,
     TelegramMessageSender,
 )
+from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.start import StartTelegramConversation
 
 
@@ -20,6 +21,7 @@ class TelegramInboxWorker:
         *,
         inbox: TelegramInbox,
         start: StartTelegramConversation,
+        help_conversation: HelpTelegramConversation,
         sender: TelegramMessageSender,
         lease_duration: timedelta = timedelta(seconds=30),
         retry_delay: timedelta = timedelta(seconds=30),
@@ -28,6 +30,7 @@ class TelegramInboxWorker:
             raise ValueError("Durações do worker devem ser positivas.")
         self._inbox = inbox
         self._start = start
+        self._help = help_conversation
         self._sender = sender
         self._lease_duration = lease_duration
         self._retry_delay = retry_delay
@@ -45,12 +48,15 @@ class TelegramInboxWorker:
 
         try:
             telegram_user_id, chat_id, text = _extract_message(claimed.payload)
-            reply = self._start.execute(
-                telegram_user_id=telegram_user_id,
-                chat_id=chat_id,
-                text=text,
-                observed_at=now,
-            )
+            if text.strip().casefold() == "/ajuda":
+                reply = self._help.execute(chat_id=chat_id, text=text)
+            else:
+                reply = self._start.execute(
+                    telegram_user_id=telegram_user_id,
+                    chat_id=chat_id,
+                    text=text,
+                    observed_at=now,
+                )
         except (ApplicationError, ValueError, TypeError, KeyError):
             transitioned = self._inbox.dead_letter(
                 update_id=claimed.update_id,

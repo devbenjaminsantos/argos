@@ -12,6 +12,7 @@ from argos.application.ports.telegram_messages import (
 )
 from argos.application.ports.telegram_users import TelegramUser
 from argos.application.services.telegram_worker import TelegramInboxWorker
+from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.start import StartTelegramConversation
 
 _LEASE_TOKEN = UUID("00000000-0000-0000-0000-000000000001")
@@ -118,6 +119,7 @@ def _worker(
     return TelegramInboxWorker(
         inbox=inbox,
         start=StartTelegramConversation(users or _UsersStub()),
+        help_conversation=HelpTelegramConversation(),
         sender=sender,
         lease_duration=timedelta(seconds=20),
         retry_delay=timedelta(seconds=15),
@@ -138,6 +140,24 @@ def test_worker_processes_start_and_completes_after_send() -> None:
     assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]
     assert inbox.retried == []
     assert inbox.dead_letters == []
+
+
+def test_worker_processes_help_without_upserting_identity() -> None:
+    payload = {
+        **_PAYLOAD,
+        "message": {**_PAYLOAD["message"], "text": "  /AJUDA  "},
+    }
+    inbox = _InboxStub(payload)
+    users = _UsersStub()
+    sender = _SenderStub()
+
+    assert _worker(inbox, sender, users).process_next(now=_NOW) is True
+
+    assert users.upserts == []
+    assert len(sender.messages) == 1
+    assert "/start" in sender.messages[0].text
+    assert "/ajuda" in sender.messages[0].text
+    assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]
 
 
 def test_worker_returns_false_when_no_update_is_available() -> None:
@@ -200,7 +220,7 @@ def test_worker_dead_letters_permanent_or_ambiguous_delivery(
 
 
 def test_worker_dead_letters_invalid_or_unsupported_payload() -> None:
-    inbox = _InboxStub({"message": {"text": "/ajuda"}})
+    inbox = _InboxStub({"message": {"text": "/cancelar"}})
 
     assert _worker(inbox, _SenderStub()).process_next(now=_NOW) is True
 

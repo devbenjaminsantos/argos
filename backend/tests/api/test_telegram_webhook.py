@@ -211,21 +211,21 @@ def test_valid_update_is_persisted_before_acknowledgement() -> None:
     assert inbox.enqueued[0][1] == _VALID_UPDATE
 
 
-def test_webhook_accepts_normalized_start_command() -> None:
+def test_webhook_accepts_normalized_supported_command() -> None:
     inbox = _InboxStub()
-    update = {
-        **_VALID_UPDATE,
-        "message": {**_VALID_UPDATE["message"], "text": "  /START  "},
-    }
+    client = _client(inbox=inbox)
 
-    response = _client(inbox=inbox).post(
-        "/webhooks/telegram",
-        headers=_HEADERS,
-        json=update,
-    )
+    for index, text in enumerate(("  /START  ", "  /AJUDA  "), start=1):
+        update = {
+            **_VALID_UPDATE,
+            "update_id": _VALID_UPDATE["update_id"] + index,
+            "message": {**_VALID_UPDATE["message"], "text": text},
+        }
+        assert client.post(
+            "/webhooks/telegram", headers=_HEADERS, json=update
+        ).status_code == 200
 
-    assert response.status_code == 200
-    assert len(inbox.enqueued) == 1
+    assert len(inbox.enqueued) == 2
 
 
 def test_webhook_acknowledges_unsupported_text_without_persisting_or_waking_worker() -> None:
@@ -233,7 +233,7 @@ def test_webhook_acknowledges_unsupported_text_without_persisting_or_waking_work
     runner = _RunnerStub()
     client = _client(inbox=inbox, runner=runner)
 
-    for text in ("/ajuda", "/start@outro_bot", "olá"):
+    for text in ("/cancelar", "/start@outro_bot", "olá"):
         update = {
             **_VALID_UPDATE,
             "update_id": _VALID_UPDATE["update_id"] + len(inbox.enqueued) + 1,
