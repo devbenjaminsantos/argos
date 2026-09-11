@@ -76,6 +76,7 @@ O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/s
 
 ## Próximos passos prováveis
 
-1. Validar retry transitório confirmado no ambiente implantado sem enviar mensagens duplicadas.
-2. Implementar `/ajuda` e `/cancelar` em incrementos posteriores.
+1. Integrar o caso de uso isolado de `/ajuda` ao worker e então liberá-lo na lista fechada do webhook.
+2. Implementar `/cancelar` em incremento posterior.
+3. Reservar testes de falha da Bot API real para staging isolado ou para uma injeção de falhas que não possa enviar mensagens duplicadas.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
