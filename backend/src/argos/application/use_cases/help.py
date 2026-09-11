@@ -7,6 +7,7 @@ _HELP_TEXT = """Comandos disponíveis neste ambiente de testes:
 
 /start - registrar ou atualizar seu acesso
 /ajuda - mostrar esta mensagem
+/cancelar - cancelar a operação em andamento
 
 O cadastro e a consulta de produtos serão liberados nas próximas etapas."""
 

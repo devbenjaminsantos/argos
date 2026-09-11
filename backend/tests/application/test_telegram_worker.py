@@ -12,6 +12,7 @@ from argos.application.ports.telegram_messages import (
 )
 from argos.application.ports.telegram_users import TelegramUser
 from argos.application.services.telegram_worker import TelegramInboxWorker
+from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.start import StartTelegramConversation
 
@@ -100,6 +101,16 @@ class _UsersStub:
         raise NotImplementedError
 
 
+class _ConversationsStub:
+    def __init__(self, *, exists: bool = False) -> None:
+        self.exists = exists
+        self.cancelled_for: list[int] = []
+
+    def cancel_for_owner(self, *, telegram_user_id: int) -> bool:
+        self.cancelled_for.append(telegram_user_id)
+        return self.exists
+
+
 class _SenderStub:
     def __init__(self, error: Exception | None = None) -> None:
         self.error = error
@@ -115,11 +126,15 @@ def _worker(
     inbox: _InboxStub,
     sender: _SenderStub,
     users: _UsersStub | None = None,
+    conversations: _ConversationsStub | None = None,
 ) -> TelegramInboxWorker:
     return TelegramInboxWorker(
         inbox=inbox,
         start=StartTelegramConversation(users or _UsersStub()),
         help_conversation=HelpTelegramConversation(),
+        cancel_conversation=CancelTelegramConversation(
+            conversations or _ConversationsStub()
+        ),
         sender=sender,
         lease_duration=timedelta(seconds=20),
         retry_delay=timedelta(seconds=15),
@@ -157,6 +172,36 @@ def test_worker_processes_help_without_upserting_identity() -> None:
     assert len(sender.messages) == 1
     assert "/start" in sender.messages[0].text
     assert "/ajuda" in sender.messages[0].text
+    assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]
+
+
+@pytest.mark.parametrize(
+    ("exists", "expected"),
+    [
+        (True, "Operação cancelada"),
+        (False, "Não há nenhuma operação em andamento"),
+    ],
+)
+def test_worker_processes_cancel_without_upserting_identity(
+    exists: bool, expected: str
+) -> None:
+    payload = {
+        **_PAYLOAD,
+        "message": {**_PAYLOAD["message"], "text": "  /CANCELAR  "},
+    }
+    inbox = _InboxStub(payload)
+    users = _UsersStub()
+    conversations = _ConversationsStub(exists=exists)
+    sender = _SenderStub()
+
+    assert _worker(
+        inbox, sender, users, conversations
+    ).process_next(now=_NOW) is True
+
+    assert users.upserts == []
+    assert conversations.cancelled_for == [700]
+    assert len(sender.messages) == 1
+    assert expected in sender.messages[0].text
     assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]
 
 
@@ -220,7 +265,7 @@ def test_worker_dead_letters_permanent_or_ambiguous_delivery(
 
 
 def test_worker_dead_letters_invalid_or_unsupported_payload() -> None:
-    inbox = _InboxStub({"message": {"text": "/cancelar"}})
+    inbox = _InboxStub({"message": {"text": "/adicionar"}})
 
     assert _worker(inbox, _SenderStub()).process_next(now=_NOW) is True
 

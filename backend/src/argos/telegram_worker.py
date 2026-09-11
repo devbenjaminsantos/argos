@@ -6,11 +6,15 @@ from sqlalchemy import Engine
 
 from argos.application.ports.telegram_messages import TelegramMessageSender
 from argos.application.services.telegram_worker import TelegramInboxWorker
+from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.start import StartTelegramConversation
 from argos.config import Settings
 from argos.infrastructure.database.config import create_database_engine
 from argos.infrastructure.database.telegram_inbox import PostgreSQLTelegramInbox
+from argos.infrastructure.database.telegram_conversations import (
+    PostgreSQLTelegramConversationDraftRepository,
+)
 from argos.infrastructure.database.telegram_users import (
     PostgreSQLTelegramUserRepository,
 )
@@ -34,10 +38,12 @@ def build_worker(
         )
 
     users = PostgreSQLTelegramUserRepository(engine)
+    conversations = PostgreSQLTelegramConversationDraftRepository(engine)
     return TelegramInboxWorker(
         inbox=PostgreSQLTelegramInbox(engine),
         start=StartTelegramConversation(users),
         help_conversation=HelpTelegramConversation(),
+        cancel_conversation=CancelTelegramConversation(conversations),
         sender=sender,
         lease_duration=timedelta(
             seconds=settings.telegram_worker_lease_seconds

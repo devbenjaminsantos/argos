@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Integrar `/cancelar` ao worker e ao webhook
+**Próximo item:** V2.8 — Implantar e validar `/cancelar` no bot de teste
 
 **Última atualização:** 11/09/2026
 
@@ -117,7 +117,7 @@ Decisões relacionadas:
 - [x] Criar `POST /webhooks/telegram`.
 - [x] Validar `X-Telegram-Bot-Api-Secret-Token` em tempo constante.
 - [x] Limitar o corpo antes do parsing e aceitar somente updates de mensagem de texto.
-- [x] Restringir a persistência a `/start`; texto e comandos desconhecidos recebem `200` sem entrar na inbox nem provocar retries do Telegram.
+- [x] Restringir a persistência aos comandos implantados; texto e comandos desconhecidos recebem `200` sem entrar na inbox nem provocar retries do Telegram.
 - [x] Recusar grupos e aceitar apenas conversas privadas.
 - [x] Responder rapidamente sem executar scraping no request.
 - [x] Testar segredo ausente, inválido, payload excessivo e conteúdo malformado.
@@ -172,7 +172,7 @@ Decisões relacionadas:
 - [x] Implementar o caso de uso isolado de `/start`, com validação do comando e identidade, upsert do proprietário e resposta em texto simples.
 - [x] Implementar `/ajuda` como caso de uso isolado, integrá-lo ao worker e liberá-lo na lista fechada do webhook, listando somente comandos disponíveis.
 - [x] Validar `/ajuda` em produção: nova entrega concluída em uma tentativa, zero dead letter e total de identidades preservado em um.
-- [x] Implementar `/cancelar` como caso de uso isolado e contrato de repositório por proprietário; persistência e integração ficam para o próximo incremento.
+- [x] Implementar `/cancelar` como caso de uso isolado, integrá-lo ao worker e liberá-lo na lista fechada do webhook usando o repositório por proprietário.
 - [x] Modelar rascunhos com um registro por `telegram_user_id`, estados fechados, JSONB, expiração, FK e cancelamento atômico.
 - [x] Validar a revisão `20260911_04` no PostgreSQL 17 do CI e aplicá-la em produção pela execução administrativa `34633911731`; tabela vazia sob ownership de `argos_migrator`, DML mínimo do runtime e nenhuma leitura por `anon` ou `authenticated` foram confirmados.
 - [x] Integrar `/start` ao núcleo do worker com claim, conclusão, retry apenas para falha transitória confirmada, dead letter para falha permanente ou resultado incerto e recuperação por lease para exceção inesperada.
@@ -193,6 +193,7 @@ Decisões relacionadas:
 5. [x] Criar o comando one-shot do worker e validar PostgreSQL → claim → `/start` → usuário → saída falsa → conclusão.
 6. [x] Integrar um runner recuperável ao processo HTTP do piloto gratuito, despertado após a persistência e pelo polling de recuperação, sem manter trabalho apenas em memória; o job de coleta permanece separado.
 7. [x] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
+8. [ ] Implantar `/cancelar`, anunciá-lo no BotFather e validar no bot real a resposta sem rascunho; o caminho com rascunho permanece coberto em PostgreSQL até existir um fluxo que o crie.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 

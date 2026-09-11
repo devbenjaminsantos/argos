@@ -9,6 +9,7 @@ from argos.application.ports.telegram_messages import (
     TelegramDeliveryError,
     TelegramMessageSender,
 )
+from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.start import StartTelegramConversation
 
@@ -22,6 +23,7 @@ class TelegramInboxWorker:
         inbox: TelegramInbox,
         start: StartTelegramConversation,
         help_conversation: HelpTelegramConversation,
+        cancel_conversation: CancelTelegramConversation,
         sender: TelegramMessageSender,
         lease_duration: timedelta = timedelta(seconds=30),
         retry_delay: timedelta = timedelta(seconds=30),
@@ -31,6 +33,7 @@ class TelegramInboxWorker:
         self._inbox = inbox
         self._start = start
         self._help = help_conversation
+        self._cancel = cancel_conversation
         self._sender = sender
         self._lease_duration = lease_duration
         self._retry_delay = retry_delay
@@ -48,8 +51,15 @@ class TelegramInboxWorker:
 
         try:
             telegram_user_id, chat_id, text = _extract_message(claimed.payload)
-            if text.strip().casefold() == "/ajuda":
+            command = text.strip().casefold()
+            if command == "/ajuda":
                 reply = self._help.execute(chat_id=chat_id, text=text)
+            elif command == "/cancelar":
+                reply = self._cancel.execute(
+                    telegram_user_id=telegram_user_id,
+                    chat_id=chat_id,
+                    text=text,
+                )
             else:
                 reply = self._start.execute(
                     telegram_user_id=telegram_user_id,
