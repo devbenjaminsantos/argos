@@ -4,7 +4,7 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-Identidade, caso de uso `/start`, worker, adaptador da Bot API, comando one-shot e runner do webhook estão testados sem credencial externa. O bot exclusivo de teste `@argos_teste_bot` foi criado e configurado no BotFather em 11/09/2026, limitado a conversas privadas e com somente `/start` anunciado. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O próximo incremento é armazenar o token diretamente no Render e confirmar a identidade pela Bot API. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+O primeiro fluxo real do Telegram está validado: `@argos_teste_bot` recebeu `/start`, o webhook persistiu o update, o runner registrou a identidade, enviou a resposta esperada e concluiu a inbox em uma tentativa. O bot permanece limitado a conversas privadas e anuncia somente `/start`. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O próximo incremento é restringir explicitamente os comandos aceitos na fronteira do webhook. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
@@ -63,7 +63,7 @@ Identidade, caso de uso `/start`, worker, adaptador da Bot API, comando one-shot
 
 ### A verificar antes do piloto
 
-- A chamada autenticada ao webhook implantado e a respectiva linha na inbox de produção ainda não foram verificadas ponta a ponta. O usuário informou em 10/09/2026 que não consegue fazer essa validação manual agora; mantê-la pendente sem recuperar ou expor o segredo existente.
+- Em 11/09/2026, a aceitação real de `/start` confirmou uma inbox `completed`, `attempt_count=1`, zero dead letter e uma identidade persistida. A consulta exibiu somente contagens, estado e tempos, sem IDs Telegram ou payload.
 - Ao configurar o que falta, preservar `ARGOS_TELEGRAM_WEBHOOK_SECRET` já existente. Confirmar identidade do bot e estado do webhook pela Bot API quando houver acesso ao token; existência do segredo de webhook não comprova existência do bot.
 - Conectividade de Render e do executor com o endpoint PostgreSQL escolhido, credencial mínima, pool de conexões, latência e limites dos planos. O handshake direto com TLS `verify-full` e a CA do projeto já foi validado a partir do ambiente atual.
 - Recuperação de um update ou envio de alerta quando o processo cai depois de um efeito externo; “exatamente uma entrega” não é garantível sem política explícita para resultado incerto.
@@ -75,7 +75,7 @@ Identidade, caso de uso `/start`, worker, adaptador da Bot API, comando one-shot
 
 ## Próximos passos prováveis
 
-1. Armazenar `ARGOS_TELEGRAM_BOT_TOKEN` diretamente no secret store do Render, sem enviá-lo pelo chat ou gravá-lo no repositório.
-2. Implantar a revisão atual, confirmar a identidade `@argos_teste_bot` com `getMe`, registrar o webhook e executar a aceitação ponta a ponta, conferindo inbox, usuário, conclusão e logs sem segredos.
-3. Validar reinício, retry confirmado, resultado incerto e ausência de token no log do ambiente implantado.
+1. Restringir explicitamente os comandos aceitos na fronteira do webhook, mantendo `/start` como único comando ativo.
+2. Validar reinício, retry confirmado e resultado incerto no ambiente implantado.
+3. Implementar `/ajuda` e `/cancelar` em incrementos posteriores.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

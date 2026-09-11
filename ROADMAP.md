@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.4 — Armazenar o token do bot no Render e confirmar sua identidade
+**Próximo item:** V2.5 — Restringir explicitamente os comandos aceitos
 
 **Última atualização:** 11/09/2026
 
@@ -25,9 +25,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 | Bloco | Estado comprovado | Falta |
 | --- | --- | --- |
 | Runtime e migrações | Logins mínimos separados, TLS `verify-full`, readiness com consulta e Alembic administrativo validados | Revisar privilégios padrão do provedor para objetos criados fora de `argos_migrator` |
-| Webhook e inbox | Autenticação, limites, persistência, deduplicação, concorrência e recuperação validados; revisão `9a9eb20` implantada | Teste autenticado na inbox de produção, adiado pelo usuário |
-| Identidade e `/start` | Tabela, repositório, caso de uso, worker, adaptador Bot API, comando one-shot e runner do webhook validados sem credencial real | Aceitação com o bot real |
-| Bot Telegram | Bot de teste `@argos_teste_bot` criado e configurado; segredo do webhook configurado | Armazenar token, confirmar identidade e registrar webhook |
+| Webhook e inbox | Autenticação, limites, persistência, deduplicação, concorrência e recuperação validados; webhook real persistiu e concluiu o primeiro update | Restringir explicitamente os comandos aceitos |
+| Identidade e `/start` | Fluxo real mensagem → inbox → identidade → resposta concluído em produção | Ampliar comandos em incrementos posteriores |
+| Bot Telegram | `@argos_teste_bot`, token, identidade e webhook validados sem expor segredos | Validar rotação em etapa operacional posterior |
 | Domínio do monitoramento | Regras da V1 disponíveis como referência | Usuários, produtos, preços, conversas, coleta e notificações da V2 |
 
 ---
@@ -96,14 +96,14 @@ Decisões relacionadas:
 
 **Critério de conclusão:** arquitetura, limites de custo e restrições de provedor documentados, sem API ou job cloud provisionados nesta etapa.
 
-### V2.4 — Bot de teste e segredos — EM ANDAMENTO
+### V2.4 — Bot de teste e segredos — CONCLUÍDA
 
 - [x] Criar e configurar o bot exclusivo de desenvolvimento `@argos_teste_bot` no BotFather, limitado a conversas privadas e com somente `/start` anunciado.
 - [x] Guardar e validar `ARGOS_TELEGRAM_WEBHOOK_SECRET` somente no secret store do Render; o endpoint público rejeita segredo ausente ou inválido com `401`.
-- [ ] Guardar `ARGOS_TELEGRAM_BOT_TOKEN` somente no secret store do Render e registrar o webhook do bot após criar sua identidade.
-- [ ] Confirmar a identidade do bot com a Bot API.
+- [x] Guardar `ARGOS_TELEGRAM_BOT_TOKEN` somente no secret store do Render e registrar o webhook do bot após criar sua identidade.
+- [x] Confirmar a identidade `@argos_teste_bot` com a Bot API durante a inicialização segura.
 - [x] Mascarar o token na configuração e no adaptador, substituir erros de transporte por códigos seguros e testar que a credencial não aparece nas exceções ou representações.
-- [ ] Confirmar após a configuração real que logs do Render e do executor não contêm token.
+- [x] Confirmar após a configuração real que logs do Render e do executor não contêm token.
 
 > O plano Free não oferece shell neste serviço. A aplicação configura o webhook de forma idempotente na inicialização quando recebe a URL e o username esperados: valida `getMe`, recusa outra identidade, consulta `getWebhookInfo` e chama `setWebhook` somente quando necessário.
 
@@ -121,7 +121,7 @@ Decisões relacionadas:
 - [x] Responder rapidamente sem executar scraping no request.
 - [x] Testar segredo ausente, inválido, payload excessivo e conteúdo malformado.
 - [x] Persistir e deduplicar o update antes de responder `200`; ausência da inbox ou falha SQL retorna `503` para permitir nova entrega.
-- [ ] Validar manualmente em produção uma chamada autenticada e confirmar a nova linha no PostgreSQL; adiado em 10/09/2026 porque o usuário não consegue executar essa validação no momento.
+- [x] Validar em produção uma entrega autenticada real e confirmar no PostgreSQL uma inbox concluída em uma tentativa, sem dead letter, além da identidade persistida.
 
 **Critério de conclusão:** somente updates autenticados e válidos são aceitos.
 
@@ -185,7 +185,7 @@ Decisões relacionadas:
 4. [x] Implementar o adaptador da Bot API com host fixo, texto simples, timeout, limite de resposta e classificação segura de falhas, sem configurar credenciais reais.
 5. [x] Criar o comando one-shot do worker e validar PostgreSQL → claim → `/start` → usuário → saída falsa → conclusão.
 6. [x] Integrar um runner recuperável ao processo HTTP do piloto gratuito, despertado após a persistência e pelo polling de recuperação, sem manter trabalho apenas em memória; o job de coleta permanece separado.
-7. [ ] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
+7. [x] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
