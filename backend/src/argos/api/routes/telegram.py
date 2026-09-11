@@ -14,6 +14,7 @@ from starlette.concurrency import run_in_threadpool
 
 from argos.api.schemas import TelegramUpdateInput
 from argos.application.ports.telegram_inbox import TelegramInbox
+from argos.application.ports.telegram_worker import TelegramWorkerRunner
 from argos.config import Settings
 
 router = APIRouter(prefix="/webhooks", tags=["telegram"])
@@ -95,5 +96,11 @@ async def receive_telegram_update(request: Request) -> Response:
         raise HTTPException(
             status_code=HTTPStatus.SERVICE_UNAVAILABLE
         ) from None
+
+    worker_runner: TelegramWorkerRunner | None = (
+        request.app.state.telegram_worker_runner
+    )
+    if worker_runner is not None:
+        worker_runner.notify()
 
     return Response(status_code=HTTPStatus.OK)

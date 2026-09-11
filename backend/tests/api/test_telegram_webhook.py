@@ -55,17 +55,38 @@ class _InboxStub:
         raise NotImplementedError
 
 
+class _RunnerStub:
+    def __init__(self) -> None:
+        self.notifications = 0
+
+    async def start(self) -> None:
+        pass
+
+    async def stop(self) -> None:
+        pass
+
+    def notify(self) -> None:
+        self.notifications += 1
+
+
 def _client(
     *,
     maximum_bytes: int = 65_536,
     inbox: _InboxStub | None = None,
+    runner: _RunnerStub | None = None,
 ) -> TestClient:
     settings = Settings(
         environment="test",
         telegram_webhook_secret=SecretStr(_SECRET),
         telegram_webhook_max_body_bytes=maximum_bytes,
     )
-    return TestClient(create_app(settings, telegram_inbox=inbox))
+    return TestClient(
+        create_app(
+            settings,
+            telegram_inbox=inbox,
+            telegram_worker_runner=runner,
+        )
+    )
 
 
 def test_webhook_fails_closed_when_secret_is_not_configured() -> None:
@@ -213,3 +234,16 @@ def test_database_failure_is_not_acknowledged() -> None:
 
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "service_unavailable"
+
+
+def test_persisted_update_wakes_configured_worker_runner() -> None:
+    runner = _RunnerStub()
+
+    response = _client(inbox=_InboxStub(), runner=runner).post(
+        "/webhooks/telegram",
+        headers=_HEADERS,
+        json=_VALID_UPDATE,
+    )
+
+    assert response.status_code == 200
+    assert runner.notifications == 1

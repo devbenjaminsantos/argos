@@ -18,6 +18,7 @@ def test_settings_use_safe_development_defaults(monkeypatch: pytest.MonkeyPatch)
     assert settings.telegram_request_timeout_seconds == 5
     assert settings.telegram_worker_lease_seconds == 30
     assert settings.telegram_worker_retry_seconds == 30
+    assert settings.telegram_worker_poll_seconds == 10
 
 
 def test_settings_read_environment_and_mask_secret(
