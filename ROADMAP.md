@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.4 — Criar e configurar o bot exclusivo de teste
+**Próximo item:** V2.4 — Armazenar o token do bot no Render e confirmar sua identidade
 
 **Última atualização:** 11/09/2026
 
@@ -27,7 +27,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 | Runtime e migrações | Logins mínimos separados, TLS `verify-full`, readiness com consulta e Alembic administrativo validados | Revisar privilégios padrão do provedor para objetos criados fora de `argos_migrator` |
 | Webhook e inbox | Autenticação, limites, persistência, deduplicação, concorrência e recuperação validados; revisão `9a9eb20` implantada | Teste autenticado na inbox de produção, adiado pelo usuário |
 | Identidade e `/start` | Tabela, repositório, caso de uso, worker, adaptador Bot API, comando one-shot e runner do webhook validados sem credencial real | Aceitação com o bot real |
-| Bot Telegram | Segredo do webhook configurado | Criar bot, armazenar token, confirmar identidade e registrar webhook |
+| Bot Telegram | Bot de teste `@argos_teste_bot` criado e configurado; segredo do webhook configurado | Armazenar token, confirmar identidade e registrar webhook |
 | Domínio do monitoramento | Regras da V1 disponíveis como referência | Usuários, produtos, preços, conversas, coleta e notificações da V2 |
 
 ---
@@ -96,16 +96,16 @@ Decisões relacionadas:
 
 **Critério de conclusão:** arquitetura, limites de custo e restrições de provedor documentados, sem API ou job cloud provisionados nesta etapa.
 
-### V2.4 — Bot de teste e segredos — PRÓXIMA
+### V2.4 — Bot de teste e segredos — EM ANDAMENTO
 
-- [ ] Criar um bot exclusivo de desenvolvimento no BotFather.
+- [x] Criar e configurar o bot exclusivo de desenvolvimento `@argos_teste_bot` no BotFather, limitado a conversas privadas e com somente `/start` anunciado.
 - [x] Guardar e validar `ARGOS_TELEGRAM_WEBHOOK_SECRET` somente no secret store do Render; o endpoint público rejeita segredo ausente ou inválido com `401`.
 - [ ] Guardar `ARGOS_TELEGRAM_BOT_TOKEN` somente no secret store do Render e registrar o webhook do bot após criar sua identidade.
 - [ ] Confirmar a identidade do bot com a Bot API.
 - [x] Mascarar o token na configuração e no adaptador, substituir erros de transporte por códigos seguros e testar que a credencial não aparece nas exceções ou representações.
 - [ ] Confirmar após a configuração real que logs do Render e do executor não contêm token.
 
-> Em 10/09/2026, o bot e `ARGOS_TELEGRAM_BOT_TOKEN` ainda não existiam. Não chamar a Bot API antes da criação explícita dessa identidade.
+> Em 11/09/2026, o bot `@argos_teste_bot` foi criado e configurado. O token ainda deve ser armazenado diretamente no Render antes de confirmar a identidade pela Bot API; não enviar ou versionar a credencial.
 
 **Critério de conclusão:** a API consulta a identidade do bot sem expor credenciais.
 

@@ -8,9 +8,9 @@ from argos.application.ports.telegram_users import TelegramUserRepository
 
 _START_TEXT = """Olá! Eu sou o Argos.
 
-Posso acompanhar até 3 produtos do Mercado Livre e avisar quando o preço atingir seu objetivo.
+Este é o ambiente inicial de testes. Seu acesso foi registrado com sucesso.
 
-Use /adicionar para cadastrar um produto ou /ajuda para ver os comandos."""
+Os comandos de cadastro e consulta serão liberados nas próximas etapas."""
 
 
 class StartTelegramConversation:

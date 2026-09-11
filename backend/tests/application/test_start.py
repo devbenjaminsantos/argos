@@ -47,8 +47,9 @@ def test_start_upserts_owner_and_returns_plain_text_reply() -> None:
     assert users.upserts == [(700, 800, observed_at)]
     assert reply.chat_id == 800
     assert "Eu sou o Argos" in reply.text
-    assert "/adicionar" in reply.text
-    assert "/ajuda" in reply.text
+    assert "ambiente inicial de testes" in reply.text
+    assert "/adicionar" not in reply.text
+    assert "/ajuda" not in reply.text
 
 
 def test_start_normalizes_surrounding_space_and_case() -> None:
