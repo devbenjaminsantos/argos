@@ -26,7 +26,8 @@ class TelegramAdmissionRepository(Protocol):
 
         Repetição não consome quota nem muda a decisão persistida. Somente
         ADMITTED cria trabalho na inbox; RATE_LIMITED também fica deduplicado.
-        A janela conta admissões em (received_at - window, received_at].
+        O horário efetivo é monotônico por proprietário; a janela conta
+        admissões em (horário efetivo - window, horário efetivo].
         Qualquer falha reverte decisão, quota e inserção na inbox juntas.
         """
         ...

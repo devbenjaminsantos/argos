@@ -78,7 +78,7 @@ Em 12/09/2026, o usuário confirmou a resposta “Não há nenhuma operação em
 
 ## Próximos passos prováveis
 
-1. Validar em PostgreSQL real a migração `20260912_05` e o adaptador de admissão atômica implementados; depois preparar a aplicação administrativa e a integração ao webhook. Política e contrato isolados já existem: 10 comandos por usuário em janela móvel de 60 segundos, duplicatas sem quota e excedentes deduplicados sem execução ou resposta. O limite ainda não está ativo em produção; critérios em `docs/V2_TELEGRAM_ADMISSION.md`. Confirmar em paralelo o menu `/cancelar` no BotFather.
+1. Aplicar administrativamente `20260912_05` e verificar ownership/grants antes de integrar a admissão ao webhook. A migração e o adaptador já passaram em PostgreSQL 17 no CI `34705698375`, commit `64cb313`, com 120 testes, incluindo concorrência, rollback e downgrade seguro. Política e contrato isolados já existem: 10 comandos por usuário em janela móvel de 60 segundos, duplicatas sem quota e excedentes deduplicados sem execução ou resposta. O limite ainda não está ativo em produção; critérios em `docs/V2_TELEGRAM_ADMISSION.md`. Confirmar em paralelo o menu `/cancelar` no BotFather.
 2. Validar o resultado com rascunho no bot real quando `/adicionar` fornecer um fluxo público capaz de criá-lo; até lá, manter a cobertura isolada e em PostgreSQL.
 3. Reservar testes de falha da Bot API real para staging isolado ou para uma injeção de falhas que não possa enviar mensagens duplicadas.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.

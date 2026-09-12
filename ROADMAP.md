@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Implementar e validar a admissão atômica no PostgreSQL
+**Próximo item:** V2.8 — Aplicar a migração de admissão pelo executor administrativo
 
 **Última atualização:** 12/09/2026
 
@@ -196,8 +196,9 @@ Decisões relacionadas:
 8. [x] Implantar `/cancelar` e validar no bot real a resposta sem rascunho: em 12/09/2026, inbox `completed` em uma tentativa, zero rascunhos e zero dead letters; o caminho com rascunho permanece coberto em PostgreSQL até existir um fluxo que o crie.
 9. [ ] Confirmar a inclusão de `/cancelar` no menu público do BotFather.
 10. [x] Definir a política inicial de 10 comandos em 60 segundos e o contrato atômico de admissão; validar a aplicação isolada. Detalhes em [admissão Telegram](docs/V2_TELEGRAM_ADMISSION.md).
-11. [ ] Implementar migração e adaptador PostgreSQL, validando concorrência, repetição, fronteira da janela e rollback com a inbox.
-12. [ ] Integrar a admissão ao webhook e validar o rate limit implantado antes dos fluxos de cadastro.
+11. [x] Implementar migração `20260912_05` e adaptador PostgreSQL; CI `34705698375` aprovou 120 testes, incluindo concorrência, repetição, fronteira da janela, horário monotônico, rollback da inbox e downgrade seguro.
+12. [ ] Aplicar `20260912_05` pelo executor administrativo e confirmar tabelas, ownership e grants mínimos em produção.
+13. [ ] Integrar a admissão ao webhook e validar o rate limit implantado antes dos fluxos de cadastro.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
