@@ -78,7 +78,7 @@ Em 12/09/2026, o usuário confirmou a resposta “Não há nenhuma operação em
 
 ## Próximos passos prováveis
 
-1. Definir e implementar rate limit persistente por usuário antes dos fluxos de cadastro; confirmar em paralelo a inclusão de `/cancelar` no menu do BotFather.
+1. Implementar migração e adaptador PostgreSQL para admissão atômica antes de integrar o rate limit ao webhook. Política e contrato isolados já existem: 10 comandos por usuário em janela móvel de 60 segundos, duplicatas sem quota e excedentes deduplicados sem execução ou resposta. O limite ainda não está ativo em produção; critérios em `docs/V2_TELEGRAM_ADMISSION.md`. Confirmar em paralelo o menu `/cancelar` no BotFather.
 2. Validar o resultado com rascunho no bot real quando `/adicionar` fornecer um fluxo público capaz de criá-lo; até lá, manter a cobertura isolada e em PostgreSQL.
 3. Reservar testes de falha da Bot API real para staging isolado ou para uma injeção de falhas que não possa enviar mensagens duplicadas.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
