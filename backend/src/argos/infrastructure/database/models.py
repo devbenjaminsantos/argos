@@ -118,3 +118,28 @@ class TelegramConversationDraftRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class TelegramAdmissionOwner(Base):
+    """Bloqueio e horário monotônico, inclusive antes de /start."""
+
+    __tablename__ = "telegram_admission_owners"
+    __table_args__ = (CheckConstraint("telegram_user_id > 0", name="positive_user_id"),)
+    telegram_user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=False)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class TelegramAdmissionRecord(Base):
+    """Decisão mínima durável; rejeições não armazenam o payload."""
+
+    __tablename__ = "telegram_admissions"
+    __table_args__ = (
+        CheckConstraint("decision IN ('admitted', 'rate_limited')", name="valid_decision"),
+        Index("ix_telegram_admissions_owner_window", "telegram_user_id", "decided_at",
+              postgresql_where=text("decision = 'admitted'")),
+    )
+    update_id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=False)
+    telegram_user_id: Mapped[int] = mapped_column(BigInteger,
+        ForeignKey("telegram_admission_owners.telegram_user_id"), nullable=False)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    decision: Mapped[str] = mapped_column(String(16), nullable=False)
