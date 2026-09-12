@@ -7,7 +7,7 @@ from threading import Barrier
 
 import pytest
 from sqlalchemy import create_engine, text
-from sqlalchemy.exc import StatementError
+from sqlalchemy.exc import DataError
 
 from argos.application.ports.telegram_admission import TelegramAdmissionResult as Result
 from argos.infrastructure.database.telegram_admission import PostgreSQLTelegramAdmissionRepository
@@ -92,8 +92,8 @@ def test_stale_timestamps_cannot_bypass_full_window(engine):
 
 
 def test_inbox_failure_rolls_back_owner_and_decision(engine):
-    with pytest.raises(StatementError):
-        admit(engine, 1, payload={"invalid_json": object()})
+    with pytest.raises(DataError):
+        admit(engine, 1, payload={"invalid_json": "\x00"})
     assert counts(engine) == (0, 0)
     with engine.connect() as connection:
         assert connection.scalar(text("SELECT count(*) FROM telegram_admission_owners")) == 0
@@ -132,8 +132,8 @@ def test_runtime_grants_exclude_delete_and_public_read(engine):
 def test_existing_quota_clock_rolls_back_when_inbox_fails(engine):
     for update_id in range(10):
         assert admit(engine, update_id) is Result.ADMITTED
-    with pytest.raises(StatementError):
-        admit(engine, 10, now=_NOW + timedelta(seconds=120), payload={"invalid": object()})
+    with pytest.raises(DataError):
+        admit(engine, 10, now=_NOW + timedelta(seconds=120), payload={"invalid": "\x00"})
     assert admit(engine, 10) is Result.RATE_LIMITED
 
 
