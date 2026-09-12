@@ -14,9 +14,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Implantar e validar `/cancelar` no bot de teste
+**Próximo item:** V2.8 — Definir e implementar rate limit persistente por usuário
 
-**Última atualização:** 11/09/2026
+**Última atualização:** 12/09/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -193,7 +193,9 @@ Decisões relacionadas:
 5. [x] Criar o comando one-shot do worker e validar PostgreSQL → claim → `/start` → usuário → saída falsa → conclusão.
 6. [x] Integrar um runner recuperável ao processo HTTP do piloto gratuito, despertado após a persistência e pelo polling de recuperação, sem manter trabalho apenas em memória; o job de coleta permanece separado.
 7. [x] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
-8. [ ] Implantar `/cancelar`, anunciá-lo no BotFather e validar no bot real a resposta sem rascunho; o caminho com rascunho permanece coberto em PostgreSQL até existir um fluxo que o crie.
+8. [x] Implantar `/cancelar` e validar no bot real a resposta sem rascunho: em 12/09/2026, inbox `completed` em uma tentativa, zero rascunhos e zero dead letters; o caminho com rascunho permanece coberto em PostgreSQL até existir um fluxo que o crie.
+9. [ ] Confirmar a inclusão de `/cancelar` no menu público do BotFather.
+10. [ ] Definir e implementar rate limit persistente por usuário antes dos fluxos de cadastro.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 

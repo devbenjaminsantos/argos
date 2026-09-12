@@ -4,13 +4,13 @@
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
-Os fluxos reais de `/start` e `/ajuda` estão validados no `@argos_teste_bot`. `/cancelar` está integrado ao worker e ao webhook, com implantação e validação real ainda pendentes. O bot permanece limitado a conversas privadas; o BotFather ainda anuncia somente `/start` e `/ajuda`. A fronteira persiste somente comandos disponíveis; texto ou comandos desconhecidos são confirmados sem persistência para evitar retries do Telegram. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
+Os fluxos reais de `/start` e `/ajuda` estão validados no `@argos_teste_bot`. `/cancelar` está implantado e validado no cenário sem rascunho. O bot permanece limitado a conversas privadas; a inclusão de `/cancelar` no menu do BotFather ainda requer confirmação. A fronteira persiste somente comandos disponíveis; texto ou comandos desconhecidos são confirmados sem persistência para evitar retries do Telegram. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.
 
 ## Estado atual
 
 - A V1 implementa monitoramento local de até três produtos do Mercado Livre: IndexedDB, alarmes aproximados de 12/24 horas, extração, preço-alvo, queda percentual e notificações Chrome. A aceitação manual no Chrome ainda não foi executada.
 - A V2 possui uma fundação FastAPI em `backend/`: `GET /health`, middleware de correlação, tratamento seguro de erros e `POST /webhooks/telegram` com segredo em tempo constante, corpo limitado e somente mensagens privadas de texto.
-- O webhook persiste cada comando suportado e autenticado na inbox antes de responder `200`; updates repetidos recebem `200` sem nova linha. Ausência da inbox ou falha SQL retorna `503`. `/start` e `/ajuda` já foram executados contra o bot real; `/cancelar` está integrado localmente e aguarda implantação. Também faltam os comandos de produtos, domínio V2 e coletor Python.
+- O webhook persiste cada comando suportado e autenticado na inbox antes de responder `200`; updates repetidos recebem `200` sem nova linha. Ausência da inbox ou falha SQL retorna `503`. `/start` e `/ajuda` já foram executados contra o bot real; `/cancelar` também está implantado e validado sem rascunho. Também faltam os comandos de produtos, domínio V2 e coletor Python.
 - PostgreSQL usa SQLAlchemy, Alembic e psycopg. O projeto Supabase Argos existe em `sa-east-1` (`mkpziasjjfnwvtvuorig`), está saudável e tem a revisão Alembic `20260911_04` aplicada. `telegram_update_inbox` preserva o payload e modela disponibilidade, tentativas, lease, conclusão e dead letter. `telegram_users` separa propriedade e destino; `telegram_conversation_drafts` mantém o estado incompleto por proprietário. Os repositórios tratam deduplicação, concorrência, atualização monotônica do destino e cancelamento atômico do rascunho.
 - A execução GitHub Actions `34510894628`, no commit `9a9eb20`, aplicou as migrations em PostgreSQL 17 descartável e concluiu os 40 testes. A integração cobre o caminho HTTP até a linha persistida, update repetido, inserção e claim concorrentes, lease expirado, rejeição de conclusão obsoleta e retry agendado.
 - O commit `9a9eb20` (2026-09-10) ligou o webhook à inbox. O deploy Render `dep-daheu5ifngtc7397e490` ficou `live` com essa revisão.
@@ -74,9 +74,11 @@ Os fluxos reais de `/start` e `/ajuda` estão validados no `@argos_teste_bot`. `
 - Shopee, regras de queda absoluta e menor preço em 30/90 dias não estão implementadas.
 - OIDC, extensão conectada à cloud, modo local distribuível e Android pertencem às versões futuras.
 
+Em 12/09/2026, o usuário confirmou a resposta “Não há nenhuma operação em andamento.” para `/cancelar`. A consulta independente encontrou o update `completed`, `attempt_count=1`, zero rascunhos e zero dead letters, sem exibir IDs ou payloads. O deploy funcional é `dep-dai8mtid0e5s73fo68r0`, commit `71f3eac`, aprovado pelo CI `34657241226`.
+
 ## Próximos passos prováveis
 
-1. Implantar `/cancelar`, adicioná-lo ao menu do BotFather e validar no bot real a resposta quando não há rascunho.
+1. Definir e implementar rate limit persistente por usuário antes dos fluxos de cadastro; confirmar em paralelo a inclusão de `/cancelar` no menu do BotFather.
 2. Validar o resultado com rascunho no bot real quando `/adicionar` fornecer um fluxo público capaz de criá-lo; até lá, manter a cobertura isolada e em PostgreSQL.
 3. Reservar testes de falha da Bot API real para staging isolado ou para uma injeção de falhas que não possa enviar mensagens duplicadas.
 4. Executar a aceitação manual da V1 no Chrome quando houver ambiente disponível.
