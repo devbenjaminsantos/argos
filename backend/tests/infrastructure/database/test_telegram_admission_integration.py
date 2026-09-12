@@ -127,3 +127,34 @@ def test_runtime_grants_exclude_delete_and_public_read(engine):
             assert not connection.scalar(text("SELECT has_table_privilege('argos_runtime', :table, 'DELETE')"), {"table": table})
             for role in ("anon", "authenticated", "service_role"):
                 assert not connection.scalar(text("SELECT has_table_privilege(:role, :table, 'SELECT')"), {"role": role, "table": table})
+
+
+def test_existing_quota_clock_rolls_back_when_inbox_fails(engine):
+    for update_id in range(10):
+        assert admit(engine, update_id) is Result.ADMITTED
+    with pytest.raises(StatementError):
+        admit(engine, 10, now=_NOW + timedelta(seconds=120), payload={"invalid": object()})
+    assert admit(engine, 10) is Result.RATE_LIMITED
+
+
+def test_migration_refuses_data_loss_and_empty_roundtrip(engine, monkeypatch):
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import inspect
+
+    monkeypatch.setenv("ARGOS_ENVIRONMENT", "test")
+    monkeypatch.setenv("ARGOS_MIGRATION_DATABASE_URL", _DATABASE_URL)
+    config = Config("alembic.ini")
+    assert admit(engine, 1) is Result.ADMITTED
+    with pytest.raises(RuntimeError, match="downgrade destrutivo recusado"):
+        command.downgrade(config, "20260911_04")
+    assert counts(engine) == (1, 1)
+    with engine.begin() as connection:
+        connection.execute(text("TRUNCATE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+    try:
+        command.downgrade(config, "20260911_04")
+        assert "telegram_admissions" not in inspect(engine).get_table_names()
+        assert "telegram_admission_owners" not in inspect(engine).get_table_names()
+    finally:
+        command.upgrade(config, "head")
+    assert admit(engine, 2) is Result.ADMITTED
