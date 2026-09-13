@@ -2,7 +2,7 @@
 
 ## Estado
 
-Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e foi aprovada no CI `34777851672`, commit `3c28e40`, e está implantada no deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`. O código está ativo em produção; a aceitação por mensagem real e quota ainda está pendente.
+Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e foi aprovada no CI `34777851672`, commit `3c28e40`, e está implantada no deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`. O código está ativo em produção; a mensagem real `/ajuda` foi validada em 13/09/2026 (decisão `admitted`, inbox `completed`, uma tentativa), com resposta confirmada pelo usuário. A aceitação do teto de quota e da liberação da janela ainda está pendente.
 
 ## Política inicial do piloto
 

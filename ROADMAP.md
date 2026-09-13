@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Implantar e validar a admissão no Render
+**Próximo item:** V2.8 — Validar o teto de quota no bot de teste
 
 **Última atualização:** 13/09/2026
 
@@ -200,7 +200,8 @@ Decisões relacionadas:
 12. [x] Aplicar `20260912_05` pelo executor administrativo (workflow `34776918057`) e confirmar tabelas vazias, ownership de `argos_migrator`, SELECT/INSERT/UPDATE do runtime sem DELETE e nenhuma leitura por `anon`, `authenticated` ou `service_role`.
 13. [x] Integrar a admissão ao webhook; CI `34777851672` aprovado no commit `3c28e40`, incluindo rajada HTTP com dez admissões e um excedente deduplicado, sem worker externo.
 14. [x] Implantar a integração no Render: deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`, live em 13/09/2026; `/health/ready` respondeu 200 e não houve erros recentes.
-15. [ ] Validar uma mensagem real do bot na tabela de admissões e na inbox; depois validar o teto de quota em uma janela controlada antes dos fluxos de cadastro.
+15. [x] Validar uma mensagem real do bot: `/ajuda` gerou decisão `admitted` e inbox `completed` em uma tentativa, confirmadas no PostgreSQL em 13/09/2026.
+16. [ ] Validar o teto de quota e a liberação da janela no bot de teste antes dos fluxos de cadastro.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
