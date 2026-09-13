@@ -278,3 +278,9 @@ Verificação independente em produção: revisão `20260913_06`, coluna `versio
 O futuro adaptador deve conferir lease vigente e identidade/comando contra o payload da inbox, serializar update e proprietário e gravar rascunho e resposta na mesma transação. Reprocessamento devolve a resposta persistida, mesmo após expiração ou cancelamento, sem recriar rascunho nem renovar prazo. Também deve persistir respostas de operação já ativa ou acesso ainda não registrado. Não usar operações independentes do repositório atual, pois elas abririam uma janela entre efeito e resultado.
 
 Este incremento implementa apenas aplicação e contrato. Persistência de resultados, migração, composição no worker e liberação no webhook ainda estão pendentes. Testar no PostgreSQL: chamadas repetidas e concorrentes, recriação do pool, recuperação após efeito persistido, lease perdido, identidade divergente, rollback após falha ao guardar a resposta e preservação do rascunho ativo. Reutilizar o resultado não garante envio único pela Bot API; o tratamento de resultado externo incerto permanece necessário.
+
+## Adaptador de início idempotente
+
+`PostgreSQLTelegramRegistrationRepository` e a migração `20260913_07` estão implementados, ainda sem aplicação em produção ou integração ao worker. A tabela `telegram_registration_results` referencia o update da inbox e guarda proprietário, chat, resposta e horário. Runtime recebe somente SELECT/INSERT, sem UPDATE/DELETE; roles públicas ficam sem acesso. O downgrade recusa remover resultados existentes.
+
+A transação bloqueia o update, verifica lease contra o relógio PostgreSQL e identidade/comando contra seu payload, reutiliza um resultado existente ou bloqueia o usuário para decidir entre iniciar cadastro, preservar ativo e exigir `/start`. Rascunho e resposta são gravados juntos. O resultado persistido não faz envio externo. A retenção da inbox deverá preservar resultados; a FK impede removê-la sem uma política explícita.

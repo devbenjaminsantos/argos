@@ -145,3 +145,18 @@ class TelegramAdmissionRecord(Base):
         ForeignKey("telegram_admission_owners.telegram_user_id"), nullable=False)
     decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     decision: Mapped[str] = mapped_column(String(16), nullable=False)
+
+
+class TelegramRegistrationResult(Base):
+    """Resposta imutável do início de cadastro por update."""
+    __tablename__ = "telegram_registration_results"
+    __table_args__ = (
+        CheckConstraint("telegram_user_id > 0 AND chat_id > 0", name="positive_identity"),
+        CheckConstraint("length(reply_text) BETWEEN 1 AND 4096", name="valid_reply"),
+    )
+    update_id: Mapped[int] = mapped_column(BigInteger,
+        ForeignKey("telegram_update_inbox.update_id"), primary_key=True, autoincrement=False)
+    telegram_user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    chat_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    reply_text: Mapped[str] = mapped_column(String(4096), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

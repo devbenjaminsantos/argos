@@ -28,12 +28,12 @@ def inbox() -> PostgreSQLTelegramInbox:
     assert _DATABASE_URL is not None
     engine = create_engine(_DATABASE_URL, pool_size=5, max_overflow=0)
     with engine.begin() as connection:
-        connection.execute(text("TRUNCATE TABLE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+        connection.execute(text("TRUNCATE TABLE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
     try:
         yield PostgreSQLTelegramInbox(engine)
     finally:
         with engine.begin() as connection:
-            connection.execute(text("TRUNCATE TABLE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+            connection.execute(text("TRUNCATE TABLE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
         engine.dispose()
 
 
@@ -180,7 +180,7 @@ def test_webhook_acknowledges_only_after_postgresql_persistence() -> None:
     assert _DATABASE_URL is not None
     engine = create_engine(_DATABASE_URL)
     with engine.begin() as connection:
-        connection.execute(text("TRUNCATE TABLE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+        connection.execute(text("TRUNCATE TABLE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
 
     settings = Settings(
         environment="test",
@@ -213,7 +213,7 @@ def test_webhook_acknowledges_only_after_postgresql_persistence() -> None:
                 "FROM telegram_update_inbox WHERE update_id = 105"
             )
         ).one()
-        connection.execute(text("TRUNCATE TABLE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+        connection.execute(text("TRUNCATE TABLE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
     engine.dispose()
 
     assert response.status_code == 200
@@ -226,7 +226,7 @@ def test_one_shot_worker_persists_owner_sends_start_and_completes() -> None:
     assert _DATABASE_URL is not None
     engine = create_engine(_DATABASE_URL)
     with engine.begin() as connection:
-        connection.execute(text("TRUNCATE TABLE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+        connection.execute(text("TRUNCATE TABLE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
         connection.execute(
             text(
                 "TRUNCATE TABLE telegram_conversation_drafts, "
@@ -275,7 +275,7 @@ def test_one_shot_worker_persists_owner_sends_start_and_completes() -> None:
                 "WHERE telegram_user_id = 900"
             )
         ).one()
-        connection.execute(text("TRUNCATE TABLE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+        connection.execute(text("TRUNCATE TABLE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
         connection.execute(
             text(
                 "TRUNCATE TABLE telegram_conversation_drafts, "

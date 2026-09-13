@@ -21,12 +21,12 @@ _NOW = datetime(2026, 9, 12, tzinfo=UTC)
 def engine():
     db = create_engine(_DATABASE_URL, pool_size=25, max_overflow=0)
     with db.begin() as connection:
-        connection.execute(text("TRUNCATE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+        connection.execute(text("TRUNCATE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
     try:
         yield db
     finally:
         with db.begin() as connection:
-            connection.execute(text("TRUNCATE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+            connection.execute(text("TRUNCATE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
         db.dispose()
 
 
@@ -150,7 +150,7 @@ def test_migration_refuses_data_loss_and_empty_roundtrip(engine, monkeypatch):
         command.downgrade(config, "20260911_04")
     assert counts(engine) == (1, 1)
     with engine.begin() as connection:
-        connection.execute(text("TRUNCATE telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
+        connection.execute(text("TRUNCATE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
     try:
         command.downgrade(config, "20260911_04")
         assert "telegram_admissions" not in inspect(engine).get_table_names()
