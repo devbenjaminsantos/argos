@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     telegram_worker_lease_seconds: int = Field(default=30, ge=5, le=300)
     telegram_worker_retry_seconds: int = Field(default=30, ge=1, le=3_600)
     telegram_worker_poll_seconds: float = Field(default=10.0, gt=0, le=60)
+    telegram_admission_maximum_commands: int = Field(default=10, ge=1, le=100)
+    telegram_admission_window_seconds: int = Field(default=60, ge=1, le=3_600)
     database_url: SecretStr | None = None
     migration_database_url: SecretStr | None = None
 

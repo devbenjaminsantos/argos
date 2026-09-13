@@ -158,3 +158,24 @@ def test_migration_refuses_data_loss_and_empty_roundtrip(engine, monkeypatch):
     finally:
         command.upgrade(config, "head")
     assert admit(engine, 2) is Result.ADMITTED
+
+
+def test_http_burst_limits_and_deduplicates_without_worker(engine):
+    from fastapi.testclient import TestClient
+    from pydantic import SecretStr
+    from argos.config import Settings
+    from argos.main import create_app
+
+    settings = Settings(environment="test", database_url=SecretStr(_DATABASE_URL),
+                        telegram_webhook_secret=SecretStr("integration-secret"))
+    headers = {"X-Telegram-Bot-Api-Secret-Token": "integration-secret"}
+    with TestClient(create_app(settings)) as client:
+        for update_id in range(11):
+            payload = {"update_id": update_id, "message": {
+                "message_id": 1, "from": {"id": 700},
+                "chat": {"id": 800, "type": "private"}, "text": "/ajuda"}}
+            assert client.post("/webhooks/telegram", headers=headers, json=payload).status_code == 200
+        assert client.post("/webhooks/telegram", headers=headers, json=payload).status_code == 200
+    assert counts(engine) == (11, 10)
+    with engine.connect() as connection:
+        assert connection.scalar(text("SELECT decision FROM telegram_admissions WHERE update_id=10")) == "rate_limited"

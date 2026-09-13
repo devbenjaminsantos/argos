@@ -2,7 +2,7 @@
 
 ## Estado
 
-Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook ainda está pendente. O rate limit ainda não está ativo em produção.
+Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e aguarda validação do CI e implantação. O rate limit ainda não está ativo em produção.
 
 ## Política inicial do piloto
 
@@ -25,10 +25,14 @@ Testar em PostgreSQL real: dez admissões e rejeição da décima primeira; libe
 
 `telegram_admission_owners` serializa operações por proprietário e mantém um horário monotônico. `telegram_admissions` guarda somente proprietário, update, horário e decisão; somente admissões guardam payload na inbox. O adaptador bloqueia o proprietário, reserva o update globalmente, conta admissões na janela e grava decisão e inbox na mesma transação. Updates já presentes na inbox antes da ativação retornam duplicata sem consumir quota.
 
-A migração concede somente SELECT/INSERT/UPDATE ao runtime e revoga acesso das roles públicas. O downgrade recusa remover tabelas que contenham decisões ou proprietários. A revisão foi aplicada em produção pelo workflow `34776918057` (commit `fdeb17f`), concluído com sucesso. Em 13/09/2026, a consulta independente confirmou `20260912_05`, ambas as tabelas vazias sob ownership de `argos_migrator`, runtime com SELECT/INSERT/UPDATE sem DELETE e nenhuma leitura por `anon`, `authenticated` ou `service_role`. A admissão ainda não está ligada ao webhook.
+A migração concede somente SELECT/INSERT/UPDATE ao runtime e revoga acesso das roles públicas. O downgrade recusa remover tabelas que contenham decisões ou proprietários. A revisão foi aplicada em produção pelo workflow `34776918057` (commit `fdeb17f`), concluído com sucesso. Em 13/09/2026, a consulta independente confirmou `20260912_05`, ambas as tabelas vazias sob ownership de `argos_migrator`, runtime com SELECT/INSERT/UPDATE sem DELETE e nenhuma leitura por `anon`, `authenticated` ou `service_role`. A ligação ao webhook está implementada, mas ainda não foi implantada.
 
 ## Evidência de validação
 
 O CI confirmou dez admissões entre vinte chamadas concorrentes, deduplicação global do mesmo update disputado por dois proprietários, preservação da quota após recriação do pool, janela de 60 segundos e rejeição de timestamps obsoletos. Uma inserção JSONB rejeitada pelo PostgreSQL comprovou o rollback tanto de um novo proprietário quanto do relógio e da decisão de um proprietário existente. O ciclo downgrade/upgrade foi exercitado com tabelas vazias; dados existentes fizeram o downgrade falhar preservando a decisão e a inbox. Os grants foram inspecionados: runtime sem DELETE e roles públicas sem leitura.
 
 O Docker local falhou ao iniciar o daemon. A suíte local concluiu 97 testes e ignorou 21 integrações naquele momento; a evidência PostgreSQL vem do CI. A primeira execução do conjunto completo falhou em dois testes por uma expectativa incorreta de exceção na simulação de JSON inválido. A simulação foi substituída por uma falha SQL real, e a execução final aprovou todos os 120 testes.
+
+## Integração HTTP
+
+A composição usa `AdmitTelegramUpdate` e o adaptador PostgreSQL. `ARGOS_TELEGRAM_ADMISSION_MAXIMUM_COMMANDS` e `ARGOS_TELEGRAM_ADMISSION_WINDOW_SECONDS` configuram os valores padrão de 10 e 60. Autenticação, parsing e filtro de comandos precedem a admissão. Somente ADMITTED notifica o runner; DUPLICATE e RATE_LIMITED recebem 200 sem notificação. Erros SQL recebem 503 e logs apenas com correlação, sem parâmetros SQL ou payload.

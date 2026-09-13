@@ -13,7 +13,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from starlette.concurrency import run_in_threadpool
 
 from argos.api.schemas import TelegramUpdateInput
-from argos.application.ports.telegram_inbox import TelegramInbox
+from argos.application.ports.telegram_admission import TelegramAdmissionResult
+from argos.application.use_cases.admit_telegram_update import AdmitTelegramUpdate
 from argos.application.ports.telegram_worker import TelegramWorkerRunner
 from argos.config import Settings
 
@@ -84,19 +85,20 @@ async def receive_telegram_update(request: Request) -> Response:
     if not _is_supported_command(update.message.text):
         return Response(status_code=HTTPStatus.OK)
 
-    inbox: TelegramInbox | None = request.app.state.telegram_inbox
-    if inbox is None:
+    admission: AdmitTelegramUpdate | None = request.app.state.telegram_admission
+    if admission is None:
         raise HTTPException(status_code=HTTPStatus.SERVICE_UNAVAILABLE)
 
     try:
-        await run_in_threadpool(
-            inbox.enqueue,
+        result = await run_in_threadpool(
+            admission.execute,
             update_id=update.update_id,
+            telegram_user_id=update.message.sender.id,
             payload=cast(dict[str, object], payload),
             received_at=datetime.now(UTC),
         )
     except SQLAlchemyError:
-        logger.exception(
+        logger.error(
             "Failed to persist Telegram update correlation_id=%s",
             request.state.correlation_id,
         )
@@ -107,7 +109,7 @@ async def receive_telegram_update(request: Request) -> Response:
     worker_runner: TelegramWorkerRunner | None = (
         request.app.state.telegram_worker_runner
     )
-    if worker_runner is not None:
+    if worker_runner is not None and result is TelegramAdmissionResult.ADMITTED:
         worker_runner.notify()
 
     return Response(status_code=HTTPStatus.OK)

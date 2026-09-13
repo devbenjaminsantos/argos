@@ -6,7 +6,8 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 from sqlalchemy.exc import OperationalError
 
-from argos.application.ports.telegram_inbox import ClaimedTelegramUpdate
+from argos.application.ports.telegram_admission import TelegramAdmissionResult
+from argos.application.use_cases.admit_telegram_update import AdmitTelegramUpdate
 from argos.config import Settings
 from argos.main import create_app
 
@@ -31,22 +32,23 @@ class _InboxStub:
         self.error = error
         self.enqueued: list[tuple[int, dict[str, object], datetime]] = []
 
-    def enqueue(
+    def admit(
         self,
         *,
         update_id: int,
         payload: dict[str, object],
         received_at: datetime,
-    ) -> bool:
+        telegram_user_id: int,
+        maximum_commands: int,
+        window: object,
+    ) -> TelegramAdmissionResult:
         if self.error:
             raise OperationalError("INSERT", {}, Exception("unavailable"))
         is_new = not any(item[0] == update_id for item in self.enqueued)
         if is_new:
             self.enqueued.append((update_id, payload, received_at))
-        return is_new
-
-    def claim_next(self, **_kwargs: object) -> ClaimedTelegramUpdate | None:
-        raise NotImplementedError
+        return (TelegramAdmissionResult.ADMITTED if is_new
+                else TelegramAdmissionResult.DUPLICATE)
 
     def complete(self, **_kwargs: object) -> bool:
         raise NotImplementedError
@@ -83,7 +85,7 @@ def _client(
     return TestClient(
         create_app(
             settings,
-            telegram_inbox=inbox,
+            telegram_admission=AdmitTelegramUpdate(inbox) if inbox is not None else None,
             telegram_worker_runner=runner,
         )
     )
@@ -287,4 +289,28 @@ def test_persisted_update_wakes_configured_worker_runner() -> None:
     )
 
     assert response.status_code == 200
+    assert runner.notifications == 1
+
+
+def test_rate_limited_update_is_acknowledged_without_waking_worker() -> None:
+    class LimitedRepository:
+        def admit(self, **kwargs: object) -> TelegramAdmissionResult:
+            assert kwargs["telegram_user_id"] == 789
+            return TelegramAdmissionResult.RATE_LIMITED
+
+    runner = _RunnerStub()
+    client = TestClient(create_app(
+        Settings(environment="test", telegram_webhook_secret=SecretStr(_SECRET)),
+        telegram_admission=AdmitTelegramUpdate(LimitedRepository()),
+        telegram_worker_runner=runner,
+    ))
+    assert client.post("/webhooks/telegram", headers=_HEADERS, json=_VALID_UPDATE).status_code == 200
+    assert runner.notifications == 0
+
+
+def test_duplicate_update_does_not_wake_worker_again() -> None:
+    runner = _RunnerStub()
+    client = _client(inbox=_InboxStub(), runner=runner)
+    for _ in range(2):
+        assert client.post("/webhooks/telegram", headers=_HEADERS, json=_VALID_UPDATE).status_code == 200
     assert runner.notifications == 1
