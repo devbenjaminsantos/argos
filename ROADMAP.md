@@ -208,7 +208,7 @@ Decisões relacionadas:
 19. [x] Preparar caso de uso e contrato atômico para início de cadastro por update, com lease, resposta reutilizada, `/start` prévio e rascunho de 15 minutos; validação isolada concluída.
 20. [x] Implementar migração `20260913_07` e adaptador atômico de início e resposta; CI `34788802511` aprovado no commit `af907fb`, incluindo repetição, concorrência, recuperação com novo lease, rollback, grants e downgrade protegido.
 21. [x] Aplicar `20260913_07` pelo workflow `34789307934` (commit `a924821`); tabela vazia sob ownership de `argos_migrator`, runtime com SELECT/INSERT sem UPDATE/DELETE e roles públicas sem leitura, confirmados no PostgreSQL.
-22. [x] Integrar o início de `/adicionar` ao worker e webhook, distinguindo início de rascunho de cadastro completo; ajuda atualizada e recuperação com resposta persistida coberta em testes.
+22. [x] Integrar o início de `/adicionar` ao worker e webhook, distinguindo início de rascunho de cadastro completo; ajuda atualizada e recuperação com resposta persistida validada no CI `34789845853`, commit `724fe24`.
 23. [ ] Implantar essa integração no Render e validar `/adicionar` → repetição → `/cancelar` → novo `/adicionar` no bot real. O recebimento da URL ainda não está liberado.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
