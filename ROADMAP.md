@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Persistir início de cadastro e resposta por update
+**Próximo item:** V2.8 — Aplicar a migração de respostas de cadastro
 
 **Última atualização:** 13/09/2026
 
@@ -206,7 +206,8 @@ Decisões relacionadas:
 17. [x] Implementar início e avanço persistentes com expiração e versão UUID; CI `34787786771` aprovado no commit `5099b39`, incluindo concorrência e cancelamento/recriação no mesmo timestamp.
 18. [x] Aplicar `20260913_06` pelo workflow `34788321746` (commit `75b31bf`); consulta independente confirmou coluna UUID NOT NULL com default `gen_random_uuid()`, ownership de `argos_migrator`, DML do runtime e nenhuma leitura por roles públicas.
 19. [x] Preparar caso de uso e contrato atômico para início de cadastro por update, com lease, resposta reutilizada, `/start` prévio e rascunho de 15 minutos; validação isolada concluída.
-20. [ ] Implementar migração e adaptador que persistam rascunho e resposta juntos, validando repetição, concorrência, lease e rollback antes de liberar `/adicionar`.
+20. [x] Implementar migração `20260913_07` e adaptador atômico de início e resposta; CI `34788802511` aprovado no commit `af907fb`, incluindo repetição, concorrência, recuperação com novo lease, rollback, grants e downgrade protegido.
+21. [ ] Aplicar `20260913_07` pelo executor administrativo e conferir ownership/grants; depois integrar o início de `/adicionar` ao worker e webhook.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
