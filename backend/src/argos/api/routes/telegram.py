@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def _is_supported_command(text: str) -> bool:
-    return text.strip().casefold() in {"/start", "/ajuda", "/cancelar"}
+    return text.strip().casefold() in {"/start", "/ajuda", "/cancelar", "/adicionar"}
 
 
 def _authenticate(request: Request, settings: Settings) -> None:

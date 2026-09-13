@@ -135,3 +135,48 @@ def test_downgrade_refuses_existing_results(context, monkeypatch):
     with pytest.raises(RuntimeError, match="downgrade destrutivo recusado"):
         command.downgrade(Config("alembic.ini"), "20260913_06")
     assert begin(context).text == "started"
+
+
+@pytest.mark.parametrize("interrupted", [False, True])
+def test_composed_worker_recovers_persisted_reply_without_renewing_draft(context, interrupted):
+    from argos.application.ports.telegram_messages import TelegramDeliveryError
+    from argos.config import Settings
+    from argos.telegram_worker import build_worker
+
+    engine, now, _ = context
+    with engine.begin() as c:
+        c.execute(text("DELETE FROM telegram_update_inbox WHERE update_id=2"))
+        c.execute(text("UPDATE telegram_update_inbox SET status='pending',lease_token=NULL,lease_expires_at=NULL"))
+
+    class Sender:
+        def __init__(self):
+            self.messages = []
+            self.fail = True
+
+        def send(self, message):
+            self.messages.append(message)
+            if self.fail:
+                if interrupted:
+                    raise RuntimeError("Interrupção simulada antes do envio")
+                raise TelegramDeliveryError("telegram_rate_limited", retryable=True)
+
+    sender = Sender()
+    worker = build_worker(Settings(environment="test"), engine=engine, sender=sender)
+    if interrupted:
+        with pytest.raises(RuntimeError, match="Interrupção simulada"):
+            worker.process_next(now=now)
+    else:
+        assert worker.process_next(now=now)
+    with engine.connect() as c:
+        original = c.execute(text("SELECT version,expires_at FROM telegram_conversation_drafts")).one()
+        assert c.scalar(text("SELECT status FROM telegram_update_inbox")) == ("processing" if interrupted else "pending")
+        assert c.scalar(text("SELECT count(*) FROM telegram_registration_results")) == 1
+    engine.dispose()
+    sender.fail = False
+    recovered = build_worker(Settings(environment="test"), engine=engine, sender=sender)
+    assert recovered.process_next(now=now + timedelta(minutes=2))
+    assert sender.messages[0] == sender.messages[1]
+    with engine.connect() as c:
+        assert c.execute(text("SELECT version,expires_at FROM telegram_conversation_drafts")).one() == original
+        assert c.scalar(text("SELECT count(*) FROM telegram_registration_results")) == 1
+        assert c.execute(text("SELECT status,attempt_count FROM telegram_update_inbox")).one() == ("completed", 2)

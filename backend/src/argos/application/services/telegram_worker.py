@@ -9,6 +9,7 @@ from argos.application.ports.telegram_messages import (
     TelegramDeliveryError,
     TelegramMessageSender,
 )
+from argos.application.use_cases.begin_registration import BeginTelegramRegistration
 from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.start import StartTelegramConversation
@@ -24,6 +25,7 @@ class TelegramInboxWorker:
         start: StartTelegramConversation,
         help_conversation: HelpTelegramConversation,
         cancel_conversation: CancelTelegramConversation,
+        begin_registration: BeginTelegramRegistration,
         sender: TelegramMessageSender,
         lease_duration: timedelta = timedelta(seconds=30),
         retry_delay: timedelta = timedelta(seconds=30),
@@ -34,6 +36,7 @@ class TelegramInboxWorker:
         self._start = start
         self._help = help_conversation
         self._cancel = cancel_conversation
+        self._registration = begin_registration
         self._sender = sender
         self._lease_duration = lease_duration
         self._retry_delay = retry_delay
@@ -59,6 +62,15 @@ class TelegramInboxWorker:
                     telegram_user_id=telegram_user_id,
                     chat_id=chat_id,
                     text=text,
+                )
+            elif command == "/adicionar":
+                reply = self._registration.execute(
+                    update_id=claimed.update_id,
+                    lease_token=claimed.lease_token,
+                    telegram_user_id=telegram_user_id,
+                    chat_id=chat_id,
+                    text=text,
+                    observed_at=now,
                 )
             else:
                 reply = self._start.execute(

@@ -12,7 +12,7 @@ def test_help_returns_only_available_commands_as_plain_text() -> None:
     assert "/start" in reply.text
     assert "/ajuda" in reply.text
     assert "/cancelar" in reply.text
-    assert "/adicionar" not in reply.text
+    assert "/adicionar" in reply.text
     assert "/produtos" not in reply.text
 
 

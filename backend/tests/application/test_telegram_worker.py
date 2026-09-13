@@ -12,6 +12,7 @@ from argos.application.ports.telegram_messages import (
 )
 from argos.application.ports.telegram_users import TelegramUser
 from argos.application.services.telegram_worker import TelegramInboxWorker
+from argos.application.use_cases.begin_registration import BeginTelegramRegistration
 from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.start import StartTelegramConversation
@@ -111,6 +112,15 @@ class _ConversationsStub:
         return self.exists
 
 
+class _RegistrationStub:
+    def __init__(self):
+        self.calls = []
+
+    def begin_for_update(self, **kwargs):
+        self.calls.append(kwargs)
+        return TelegramMessage(chat_id=kwargs["chat_id"], text=kwargs["replies"].started)
+
+
 class _SenderStub:
     def __init__(self, error: Exception | None = None) -> None:
         self.error = error
@@ -127,6 +137,7 @@ def _worker(
     sender: _SenderStub,
     users: _UsersStub | None = None,
     conversations: _ConversationsStub | None = None,
+    registrations: _RegistrationStub | None = None,
 ) -> TelegramInboxWorker:
     return TelegramInboxWorker(
         inbox=inbox,
@@ -135,6 +146,7 @@ def _worker(
         cancel_conversation=CancelTelegramConversation(
             conversations or _ConversationsStub()
         ),
+        begin_registration=BeginTelegramRegistration(registrations or _RegistrationStub()),
         sender=sender,
         lease_duration=timedelta(seconds=20),
         retry_delay=timedelta(seconds=15),
@@ -285,3 +297,15 @@ def test_unexpected_failure_leaves_lease_for_recovery() -> None:
     assert inbox.completed == []
     assert inbox.retried == []
     assert inbox.dead_letters == []
+
+
+def test_worker_dispatches_registration_with_claimed_update_and_lease():
+    payload = {**_PAYLOAD, "message": {**_PAYLOAD["message"], "text": " /ADICIONAR "}}
+    inbox, sender, users, registrations = _InboxStub(payload), _SenderStub(), _UsersStub(), _RegistrationStub()
+    assert _worker(inbox, sender, users, registrations=registrations).process_next(now=_NOW)
+    call = registrations.calls[0]
+    assert (call["update_id"], call["lease_token"], call["telegram_user_id"], call["chat_id"], call["observed_at"]) == (10, _LEASE_TOKEN, 700, 800, _NOW)
+    assert users.upserts == []
+    assert "Rascunho de teste" in sender.messages[0].text
+    assert "próximas etapas" in sender.messages[0].text
+    assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]

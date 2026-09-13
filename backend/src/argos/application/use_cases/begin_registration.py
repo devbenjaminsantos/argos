@@ -11,7 +11,7 @@ from argos.application.ports.telegram_registration import (
 )
 
 _REPLIES = BeginRegistrationReplies(
-    started="Vamos cadastrar um produto. Envie a URL do anúncio do Mercado Livre.\n\nUse /cancelar para interromper o cadastro.",
+    started="Rascunho de teste iniciado por 15 minutos. O recebimento da URL e o cadastro completo serão liberados nas próximas etapas.\n\nUse /cancelar para interromper o cadastro.",
     already_active="Já existe uma operação em andamento. Use /cancelar antes de iniciar outro cadastro.",
     registration_required="Envie /start para registrar seu acesso antes de cadastrar um produto.",
 )

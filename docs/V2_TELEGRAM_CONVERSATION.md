@@ -288,3 +288,9 @@ A transação bloqueia o update, verifica lease contra o relógio PostgreSQL e i
 Validação final do adaptador: CI `34788802511`, commit `af907fb`, aprovado em PostgreSQL real. Reprocessamento com novo lease preservou a resposta após remover o rascunho, sem recriá-lo; falha SQL ao guardar a resposta reverteu a criação; concorrência preservou uma operação ativa; lease expirado e identidade divergente foram recusados; runtime sem UPDATE/DELETE e downgrade com dados recusado. A migração foi aplicada em produção; o comando continua pendente.
 
 Aplicação em produção de `20260913_07`: workflow `34789307934`, commit `a924821`, concluído com sucesso. Consulta independente confirmou revisão, tabela de resultados vazia sob ownership de `argos_migrator`, runtime com SELECT/INSERT sem UPDATE/DELETE e roles públicas sem leitura. A integração ao worker e webhook continua pendente.
+
+## Início integrado no piloto (13/09/2026)
+
+O webhook e o worker aceitam `/adicionar` para iniciar um rascunho de teste com duração de 15 minutos, após `/start`. Rascunho e resposta são persistidos na mesma transação sob o lease da inbox. Uma operação ativa é preservada; o mesmo update reutiliza a resposta original, inclusive após recuperação do worker. `/cancelar` permite remover esse rascunho.
+
+A ajuda e a resposta de início esclarecem que o recebimento da URL e o cadastro completo ainda serão liberados. Texto livre continua confirmado sem persistência. A integração precisa de deploy e aceitação no bot real; isso não conclui o cadastro de produtos da V2.9.
