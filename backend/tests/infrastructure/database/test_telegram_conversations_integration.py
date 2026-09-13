@@ -57,3 +57,61 @@ def test_cancel_deletes_only_owner_draft_atomically(repository) -> None:
     assert drafts.cancel_for_owner(telegram_user_id=700) is True
     assert drafts.cancel_for_owner(telegram_user_id=700) is False
     assert drafts.get_active(telegram_user_id=701, observed_at=now) is not None
+
+
+def test_begin_preserves_active_and_replaces_expired(repository):
+    drafts, now = repository
+    assert drafts.begin(telegram_user_id=700, observed_at=now,
+                        expires_at=now + timedelta(minutes=5)) is None
+    restarted = drafts.begin(telegram_user_id=701, observed_at=now + timedelta(seconds=2),
+                             expires_at=now + timedelta(minutes=5))
+    assert restarted is not None
+    assert restarted.state == "awaiting_url"
+    assert restarted.data == {}
+    assert drafts.get_active(telegram_user_id=700, observed_at=now).state == "awaiting_url"
+
+
+def test_advance_preserves_expiry_and_rejects_stale_version(repository):
+    drafts, now = repository
+    expected = drafts.get_active(telegram_user_id=700, observed_at=now)
+    changed = drafts.advance(expected=expected, state="awaiting_alias",
+                             data={"url": "validated-by-application"},
+                             observed_at=now + timedelta(seconds=1))
+    assert changed is not None
+    assert changed.expires_at == expected.expires_at
+    assert changed.data == {"url": "validated-by-application"}
+    assert drafts.advance(expected=expected, state="awaiting_alias", data={},
+                          observed_at=now + timedelta(seconds=2)) is None
+    assert drafts.get_active(telegram_user_id=701, observed_at=now).data == {}
+
+
+def test_expired_draft_cannot_advance(repository):
+    drafts, now = repository
+    expected = drafts.get_active(telegram_user_id=701, observed_at=now)
+    assert drafts.advance(expected=expected, state="awaiting_target_price", data={},
+                          observed_at=now + timedelta(seconds=1)) is None
+
+
+def test_concurrent_advances_allow_only_one_version(repository):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    drafts, now = repository
+    expected = drafts.get_active(telegram_user_id=700, observed_at=now)
+    barrier = Barrier(2)
+    def execute(value):
+        barrier.wait(timeout=10)
+        return drafts.advance(expected=expected, state="awaiting_alias",
+                              data={"choice": value}, observed_at=now + timedelta(seconds=1))
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(execute, [1, 2]))
+    assert sum(result is not None for result in results) == 1
+
+
+def test_cancel_and_recreate_does_not_allow_old_snapshot(repository):
+    drafts, now = repository
+    expected = drafts.get_active(telegram_user_id=700, observed_at=now)
+    drafts.cancel_for_owner(telegram_user_id=700)
+    drafts.begin(telegram_user_id=700, observed_at=now,
+                 expires_at=now + timedelta(minutes=5))
+    assert drafts.advance(expected=expected, state="awaiting_alias", data={},
+                          observed_at=now + timedelta(seconds=2)) is None

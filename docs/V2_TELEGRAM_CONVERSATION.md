@@ -262,3 +262,7 @@ Se houver conflito de versão, o caso de uso recarrega o estado uma única vez. 
 - suporte à Shopee;
 - localização em outros idiomas;
 - autenticação OIDC.
+
+## Persistência implementada em preparação
+
+O repositório oferece `begin` para iniciar cadastro sem sobrescrever rascunho ativo (um expirado pode ser substituído), e `advance` para atualizar somente a versão ativa lida pelo chamador. A expiração inicial é preservada ao avançar; a aplicação escolhe sua duração ao iniciar. A versão UUID é renovada na criação e em cada avanço, impedindo sobrescrita concorrente e atualização após cancelamento/recriação. A revisão `20260913_06` adiciona a coluna; aplicação em produção ainda pendente. O grafo de transições vive no domínio. Este preparo não libera `/adicionar` nem valida URL, apelido ou dinheiro: os casos de uso das etapas ainda deverão validar dados e coordenar a idempotência por update com os efeitos persistidos.

@@ -1,7 +1,7 @@
 """Modelos ORM exclusivos da infraestrutura de persistência."""
 
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Index, Integer, MetaData, String, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PostgreSQLUUID
@@ -118,6 +118,8 @@ class TelegramConversationDraftRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    version: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), nullable=False,
+                                        default=uuid4, server_default=text("gen_random_uuid()"))
 
 
 class TelegramAdmissionOwner(Base):
