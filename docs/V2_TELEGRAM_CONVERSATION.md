@@ -270,3 +270,11 @@ O repositório oferece `begin` para iniciar cadastro sem sobrescrever rascunho a
 Validação: CI `34787786771`, commit `5099b39`, aprovado em PostgreSQL real. Cobre preservação de ativo, substituição de expirado, rejeição na expiração, avanço concorrente e snapshot anterior ao cancelamento/recriação no mesmo timestamp. A suíte local antes da adição da coluna UUID concluiu 104 testes, com 29 integrações ignoradas; a validação final do esquema e do adaptador versionado vem do CI.
 
 Verificação independente em produção: revisão `20260913_06`, coluna `version` UUID NOT NULL com default `gen_random_uuid()`, ownership de `argos_migrator`, DML do runtime preservado e nenhuma leitura por `anon`, `authenticated` ou `service_role`. A migração não implanta o código do repositório no Render nem libera `/adicionar`.
+
+## Início de cadastro idempotente — contrato preparado
+
+`BeginTelegramRegistration` valida `/adicionar`, identidade, update, horário e lease e delega à porta `TelegramRegistrationRepository.begin_for_update`. A política inicial exige `/start` prévio, inicia rascunho de 15 minutos e preserva uma operação já ativa, orientando `/cancelar` antes de outro cadastro.
+
+O futuro adaptador deve conferir lease vigente e identidade/comando contra o payload da inbox, serializar update e proprietário e gravar rascunho e resposta na mesma transação. Reprocessamento devolve a resposta persistida, mesmo após expiração ou cancelamento, sem recriar rascunho nem renovar prazo. Também deve persistir respostas de operação já ativa ou acesso ainda não registrado. Não usar operações independentes do repositório atual, pois elas abririam uma janela entre efeito e resultado.
+
+Este incremento implementa apenas aplicação e contrato. Persistência de resultados, migração, composição no worker e liberação no webhook ainda estão pendentes. Testar no PostgreSQL: chamadas repetidas e concorrentes, recriação do pool, recuperação após efeito persistido, lease perdido, identidade divergente, rollback após falha ao guardar a resposta e preservação do rascunho ativo. Reutilizar o resultado não garante envio único pela Bot API; o tratamento de resultado externo incerto permanece necessário.
