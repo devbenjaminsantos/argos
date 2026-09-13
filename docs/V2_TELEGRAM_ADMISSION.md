@@ -25,7 +25,7 @@ Testar em PostgreSQL real: dez admissões e rejeição da décima primeira; libe
 
 `telegram_admission_owners` serializa operações por proprietário e mantém um horário monotônico. `telegram_admissions` guarda somente proprietário, update, horário e decisão; somente admissões guardam payload na inbox. O adaptador bloqueia o proprietário, reserva o update globalmente, conta admissões na janela e grava decisão e inbox na mesma transação. Updates já presentes na inbox antes da ativação retornam duplicata sem consumir quota.
 
-A migração concede somente SELECT/INSERT/UPDATE ao runtime e revoga acesso das roles públicas. O downgrade recusa remover tabelas que contenham decisões ou proprietários. A revisão ainda não foi aplicada em produção.
+A migração concede somente SELECT/INSERT/UPDATE ao runtime e revoga acesso das roles públicas. O downgrade recusa remover tabelas que contenham decisões ou proprietários. A revisão foi aplicada em produção pelo workflow `34776918057` (commit `fdeb17f`), concluído com sucesso. Em 13/09/2026, a consulta independente confirmou `20260912_05`, ambas as tabelas vazias sob ownership de `argos_migrator`, runtime com SELECT/INSERT/UPDATE sem DELETE e nenhuma leitura por `anon`, `authenticated` ou `service_role`. A admissão ainda não está ligada ao webhook.
 
 ## Evidência de validação
 

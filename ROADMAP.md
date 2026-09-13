@@ -14,9 +14,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Aplicar a migração de admissão pelo executor administrativo
+**Próximo item:** V2.8 — Integrar a admissão atômica ao webhook
 
-**Última atualização:** 12/09/2026
+**Última atualização:** 13/09/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -197,7 +197,7 @@ Decisões relacionadas:
 9. [ ] Confirmar a inclusão de `/cancelar` no menu público do BotFather.
 10. [x] Definir a política inicial de 10 comandos em 60 segundos e o contrato atômico de admissão; validar a aplicação isolada. Detalhes em [admissão Telegram](docs/V2_TELEGRAM_ADMISSION.md).
 11. [x] Implementar migração `20260912_05` e adaptador PostgreSQL; CI `34705698375` aprovou 120 testes, incluindo concorrência, repetição, fronteira da janela, horário monotônico, rollback da inbox e downgrade seguro.
-12. [ ] Aplicar `20260912_05` pelo executor administrativo e confirmar tabelas, ownership e grants mínimos em produção.
+12. [x] Aplicar `20260912_05` pelo executor administrativo (workflow `34776918057`) e confirmar tabelas vazias, ownership de `argos_migrator`, SELECT/INSERT/UPDATE do runtime sem DELETE e nenhuma leitura por `anon`, `authenticated` ou `service_role`.
 13. [ ] Integrar a admissão ao webhook e validar o rate limit implantado antes dos fluxos de cadastro.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
