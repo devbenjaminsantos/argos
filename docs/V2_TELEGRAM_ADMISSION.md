@@ -2,7 +2,7 @@
 
 ## Estado
 
-Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e foi aprovada no CI `34777851672`, commit `3c28e40`, e aguarda implantação. O rate limit ainda não está ativo em produção.
+Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e foi aprovada no CI `34777851672`, commit `3c28e40`, e está implantada no deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`. O código está ativo em produção; a aceitação por mensagem real e quota ainda está pendente.
 
 ## Política inicial do piloto
 
@@ -25,7 +25,7 @@ Testar em PostgreSQL real: dez admissões e rejeição da décima primeira; libe
 
 `telegram_admission_owners` serializa operações por proprietário e mantém um horário monotônico. `telegram_admissions` guarda somente proprietário, update, horário e decisão; somente admissões guardam payload na inbox. O adaptador bloqueia o proprietário, reserva o update globalmente, conta admissões na janela e grava decisão e inbox na mesma transação. Updates já presentes na inbox antes da ativação retornam duplicata sem consumir quota.
 
-A migração concede somente SELECT/INSERT/UPDATE ao runtime e revoga acesso das roles públicas. O downgrade recusa remover tabelas que contenham decisões ou proprietários. A revisão foi aplicada em produção pelo workflow `34776918057` (commit `fdeb17f`), concluído com sucesso. Em 13/09/2026, a consulta independente confirmou `20260912_05`, ambas as tabelas vazias sob ownership de `argos_migrator`, runtime com SELECT/INSERT/UPDATE sem DELETE e nenhuma leitura por `anon`, `authenticated` ou `service_role`. A ligação ao webhook está implementada, mas ainda não foi implantada.
+A migração concede somente SELECT/INSERT/UPDATE ao runtime e revoga acesso das roles públicas. O downgrade recusa remover tabelas que contenham decisões ou proprietários. A revisão foi aplicada em produção pelo workflow `34776918057` (commit `fdeb17f`), concluído com sucesso. Em 13/09/2026, a consulta independente confirmou `20260912_05`, ambas as tabelas vazias sob ownership de `argos_migrator`, runtime com SELECT/INSERT/UPDATE sem DELETE e nenhuma leitura por `anon`, `authenticated` ou `service_role`. A ligação ao webhook está implantada; readiness 200 e sem erros recentes na verificação inicial em 13/09/2026. As tabelas de admissão estavam vazias antes da aceitação pelo chat.
 
 ## Evidência de validação
 
