@@ -54,7 +54,10 @@ def test_replay_after_pool_restart_and_cancel_does_not_recreate(context):
         assert c.execute(text("SELECT version,expires_at FROM telegram_conversation_drafts")).one() == original
         c.execute(text("DELETE FROM telegram_conversation_drafts"))
     engine.dispose()
-    assert begin(context).text == "started"
+    recovered_lease = uuid4()
+    with engine.begin() as c:
+        c.execute(text("UPDATE telegram_update_inbox SET lease_token=:lease WHERE update_id=1"), {"lease": recovered_lease})
+    assert begin((engine, context[1], recovered_lease)).text == "started"
     with engine.connect() as c:
         assert c.scalar(text("SELECT count(*) FROM telegram_conversation_drafts")) == 0
 
@@ -110,3 +113,25 @@ def test_registration_required_result_is_stable(context):
         c.execute(text("INSERT INTO telegram_users VALUES (700,800,:now,:now)"), {"now": context[1]})
     assert begin(context).text == "register-first"
     assert begin(context, 2).text == "started"
+
+
+
+def test_results_are_immutable_for_runtime_and_private(context):
+    with context[0].connect() as c:
+        for privilege in ("SELECT", "INSERT"):
+            assert c.scalar(text("SELECT has_table_privilege('argos_runtime', 'telegram_registration_results', :privilege)"), {"privilege": privilege})
+        for privilege in ("UPDATE", "DELETE"):
+            assert not c.scalar(text("SELECT has_table_privilege('argos_runtime', 'telegram_registration_results', :privilege)"), {"privilege": privilege})
+        for role in ("anon", "authenticated", "service_role"):
+            assert not c.scalar(text("SELECT has_table_privilege(:role, 'telegram_registration_results', 'SELECT')"), {"role": role})
+
+
+def test_downgrade_refuses_existing_results(context, monkeypatch):
+    from alembic import command
+    from alembic.config import Config
+    monkeypatch.setenv("ARGOS_ENVIRONMENT", "test")
+    monkeypatch.setenv("ARGOS_MIGRATION_DATABASE_URL", _URL)
+    assert begin(context).text == "started"
+    with pytest.raises(RuntimeError, match="downgrade destrutivo recusado"):
+        command.downgrade(Config("alembic.ini"), "20260913_06")
+    assert begin(context).text == "started"
