@@ -2,7 +2,7 @@
 
 ## Estado
 
-Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e foi aprovada no CI `34777851672`, commit `3c28e40`, e está implantada no deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`. O código está ativo em produção; a mensagem real `/ajuda` foi validada em 13/09/2026 (decisão `admitted`, inbox `completed`, uma tentativa), com resposta confirmada pelo usuário. A aceitação do teto de quota e da liberação da janela ainda está pendente.
+Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e foi aprovada no CI `34777851672`, commit `3c28e40`, e está implantada no deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`. O código está ativo em produção; a mensagem real `/ajuda` foi validada em 13/09/2026 (decisão `admitted`, inbox `completed`, uma tentativa), com resposta confirmada pelo usuário. O teto de quota e a retomada após expirar a janela foram aceitos em produção em 13/09/2026.
 
 ## Política inicial do piloto
 
@@ -36,3 +36,7 @@ O Docker local falhou ao iniciar o daemon. A suíte local concluiu 97 testes e i
 ## Integração HTTP
 
 A composição usa `AdmitTelegramUpdate` e o adaptador PostgreSQL. `ARGOS_TELEGRAM_ADMISSION_MAXIMUM_COMMANDS` e `ARGOS_TELEGRAM_ADMISSION_WINDOW_SECONDS` configuram os valores padrão de 10 e 60. Autenticação, parsing e filtro de comandos precedem a admissão. Somente ADMITTED notifica o runner; DUPLICATE e RATE_LIMITED recebem 200 sem notificação. Erros SQL recebem 503 e logs apenas com correlação, sem parâmetros SQL ou payload.
+
+## Aceitação da quota em produção
+
+Em 13/09/2026, o usuário enviou onze comandos em menos de 60 segundos e confirmou dez respostas, nenhuma para o 11º e uma nova resposta após aguardar. A leitura independente confirmou dez admissões entre 22:33:20 e 22:33:42 UTC, todas `completed` em uma tentativa, seguidas de `rate_limited` às 22:33:44 UTC sem registro na inbox. Às 22:39:37 UTC, um novo comando foi admitido e concluído. A observação real comprova retomada após expiração; a fronteira exata de 60 segundos foi exercitada no CI. Nenhum ID ou payload foi exibido.

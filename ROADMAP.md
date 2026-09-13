@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Validar o teto de quota no bot de teste
+**Próximo item:** V2.8 — Implementar transições persistentes dos rascunhos
 
 **Última atualização:** 13/09/2026
 
@@ -180,7 +180,8 @@ Decisões relacionadas:
 - [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases, retry e ligação ao webhook validados em PostgreSQL 17 no GitHub Actions.
 - [x] Validar em produção a recuperação após reinício: a nova instância retomou um lease sintético expirado, incrementou a tentativa, liberou o lease e encerrou o comando inválido sem chamar a Bot API; o registro de teste foi removido.
 - [x] Manter retry transitório confirmado e resultado incerto cobertos por adaptadores determinísticos; não provocar falhas artificiais contra a Bot API real enquanto não houver staging isolado ou injeção de falhas segura.
-- [ ] Implementar rate limit e máquina de estados persistente.
+- [x] Implementar rate limit persistente por usuário e validar o teto e a retomada no bot real.
+- [ ] Implementar máquina de estados persistente com transições e expiração dos rascunhos.
 
 **Critério de conclusão:** updates repetidos não duplicam ações e conversas sobrevivem a reinícios.
 
@@ -201,7 +202,7 @@ Decisões relacionadas:
 13. [x] Integrar a admissão ao webhook; CI `34777851672` aprovado no commit `3c28e40`, incluindo rajada HTTP com dez admissões e um excedente deduplicado, sem worker externo.
 14. [x] Implantar a integração no Render: deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`, live em 13/09/2026; `/health/ready` respondeu 200 e não houve erros recentes.
 15. [x] Validar uma mensagem real do bot: `/ajuda` gerou decisão `admitted` e inbox `completed` em uma tentativa, confirmadas no PostgreSQL em 13/09/2026.
-16. [ ] Validar o teto de quota e a liberação da janela no bot de teste antes dos fluxos de cadastro.
+16. [x] Validar o teto de quota no bot de teste: em 13/09/2026, dez comandos concluídos em uma tentativa, 11º `rate_limited` sem inbox e novo comando admitido após a janela expirar. Fronteira exata de 60 segundos coberta no CI.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
