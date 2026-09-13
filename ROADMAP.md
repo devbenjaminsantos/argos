@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.8 — Implementar transições persistentes dos rascunhos
+**Próximo item:** V2.8 — Aplicar a versão UUID dos rascunhos pelo executor administrativo
 
 **Última atualização:** 13/09/2026
 
@@ -203,6 +203,8 @@ Decisões relacionadas:
 14. [x] Implantar a integração no Render: deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`, live em 13/09/2026; `/health/ready` respondeu 200 e não houve erros recentes.
 15. [x] Validar uma mensagem real do bot: `/ajuda` gerou decisão `admitted` e inbox `completed` em uma tentativa, confirmadas no PostgreSQL em 13/09/2026.
 16. [x] Validar o teto de quota no bot de teste: em 13/09/2026, dez comandos concluídos em uma tentativa, 11º `rate_limited` sem inbox e novo comando admitido após a janela expirar. Fronteira exata de 60 segundos coberta no CI.
+17. [x] Implementar início e avanço persistentes com expiração e versão UUID; CI `34787786771` aprovado no commit `5099b39`, incluindo concorrência e cancelamento/recriação no mesmo timestamp.
+18. [ ] Aplicar `20260913_06` pelo executor administrativo e verificar coluna, default UUID e privilégios; ainda não integrar `/adicionar`.
 
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
