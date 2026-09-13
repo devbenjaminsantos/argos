@@ -2,7 +2,7 @@
 
 ## Estado
 
-Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e aguarda validação do CI e implantação. O rate limit ainda não está ativo em produção.
+Política e contrato de aplicação implementados em 12/09/2026. O adaptador PostgreSQL e a migração `20260912_05` estão implementados e validados em PostgreSQL 17 pelo CI `34705698375`, commit `64cb313` (120 testes aprovados). A ligação ao webhook está implementada e foi aprovada no CI `34777851672`, commit `3c28e40`, e aguarda implantação. O rate limit ainda não está ativo em produção.
 
 ## Política inicial do piloto
 
