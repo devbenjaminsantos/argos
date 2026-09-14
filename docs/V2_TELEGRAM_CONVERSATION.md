@@ -396,3 +396,9 @@ Comando privado admitido com a mesma deduplicação e quota dos demais. Exibe so
 A consulta verifica lease e identidade contra a inbox e grava snapshot em telegram_registration_results na mesma transação. Reprocessamento retorna a resposta original, mesmo após alteração da lista. Usa grants existentes, sem migração. Testes locais e CI devem preceder deploy manual; aceitação real ainda pendente. No BotFather, incluir `/produtos` no menu após validação do deploy.
 
 CI 34876514072 aprovado no commit f9dd144, incluindo PostgreSQL real; 41 testes locais focados passaram. Deploy e aceitação manual de `/produtos` continuam pendentes.
+
+## Aceitação da listagem própria — 14/09/2026
+
+Usuário confirmou funcionamento após deploy manual dep-dak3bv2d0e5s738i1m5g, commit b9be394, live. Consulta agregada independente encontrou uma resposta de lista própria, update completed em uma tentativa e 72 updates completed, sem pending, processing ou dead_letter. Permanecem um produto e um rascunho awaiting_interval expirado; nenhum deles foi alterado pela validação. Sem exposição de IDs ou conteúdo pessoal.
+
+Lista vazia com outro usuário e repetição não apareceram nessa consulta: permanecem pendências de aceitação manual, embora cobertas no CI. Próximo incremento: definir contrato de remoção por proprietário, com confirmação vinculada ao produto selecionado; runtime ainda não possui DELETE em monitored_products.
