@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implantar e validar recebimento do intervalo
+**Próximo item:** V2.9 — Definir persistência e contrato transacional de confirmação
 
 **Última atualização:** 13/09/2026
 
@@ -235,7 +235,10 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar validação e contrato do intervalo (12 ou 24 horas), sem liberar no bot.
 - [x] Implementar persistência atômica do intervalo, sem migração, com preservação dos dados e expiração; testes PostgreSQL preparados, CI 34859065182 aprovado no commit 0e7f6d8, com PostgreSQL 17.
 - [x] Integrar intervalo à seleção transacional do texto e atualizar instruções; CI 34860141613 aprovado no commit 4d3a42d, com PostgreSQL 17.
-- [ ] Implantar manualmente e validar intervalo inválido → 12 ou 24 → confirmação indisponível → cancelamento, conferindo banco.
+- [x] Implantar intervalo: deploy dep-dak0vj7qj5pc73fdvaug, commit dabb28b. Usuário confirmou; banco encontrou oito updates completed em uma tentativa, intervalo inválido e aceito persistidos e zero rascunhos após cancelamento.
+- [ ] Confirmar manualmente resposta de confirmação indisponível; não encontrada na janela consultada.
+- [x] Preparar validação dos dados completos do rascunho e decisões confirmar/corrigir no domínio, sem criar produto.
+- [ ] Definir contrato transacional e schema de produtos: limite de três por proprietário, unicidade, resultado idempotente e cancelamento/correção.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
 - [ ] Escopar todas as operações ao usuário Telegram.
