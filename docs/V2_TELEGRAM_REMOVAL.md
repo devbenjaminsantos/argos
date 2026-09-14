@@ -100,3 +100,5 @@ Seleção aprovada no CI 34890588429, commit a56d87e, com PostgreSQL real; seis 
 ## Confirmação preparada isoladamente
 
 ConfirmTelegramRemoval e PostgreSQLTelegramRemovalConfirmationRepository validam código completo da proposta ativa e revalidam UUID/proprietário/atividade. Desativação com removed_at pelo relógio do banco, consumo do rascunho e resposta são atômicos. Replay antecede estado; produto indisponível encerra proposta sem alcançar substituto. Testes preparados para replay, código antigo/incorreto, concorrência, rollback e expiração. CI pendente; integração pública ainda não realizada. Sem nova migração.
+
+Confirmação aprovada no CI 34891404234, commit b81e3eb, com PostgreSQL real; cinco testes locais novos passaram. Próximo incremento: integração pública com testes de fluxo completo. Nenhum deploy necessário neste incremento isolado.
