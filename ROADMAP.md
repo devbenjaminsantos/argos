@@ -240,7 +240,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar validação dos dados completos do rascunho e decisões confirmar/corrigir no domínio, sem criar produto.
 - [x] Definir contrato transacional de confirmação e preparar schema monitored_products (20260914_08), com três slots por proprietário, chave única por proprietário, grants SELECT/INSERT e downgrade protegido; CI 34863238232 aprovado no commit 9e7e02c, com PostgreSQL 17.
 - [x] Aplicar 20260914_08 pelo workflow 34864818265 (commit 8d8bb33); consulta independente confirmou monitored_products vazia, ownership argos_migrator, runtime SELECT/INSERT sem UPDATE/DELETE/TRUNCATE e nenhuma leitura pública, constraints de slots e chave presentes.
-- [x] Implementar confirmação/correção atômicas: limite por slots, chave MLB/MLBU, criação/consumo/resposta juntos e correção com nova versão sem renovar expiração; testes PostgreSQL preparados, CI pendente.
+- [x] Implementar confirmação/correção atômicas: limite por slots, chave MLB/MLBU, criação/consumo/resposta juntos e correção com nova versão sem renovar expiração; testes PostgreSQL preparados, CI 34865501539 aprovado no commit 3b9270d, com PostgreSQL 17.
 - [ ] Integrar confirmação/correção à seleção transacional do texto e resumo de dados antes da confirmação; validar bot após CI e deploy manual.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
