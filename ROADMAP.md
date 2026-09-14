@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Aplicar schema de produtos pelo executor administrativo
+**Próximo item:** V2.9 — Implementar confirmação e correção atômicas
 
 **Última atualização:** 13/09/2026
 
@@ -239,7 +239,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Confirmar manualmente resposta de confirmação indisponível; não encontrada na janela consultada.
 - [x] Preparar validação dos dados completos do rascunho e decisões confirmar/corrigir no domínio, sem criar produto.
 - [x] Definir contrato transacional de confirmação e preparar schema monitored_products (20260914_08), com três slots por proprietário, chave única por proprietário, grants SELECT/INSERT e downgrade protegido; CI 34863238232 aprovado no commit 9e7e02c, com PostgreSQL 17.
-- [ ] Aplicar 20260914_08 pelo executor administrativo e conferir tabela/grants/ownership antes de integrar confirmação.
+- [x] Aplicar 20260914_08 pelo workflow 34864818265 (commit 8d8bb33); consulta independente confirmou monitored_products vazia, ownership argos_migrator, runtime SELECT/INSERT sem UPDATE/DELETE/TRUNCATE e nenhuma leitura pública, constraints de slots e chave presentes.
 - [ ] Implementar confirmação/correção atômicas e validar limite, unicidade, replay e concorrência em PostgreSQL antes de liberar bot.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.

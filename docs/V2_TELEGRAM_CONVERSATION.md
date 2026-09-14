@@ -364,3 +364,7 @@ Validação isolada de ProductRegistration revalida URL, apelido, centavos intei
 Runtime recebe SELECT/INSERT, sem UPDATE/DELETE; roles públicas sem acesso. Migração deve rodar somente no executor administrativo; downgrade recusa tabela populada. Contrato exige criação, consumo de rascunho e resposta juntos; corrigir limpa dados com nova versão mantendo expires_at. Migração em produção, adaptador e bot ainda pendentes. CI preparado para constraints, grants, isolamento de proprietários e downgrade protegido.
 
 Schema validado no CI 34863238232, commit 9e7e02c. Execuções anteriores falharam nas limpezas de usuários por nova FK; fixtures corrigidas incluindo monitored_products. Migração de produção continua pendente.
+
+## Migração de produtos confirmada em produção
+
+Em 14/09/2026, workflow administrativo 34864818265 (commit 8d8bb33) concluiu com sucesso. Consulta independente confirmou revisão 20260914_08, monitored_products vazia, ownership argos_migrator, runtime SELECT/INSERT sem UPDATE/DELETE/TRUNCATE e nenhuma leitura por anon/authenticated/service_role. Constraints de proprietário/slot, proprietário/chave, FK e validações presentes. Adaptador de confirmação/correção e integração pública continuam pendentes; não houve criação de produtos nesta validação.
