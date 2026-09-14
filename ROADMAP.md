@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Validar CI da remoção lógica e planejar aplicação administrativa
+**Próximo item:** V2.9 — Aplicar migração 09 pelo executor administrativo antes do deploy
 
 **Última atualização:** 14/09/2026
 
@@ -255,7 +255,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implantar e aceitar cancelamento durável: usuário aprovou; deploy dep-dak3rcbl550s73buab9g, 7970d42, live. Banco confirmou um cancelamento durável completed em uma tentativa, 85 updates completed sem outros estados, um produto e um rascunho presentes. Recuperação antiga comprovada no CI, sem injeção em produção.
 - [ ] Concluir evidência manual da sequência completa de dois cancelamentos; consulta agregada encontrou somente um resultado durável. Preservar rascunho existente.
 - [x] Preparar modelo/migração 20260914_09: removed_at nullable, índices únicos parciais de ativos, filtros de consulta/cadastro e grants UPDATE somente dessa coluna. Downgrade online recusa histórico; produtos ativos preservados.
-- [ ] Validar no CI migração/downgrade, grants reais, reutilização de slot/chave e filtros de histórico. Produção permanece em 20260914_08; não implantar consultas novas antes da migração.
+- [x] Validar no CI migração/downgrade, grants reais, reutilização de slot/chave e filtros de histórico: execução 34884132074 aprovada no commit e6afd27, com PostgreSQL real. Suíte local aprovada com integrações PostgreSQL puladas.
+- [ ] Aplicar 20260914_09 pelo executor administrativo e conferir revisão/grants/índices antes do deploy manual. Produção permanece em 20260914_08 nesta preparação; código novo exige removed_at.
 - [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 
 - [ ] Escopar todas as operações ao usuário Telegram.
