@@ -1,4 +1,4 @@
-"""Contrato transacional do apelido, ainda sem adaptador."""
+"""Contrato transacional do apelido, com adaptador PostgreSQL."""
 
 from dataclasses import dataclass
 from datetime import datetime

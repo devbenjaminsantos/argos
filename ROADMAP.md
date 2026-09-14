@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implementar persistência atômica do apelido
+**Próximo item:** V2.9 — Integrar apelido ao fluxo de texto por estado
 
 **Última atualização:** 13/09/2026
 
@@ -221,7 +221,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implantar recebimento da URL e confirmar aceitação do link /up/MLBU no bot e banco: deploy dep-dajuqnqd0e5s73dqpkp0, commit 162c26c; update completed em uma tentativa, awaiting_alias com fragmento removido e duração original de 15 minutos.
 - [ ] Concluir aceitação real de nova URL após avanço e cancelamento nessa sequência; cenários cobertos no CI.
 - [x] Preparar validador de apelido (1–60 caracteres, NFC e espaços normalizados) e contrato transacional de awaiting_alias para awaiting_target_price, sem alterar comportamento público.
-- [ ] Implementar adaptador de apelido com resposta durável, preservação da URL e expiração; validar PostgreSQL antes de integrar ao worker.
+- [x] Implementar adaptador de apelido com resposta durável, preservação da URL e expiração e testes PostgreSQL de repetição, concorrência, cancelamento, recuperação e rollback; CI pendente.
+- [ ] Integrar apelido ao worker com seleção do passo por estado dentro da operação transacional e reutilização do resultado por update antes de reavaliar estado; atualizar instruções e validar bot.
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
