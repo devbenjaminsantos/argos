@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implementar persistência atômica do intervalo
+**Próximo item:** V2.9 — Integrar intervalo ao fluxo de texto
 
 **Última atualização:** 13/09/2026
 
@@ -233,7 +233,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implantar preço-alvo e validar entrada inteira 150 → R$ 150,00: deploy dep-dak0ihuq1p3s739quj90, commit 9dbe42c; banco confirmou 15000 centavos, awaiting_interval, dados anteriores e duração original preservados, update completed em uma tentativa.
 - [ ] Confirmar aceitação manual de preço inválido, etapa indisponível e cancelamento após preço; não confirmados pelo relato atual.
 - [x] Preparar validação e contrato do intervalo (12 ou 24 horas), sem liberar no bot.
-- [ ] Implementar persistência atômica do intervalo e validar PostgreSQL antes de integrar.
+- [x] Implementar persistência atômica do intervalo, sem migração, com preservação dos dados e expiração; testes PostgreSQL preparados, CI pendente.
+- [ ] Integrar intervalo à seleção transacional do texto; atualizar instruções e validar bot após deploy manual.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
 - [ ] Escopar todas as operações ao usuário Telegram.

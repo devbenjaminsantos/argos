@@ -340,3 +340,7 @@ A seleção do texto na mesma transação contempla awaiting_target_price. O val
 Em 14/09/2026, deploy manual dep-dak0ihuq1p3s739quj90 (9dbe42c) confirmado live. Entrada 150 aceita como R$ 150,00; consulta independente confirmou 15000 centavos numéricos, awaiting_interval, URL/apelido e duração original preservados, update completed em uma tentativa. Cenários inválido, etapa indisponível e cancelamento após preço não foram confirmados no relato atual.
 
 Contrato do intervalo preparado isoladamente: texto 12 ou 24, com espaços externos tolerados; sem unidades, decimais ou outros valores. Persistência futura deve gravar interval_hours e resposta juntos, nova versão, dados e expiração preservados ao avançar para awaiting_confirmation. Confirmação e criação do produto continuarão indisponíveis nesse passo; não iniciar coleta. Nenhuma mudança pública neste incremento.
+
+## Persistência do intervalo preparada
+
+PostgreSQLTelegramRegistrationIntervalRepository implementado, sem migração: usa resultados existentes, reconfirma horas contra texto da inbox, exige lease válido e escopo do proprietário, e grava interval_hours como inteiro e resposta juntos ao avançar para awaiting_confirmation com nova versão. Preserva URL, apelido, preço, demais dados e expiração original. Replay reutiliza resposta antes de avaliar o estado; respostas negativas são duráveis. Testes PostgreSQL preparados para 12/24, concorrência, expiração, cancelamento, recuperação e rollback; CI pendente. Integração ao worker ainda pendente; não cria produto nem inicia coleta.
