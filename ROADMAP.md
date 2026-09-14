@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Integrar recebimento de URL ao worker e webhook
+**Próximo item:** V2.9 — Implantar e validar recebimento da URL no bot
 
 **Última atualização:** 13/09/2026
 
@@ -217,7 +217,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 
 - [x] Preparar validação sintática da URL do Mercado Livre Brasil e contrato de recebimento por update/lease, sem rede; caso de uso isolado com resposta reutilizada.
 - [x] Implementar adaptador e persistência atômica do avanço e resposta usando telegram_registration_results existente, sem migração; testes PostgreSQL preparados para concorrência, expiração, cancelamento e recuperação. CI `34836132177` aprovado no commit `3316bd6`, com PostgreSQL 17.
-- [ ] Integrar recebimento ao worker e admissão de texto ao webhook; só então atualizar as instruções públicas e validar no bot.
+- [x] Integrar recebimento ao worker e admissão de texto ao webhook, com quota compartilhada e instruções públicas atualizadas; CI pendente.
+- [ ] Implantar manualmente no Render e validar URL inválida → URL válida → nova URL → cancelamento no bot, com conferência no banco.
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.

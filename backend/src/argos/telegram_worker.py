@@ -9,6 +9,7 @@ from argos.application.services.telegram_worker import TelegramInboxWorker
 from argos.application.use_cases.begin_registration import BeginTelegramRegistration
 from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
+from argos.application.use_cases.receive_registration_url import ReceiveTelegramRegistrationURL
 from argos.application.use_cases.start import StartTelegramConversation
 from argos.config import Settings
 from argos.infrastructure.database.config import create_database_engine
@@ -19,6 +20,7 @@ from argos.infrastructure.database.telegram_conversations import (
 from argos.infrastructure.database.telegram_registration import (
     PostgreSQLTelegramRegistrationRepository,
 )
+from argos.infrastructure.database.telegram_registration_url import PostgreSQLTelegramRegistrationURLRepository
 from argos.infrastructure.database.telegram_users import (
     PostgreSQLTelegramUserRepository,
 )
@@ -50,6 +52,9 @@ def build_worker(
         cancel_conversation=CancelTelegramConversation(conversations),
         begin_registration=BeginTelegramRegistration(
             PostgreSQLTelegramRegistrationRepository(engine)
+        ),
+        receive_registration_url=ReceiveTelegramRegistrationURL(
+            PostgreSQLTelegramRegistrationURLRepository(engine)
         ),
         sender=sender,
         lease_duration=timedelta(

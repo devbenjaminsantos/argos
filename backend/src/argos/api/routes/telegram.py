@@ -24,8 +24,11 @@ _SECRET_HEADER = "X-Telegram-Bot-Api-Secret-Token"
 logger = logging.getLogger(__name__)
 
 
-def _is_supported_command(text: str) -> bool:
-    return text.strip().casefold() in {"/start", "/ajuda", "/cancelar", "/adicionar"}
+def _is_supported_input(text: str) -> bool:
+    value = text.strip()
+    if value and not value.startswith("/"):
+        return True
+    return value.casefold() in {"/start", "/ajuda", "/cancelar", "/adicionar"}
 
 
 def _authenticate(request: Request, settings: Settings) -> None:
@@ -82,7 +85,7 @@ async def receive_telegram_update(request: Request) -> Response:
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY
         ) from error
 
-    if not _is_supported_command(update.message.text):
+    if not _is_supported_input(update.message.text):
         return Response(status_code=HTTPStatus.OK)
 
     admission: AdmitTelegramUpdate | None = request.app.state.telegram_admission

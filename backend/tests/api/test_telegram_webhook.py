@@ -237,7 +237,7 @@ def test_webhook_acknowledges_unsupported_text_without_persisting_or_waking_work
     runner = _RunnerStub()
     client = _client(inbox=inbox, runner=runner)
 
-    for text in ("/produtos", "/start@outro_bot", "olá"):
+    for text in ("/produtos", "/start@outro_bot", " "):
         update = {
             **_VALID_UPDATE,
             "update_id": _VALID_UPDATE["update_id"] + len(inbox.enqueued) + 1,
@@ -313,4 +313,14 @@ def test_duplicate_update_does_not_wake_worker_again() -> None:
     client = _client(inbox=_InboxStub(), runner=runner)
     for _ in range(2):
         assert client.post("/webhooks/telegram", headers=_HEADERS, json=_VALID_UPDATE).status_code == 200
+    assert runner.notifications == 1
+
+
+def test_webhook_admits_text_through_same_deduplication_and_runner():
+    inbox, runner = _InboxStub(), _RunnerStub()
+    client = _client(inbox=inbox, runner=runner)
+    update = {**_VALID_UPDATE, "message": {**_VALID_UPDATE["message"], "text": "https://mercadolivre.com.br/p/MLB123"}}
+    assert client.post("/webhooks/telegram", headers=_HEADERS, json=update).status_code == 200
+    assert client.post("/webhooks/telegram", headers=_HEADERS, json=update).status_code == 200
+    assert len(inbox.enqueued) == 1
     assert runner.notifications == 1

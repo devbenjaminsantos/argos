@@ -15,6 +15,7 @@ from argos.application.services.telegram_worker import TelegramInboxWorker
 from argos.application.use_cases.begin_registration import BeginTelegramRegistration
 from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
+from argos.application.use_cases.receive_registration_url import ReceiveTelegramRegistrationURL
 from argos.application.use_cases.start import StartTelegramConversation
 
 _LEASE_TOKEN = UUID("00000000-0000-0000-0000-000000000001")
@@ -121,6 +122,15 @@ class _RegistrationStub:
         return TelegramMessage(chat_id=kwargs["chat_id"], text=kwargs["replies"].started)
 
 
+class _RegistrationURLStub:
+    def __init__(self):
+        self.calls = []
+
+    def receive_for_update(self, **kwargs):
+        self.calls.append(kwargs)
+        return TelegramMessage(chat_id=kwargs["chat_id"], text=kwargs["replies"].accepted if kwargs["normalized_url"] else kwargs["replies"].invalid_url)
+
+
 class _SenderStub:
     def __init__(self, error: Exception | None = None) -> None:
         self.error = error
@@ -138,6 +148,7 @@ def _worker(
     users: _UsersStub | None = None,
     conversations: _ConversationsStub | None = None,
     registrations: _RegistrationStub | None = None,
+    urls: _RegistrationURLStub | None = None,
 ) -> TelegramInboxWorker:
     return TelegramInboxWorker(
         inbox=inbox,
@@ -147,6 +158,7 @@ def _worker(
             conversations or _ConversationsStub()
         ),
         begin_registration=BeginTelegramRegistration(registrations or _RegistrationStub()),
+        receive_registration_url=ReceiveTelegramRegistrationURL(urls or _RegistrationURLStub()),
         sender=sender,
         lease_duration=timedelta(seconds=20),
         retry_delay=timedelta(seconds=15),
@@ -308,4 +320,16 @@ def test_worker_dispatches_registration_with_claimed_update_and_lease():
     assert users.upserts == []
     assert "Rascunho de teste" in sender.messages[0].text
     assert "próximas etapas" in sender.messages[0].text
+    assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]
+
+
+@pytest.mark.parametrize("raw,expected", [("https://mercadolivre.com.br/p/MLB123", "URL registrada"), ("https://evil.test/x", "Envie uma URL")])
+def test_worker_routes_text_to_registration_url_with_claim(raw, expected):
+    inbox = _InboxStub({**_PAYLOAD, "message": {**_PAYLOAD["message"], "text": raw}})
+    sender, users, urls = _SenderStub(), _UsersStub(), _RegistrationURLStub()
+    assert _worker(inbox, sender, users, urls=urls).process_next(now=_NOW)
+    call = urls.calls[0]
+    assert (call["update_id"], call["lease_token"], call["text"]) == (10, _LEASE_TOKEN, raw)
+    assert users.upserts == []
+    assert expected in sender.messages[0].text
     assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]

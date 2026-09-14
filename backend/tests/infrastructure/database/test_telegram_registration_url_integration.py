@@ -128,3 +128,54 @@ def test_cancel_concurrent_with_receive_never_recreates_draft(url_context):
         assert receiving.result().text in {"accepted", "absent"}
         assert cancelling.result() is True
     assert snapshot(engine) is None
+
+
+def test_http_to_composed_worker_invalid_valid_duplicate_and_quota(url_context):
+    from datetime import UTC, datetime
+    from fastapi.testclient import TestClient
+    from pydantic import SecretStr
+    from argos.application.use_cases.admit_telegram_update import AdmitTelegramUpdate
+    from argos.config import Settings
+    from argos.infrastructure.database.telegram_admission import PostgreSQLTelegramAdmissionRepository
+    from argos.main import create_app
+    from argos.telegram_worker import build_worker
+
+    engine = url_context[0]
+    with engine.begin() as c:
+        c.execute(text("DELETE FROM telegram_update_inbox"))
+        c.execute(text("DELETE FROM telegram_admissions"))
+        c.execute(text("DELETE FROM telegram_admission_owners"))
+    class Sender:
+        def __init__(self):
+            self.messages = []
+        def send(self, message):
+            self.messages.append(message)
+    sender = Sender()
+    settings = Settings(environment="test", telegram_webhook_secret=SecretStr("integration-secret"))
+    app = create_app(settings, telegram_admission=AdmitTelegramUpdate(PostgreSQLTelegramAdmissionRepository(engine)))
+    worker = build_worker(settings, engine=engine, sender=sender)
+    original = snapshot(engine)
+    try:
+        with TestClient(app) as client:
+            for update_id, raw in enumerate(["https://evil.test/x", _URL] + [_URL] * 9, start=10):
+                payload = {"update_id": update_id, "message": {"message_id": 1, "from": {"id": 700}, "chat": {"id": 800, "type": "private"}, "text": raw}}
+                headers = {"X-Telegram-Bot-Api-Secret-Token": "integration-secret"}
+                assert client.post("/webhooks/telegram", headers=headers, json=payload).status_code == 200
+                assert client.post("/webhooks/telegram", headers=headers, json=payload).status_code == 200
+                assert worker.process_next(now=datetime.now(UTC)) is (update_id < 20)
+                if update_id == 10:
+                    assert snapshot(engine) == original
+            assert "Envie uma URL" in sender.messages[0].text
+            assert "URL registrada" in sender.messages[1].text
+            assert "já recebeu" in sender.messages[2].text
+            assert len(sender.messages) == 10
+            assert snapshot(engine).state == "awaiting_alias"
+            assert snapshot(engine).expires_at == original.expires_at
+        with engine.connect() as c:
+            assert c.scalar(text("SELECT count(*) FROM telegram_update_inbox WHERE status='completed'")) == 10
+            assert c.scalar(text("SELECT count(*) FROM telegram_registration_results")) == 10
+            assert c.scalar(text("SELECT decision FROM telegram_admissions WHERE update_id=20")) == "rate_limited"
+    finally:
+        with engine.begin() as c:
+            c.execute(text("DELETE FROM telegram_admissions"))
+            c.execute(text("DELETE FROM telegram_admission_owners"))
