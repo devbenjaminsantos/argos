@@ -23,7 +23,7 @@ def repository():
     engine = create_engine(_DATABASE_URL)
     now = datetime.now(UTC)
     with engine.begin() as connection:
-        connection.execute(text("TRUNCATE TABLE telegram_conversation_drafts, telegram_users CASCADE"))
+        connection.execute(text("TRUNCATE TABLE monitored_products, telegram_conversation_drafts, telegram_users CASCADE"))
         connection.execute(
             text("INSERT INTO telegram_users (telegram_user_id, chat_id, created_at, updated_at) VALUES (700, 800, :now, :now), (701, 801, :now, :now)"),
             {"now": now},
@@ -36,7 +36,7 @@ def repository():
         yield PostgreSQLTelegramConversationDraftRepository(engine), now
     finally:
         with engine.begin() as connection:
-            connection.execute(text("TRUNCATE TABLE telegram_conversation_drafts, telegram_users CASCADE"))
+            connection.execute(text("TRUNCATE TABLE monitored_products, telegram_conversation_drafts, telegram_users CASCADE"))
         engine.dispose()
 
 
