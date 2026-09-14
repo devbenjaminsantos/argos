@@ -1,4 +1,5 @@
 import os
+import json
 from concurrent.futures import ThreadPoolExecutor
 import pytest
 from sqlalchemy import text
@@ -115,7 +116,7 @@ def test_interval_invalid_valid_replay_and_confirmation_unavailable(url_context,
     from argos.telegram_worker import build_worker
     engine=url_context[0]
     with engine.begin() as c:
-        c.execute(text("UPDATE telegram_conversation_drafts SET state='awaiting_interval',data='{\"url\":\"https://mercadolivre.com.br/p/MLB123\",\"alias\":\"Caneca\",\"target_price_cents\":15000}'::jsonb"))
+        c.execute(text("UPDATE telegram_conversation_drafts SET state='awaiting_interval',data=CAST(:data AS jsonb)"), {"data": json.dumps({"url": "https://mercadolivre.com.br/p/MLB123", "alias": "Caneca", "target_price_cents": 15000})})
         c.execute(text("UPDATE telegram_update_inbox SET payload=jsonb_set(payload,'{message,text}','\"6\"') WHERE update_id=1"))
         c.execute(text("UPDATE telegram_update_inbox SET payload=jsonb_set(payload,'{message,text}',to_jsonb(CAST(:raw AS text))) WHERE update_id=2"),{"raw":str(hours)})
     original=snapshot(engine)
