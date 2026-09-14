@@ -80,7 +80,7 @@ Entrada esperada: nome curto usado pelo próprio usuário para reconhecer o prod
 - espaços repetidos são normalizados;
 - texto vazio é recusado;
 - caracteres de controle são recusados;
-- o tamanho máximo inicial é de 80 caracteres;
+- o tamanho máximo inicial é de 60 caracteres;
 - o texto é sempre tratado como conteúdo, nunca como HTML.
 
 ### `AGUARDANDO_PRECO_ALVO`
@@ -324,3 +324,9 @@ O worker usa ReceiveTelegramRegistrationText e uma única transação PostgreSQL
 Deploy manual dep-dajvn4ojo6nc73ffi1k0 no commit ebb7dcc confirmado live. Usuário confirmou funcionamento; consulta independente encontrou quatro updates completed em uma tentativa, resultados de início, URL e apelido, e um rascunho awaiting_target_price com URL/apelido e duração original de 15 minutos. A consulta não exibiu identificadores ou conteúdo pessoal.
 
 Apelido inválido, etapa indisponível e cancelamento após apelido continuam pendentes de aceitação manual: não aparecem na janela verificada e o rascunho permanece. Essa evidência confirma o caminho principal, sem concluir todos os testes reais propostos. Próximo incremento: contrato e validação monetária do preço-alvo em centavos; entrada ainda não liberada.
+
+## Preço-alvo: contrato preparado
+
+Validação isolada aceita valores BRL inteiros, decimal com vírgula de uma ou duas casas e agrupamento de milhares por ponto, com prefixo R$ opcional. Exemplos: 2500, 2500,90 e R$ 2.500,90. Conversão usa somente inteiros, sem arredondamento. Limite inicial do piloto: de 1 a 999999999 centavos (R$ 0,01 a R$ 9.999.999,99). Ponto decimal, sinais, notação científica, mais de duas casas e agrupamento irregular são recusados.
+
+A porta transacional deve reutilizar resposta por update antes de avaliar estado, conferir lease e payload, preservar URL/apelido e expires_at e gravar target_price_cents como inteiro, nova versão e resposta formatada em BRL juntos ao avançar awaiting_target_price → awaiting_interval. Respostas inválidas também devem ser duráveis. Adaptador e integração ainda pendentes; preço-alvo não foi liberado no bot.

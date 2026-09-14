@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Preparar contrato e validação do preço-alvo
+**Próximo item:** V2.9 — Implementar persistência atômica do preço-alvo
 
 **Última atualização:** 13/09/2026
 
@@ -227,6 +227,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Confirmar aceitação real de apelido inválido, etapa indisponível e cancelamento após apelido. A janela consultada não contém essas respostas e mantém um rascunho; cenários cobertos no CI.
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
+- [x] Preparar validação BRL em centavos e contrato por update/lease do preço-alvo, limite inicial R$ 9.999.999,99, sem liberar no bot.
+- [ ] Implementar persistência atômica do preço-alvo, preservando URL, apelido e expiração; validar PostgreSQL antes de integrar.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
 - [ ] Escopar todas as operações ao usuário Telegram.
