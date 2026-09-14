@@ -25,7 +25,7 @@ def repository() -> PostgreSQLTelegramUserRepository:
     with engine.begin() as connection:
         connection.execute(
             text(
-                "TRUNCATE TABLE telegram_conversation_drafts, "
+                "TRUNCATE TABLE monitored_products, telegram_conversation_drafts, "
                 "telegram_users"
             )
         )
@@ -35,7 +35,7 @@ def repository() -> PostgreSQLTelegramUserRepository:
         with engine.begin() as connection:
             connection.execute(
                 text(
-                    "TRUNCATE TABLE telegram_conversation_drafts, "
+                    "TRUNCATE TABLE monitored_products, telegram_conversation_drafts, "
                     "telegram_users"
                 )
             )
