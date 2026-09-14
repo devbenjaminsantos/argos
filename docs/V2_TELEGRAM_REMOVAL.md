@@ -96,3 +96,7 @@ Início isolado aprovado no CI 34890173650, commit 786fe29, com PostgreSQL real;
 Seleção por texto usa o mapa persistido e revalida UUID, proprietário, slot e atividade. Avança para awaiting_removal_confirmation com product_id/slot e nova versão, mantendo prazo original. Resposta apresenta dados e código completo da proposta. Slot reutilizado encerra operação indisponível, sem selecionar substituto. Entrada inválida preserva mapa; replay retorna resposta anterior. Produto não é alterado. Testes preparados para concorrência, rollback, replay, expiração e reutilização de slot; CI pendente. Sem migração ou integração pública.
 
 Seleção aprovada no CI 34890588429, commit a56d87e, com PostgreSQL real; seis testes locais novos passaram. Próximo incremento: confirmação vinculada à proposta. Nenhum deploy necessário para este incremento isolado.
+
+## Confirmação preparada isoladamente
+
+ConfirmTelegramRemoval e PostgreSQLTelegramRemovalConfirmationRepository validam código completo da proposta ativa e revalidam UUID/proprietário/atividade. Desativação com removed_at pelo relógio do banco, consumo do rascunho e resposta são atômicos. Replay antecede estado; produto indisponível encerra proposta sem alcançar substituto. Testes preparados para replay, código antigo/incorreto, concorrência, rollback e expiração. CI pendente; integração pública ainda não realizada. Sem nova migração.

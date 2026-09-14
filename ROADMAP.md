@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implementar confirmação de remoção vinculada à proposta
+**Próximo item:** V2.9 — Validar confirmação e integrar remoção ao bot
 
 **Última atualização:** 14/09/2026
 
@@ -263,7 +263,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Validar início de remoção no CI 34890173650, commit 786fe29, com PostgreSQL real; oito testes locais novos passaram. Nenhuma desativação neste incremento.
 - [x] Preparar seleção pelo mapa UUID: produto próprio ativo revalidado, proposta com nova versão/código completo, prazo original preservado, slot reutilizado recusado e resposta durável. Sem integração pública ou remoção.
 - [x] Validar seleção no CI 34890588429, commit a56d87e, com PostgreSQL real; seis testes locais novos passaram.
-- [ ] Implementar confirmação vinculada à proposta antes da integração pública.
+- [x] Implementar confirmação vinculada à proposta: UUID próprio ativo, código completo, desativação/consumo/resposta atômicos e replay preservando substituto; sem integração pública.
+- [ ] Validar confirmação no CI e integrar início/seleção/confirmação ao worker, webhook e ajuda, antes do deploy manual.
 - [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 
 - [ ] Escopar todas as operações ao usuário Telegram.
