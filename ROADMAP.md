@@ -228,7 +228,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
 - [x] Preparar validação BRL em centavos e contrato por update/lease do preço-alvo, limite inicial R$ 9.999.999,99, sem liberar no bot.
-- [x] Implementar persistência atômica do preço-alvo, preservando URL, apelido e expiração, sem migração; testes PostgreSQL preparados, CI pendente.
+- [x] Implementar persistência atômica do preço-alvo, preservando URL, apelido e expiração, sem migração; testes PostgreSQL preparados, CI 34852857248 aprovado no commit f6f2c63, com PostgreSQL 17.
 - [ ] Integrar preço-alvo à seleção transacional do passo; atualizar instruções e validar bot após CI e deploy manual.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
