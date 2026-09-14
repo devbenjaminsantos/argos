@@ -11,7 +11,7 @@ from argos.application.ports.telegram_registration_alias import (
 from argos.domain.product_alias import normalize_product_alias
 
 REGISTRATION_ALIAS_REPLIES = RegistrationAliasReplies(
-    accepted="Apelido registrado no rascunho de teste. O recebimento do preço-alvo será liberado na próxima etapa.\n\nUse /cancelar para interromper o cadastro.",
+    accepted="Apelido registrado no rascunho de teste. Envie o preço-alvo em reais, por exemplo: R$ 2.500,90.\n\nUse /cancelar para interromper o cadastro.",
     invalid_alias="Envie um apelido de 1 a 60 caracteres, sem links ou caracteres de controle.\n\nUse /cancelar para interromper o cadastro.",
     no_active_draft="Não há cadastro ativo. Use /adicionar para iniciar um rascunho de teste.",
     unexpected_state="Este rascunho está em uma etapa ainda não disponível. Use /cancelar para reiniciar.",

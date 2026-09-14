@@ -7,6 +7,7 @@ from argos.application.errors import ApplicationError
 from argos.application.ports.telegram_messages import TelegramMessage
 from argos.application.ports.telegram_registration_text import TelegramRegistrationTextRepository
 from argos.application.use_cases.receive_registration_url import REGISTRATION_URL_REPLIES
+from argos.application.use_cases.receive_registration_target_price import REGISTRATION_TARGET_PRICE_REPLIES
 from argos.application.use_cases.receive_registration_alias import REGISTRATION_ALIAS_REPLIES
 
 
@@ -33,4 +34,5 @@ class ReceiveTelegramRegistrationText:
             telegram_user_id=telegram_user_id, chat_id=chat_id, text=text,
             observed_at=observed_at, url_replies=REGISTRATION_URL_REPLIES,
             alias_replies=REGISTRATION_ALIAS_REPLIES,
+            price_replies=REGISTRATION_TARGET_PRICE_REPLIES,
         )

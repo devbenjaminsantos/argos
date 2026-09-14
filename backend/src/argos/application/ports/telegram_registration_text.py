@@ -1,5 +1,6 @@
 """Contrato atômico do primeiro avanço do cadastro."""
 
+from argos.application.ports.telegram_registration_target_price import RegistrationTargetPriceReplies
 from argos.application.ports.telegram_registration_alias import RegistrationAliasReplies
 from datetime import datetime
 from typing import Protocol
@@ -14,6 +15,7 @@ class TelegramRegistrationTextRepository(Protocol):
         self, *, update_id: int, lease_token: UUID, telegram_user_id: int,
         chat_id: int, text: str,
         observed_at: datetime, url_replies: RegistrationURLReplies, alias_replies: RegistrationAliasReplies,
+        price_replies: RegistrationTargetPriceReplies,
     ) -> TelegramMessage:
         """Reutiliza resultado por update antes de escolher o passo sob bloqueio.
 

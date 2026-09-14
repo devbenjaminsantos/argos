@@ -7,7 +7,9 @@ from sqlalchemy import Engine, func, insert, select, update
 
 from argos.application.ports.telegram_messages import TelegramMessage
 from argos.application.ports.telegram_registration_url import RegistrationURLReplies
+from argos.application.ports.telegram_registration_target_price import RegistrationTargetPriceReplies
 from argos.application.ports.telegram_registration_alias import RegistrationAliasReplies
+from argos.domain.target_price import parse_target_price_cents, format_target_price_brl
 from argos.domain.product_alias import normalize_product_alias
 from argos.domain.mercado_livre_url import normalize_mercado_livre_product_url
 from argos.infrastructure.database.models import (
@@ -24,6 +26,7 @@ class PostgreSQLTelegramRegistrationTextRepository:
         self, *, update_id: int, lease_token: UUID, telegram_user_id: int,
         chat_id: int, text: str,
         observed_at: datetime, url_replies: RegistrationURLReplies, alias_replies: RegistrationAliasReplies,
+        price_replies: RegistrationTargetPriceReplies,
     ) -> TelegramMessage:
         if observed_at.utcoffset() is None:
             raise ValueError("Horário deve possuir fuso.")
@@ -62,18 +65,21 @@ class PostgreSQLTelegramRegistrationTextRepository:
             reply = url_replies.no_active_draft
             if user is not None and draft is not None and draft["expires_at"] > effective_at:
                 state = draft["state"]
-                if state in {"awaiting_url", "awaiting_alias"}:
-                    is_url = state == "awaiting_url"
-                    normalizer = normalize_mercado_livre_product_url if is_url else normalize_product_alias
+                steps = {
+                    "awaiting_url": (normalize_mercado_livre_product_url, "url", "awaiting_alias", url_replies.accepted, url_replies.invalid_url),
+                    "awaiting_alias": (normalize_product_alias, "alias", "awaiting_target_price", alias_replies.accepted, alias_replies.invalid_alias),
+                    "awaiting_target_price": (parse_target_price_cents, "target_price_cents", "awaiting_interval", price_replies.accepted, price_replies.invalid_target_price),
+                }
+                step = steps.get(state)
+                value = None
+                reply = alias_replies.unexpected_state
+                if step is not None:
+                    normalizer, key, following, accepted, invalid = step
                     try:
                         value = normalizer(text)
                     except ValueError:
-                        value = None
-                    replies = url_replies if is_url else alias_replies
-                    reply = replies.invalid_url if is_url else replies.invalid_alias
-                else:
-                    value = None
-                    reply = alias_replies.unexpected_state
+                        pass
+                    reply = invalid
                 if value is not None:
                     changed = connection.scalar(update(table).where(
                         table.telegram_user_id == telegram_user_id,
@@ -81,13 +87,13 @@ class PostgreSQLTelegramRegistrationTextRepository:
                         table.state == state,
                         table.expires_at > effective_at,
                     ).values(
-                        state="awaiting_alias" if is_url else "awaiting_target_price",
-                        data={**draft["data"], "url" if is_url else "alias": value},
+                        state=following,
+                        data={**draft["data"], key: value},
                         updated_at=effective_at, version=uuid4(),
                     ).returning(table.telegram_user_id))
                     if changed is None:
                         raise RuntimeError("Versão do rascunho perdida.")
-                    reply = replies.accepted
+                    reply = accepted.format(price_brl=format_target_price_brl(value)) if state == "awaiting_target_price" else accepted
             connection.execute(insert(TelegramRegistrationResult).values(
                 update_id=update_id, telegram_user_id=telegram_user_id,
                 chat_id=chat_id, reply_text=reply, created_at=current,

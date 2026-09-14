@@ -12,7 +12,7 @@ from argos.application.ports.telegram_registration_target_price import (
 from argos.domain.target_price import parse_target_price_cents, format_target_price_brl
 
 REGISTRATION_TARGET_PRICE_REPLIES = RegistrationTargetPriceReplies(
-    accepted="Preço-alvo registrado no rascunho de teste. O recebimento do intervalo será liberado na próxima etapa.\n\nUse /cancelar para interromper o cadastro.",
+    accepted="Preço-alvo {price_brl} registrado no rascunho de teste. O recebimento do intervalo será liberado na próxima etapa.\n\nUse /cancelar para interromper o cadastro.",
     invalid_target_price="Envie um preço entre R$ 0,01 e R$ 9.999.999,99, por exemplo: R$ 2.500,90.\n\nUse /cancelar para interromper o cadastro.",
     no_active_draft="Não há cadastro ativo. Use /adicionar para iniciar um rascunho de teste.",
     unexpected_state="Este rascunho não está aguardando preço-alvo. Use /cancelar para reiniciar.",
