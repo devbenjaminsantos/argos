@@ -64,3 +64,5 @@ Na inspeção anterior a este incremento, CancelTelegramConversation e cancel_fo
 O contrato não conclui implementação, CI de remoção, migração, deploy ou aceitação manual. Coleta e alertas permanecem pendentes.
 
 Cancelamento durável implementado no runtime em 14/09/2026, ainda aguardando CI/deploy/aceitação. Usa o repositório dedicado PostgreSQLTelegramCancellationRepository; cancel_for_owner permanece como operação de baixo nível fora da composição do worker. Sem migração ou novos grants.
+
+Cancelamento durável aprovado no CI 34880965589, commit a3e0cfa, com PostgreSQL real. Suíte local aprovada (PostgreSQL pulado localmente); deploy e aceitação no bot permanecem pendentes.

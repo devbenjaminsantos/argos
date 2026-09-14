@@ -408,3 +408,5 @@ Lista vazia com outro usuário e repetição não apareceram nessa consulta: per
 `/cancelar` agora verifica identidade e lease contra a inbox e grava resposta e consumo do rascunho na mesma transação. Reprocessamento retorna a resposta original antes de examinar a operação atual; uma nova operação iniciada depois do cancelamento permanece intacta. Mensagens preservadas, inclusive cancelamento de rascunho expirado, sem alteração de produtos. Sem migração ou novos privilégios.
 
 Testes PostgreSQL preparados para recuperação após interrupção no envio, concorrência do mesmo update e updates distintos, rollback da resposta, identidade divergente, isolamento de proprietários e lease expirado. CI e aceitação do deploy ainda pendentes.
+
+Cancelamento durável aprovado no CI 34880965589, commit a3e0cfa, com PostgreSQL real. Suíte local aprovada (PostgreSQL pulado localmente); deploy e aceitação no bot permanecem pendentes.

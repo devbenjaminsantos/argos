@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Validar CI e implantar cancelamento durável
+**Próximo item:** V2.9 — Implantar e aceitar cancelamento durável
 
 **Última atualização:** 14/09/2026
 
@@ -251,7 +251,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Validar manualmente lista vazia com outro usuário e repetição de `/produtos`; cobertas no CI, sem evidência desses casos na consulta de produção.
 - [x] Definir contrato de `/remover` em docs/V2_TELEGRAM_REMOVAL.md: mapa slot/UUID persistido, confirmação vinculada à versão da proposta, remoção lógica, concorrência, replay e migração/grants planejados. Sem implementação ou alteração no banco.
 - [x] Implementar `/cancelar` transacional por update/lease: consumo do rascunho e resposta juntos, resultado consultado antes do estado; bloqueios inbox/usuário/rascunho. Sem migração, mensagens preservadas.
-- [ ] Validar PostgreSQL no CI e aceitar cancelamento durável no bot após deploy manual; testes preparados para recuperação preservando nova operação, concorrência, isolamento, lease e rollback.
+- [x] Validar cancelamento durável no CI 34880965589, commit a3e0cfa, com PostgreSQL real: recuperação preservando nova operação, concorrência, isolamento, lease e rollback. Suíte local também aprovada; testes PostgreSQL pulados localmente por falta de banco.
+- [ ] Aceitar cancelamento durável no bot após deploy manual: iniciar/cancelar, iniciar novo rascunho, consultar produtos sem interromper e cancelar novamente. Recuperação de update antigo comprovada no CI, sem injeção no bot real.
 - [ ] Preparar removed_at, índices únicos de ativos, filtros de consulta/cadastro e grants UPDATE somente dessa coluna, com testes de migração e downgrade protegido.
 - [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 
