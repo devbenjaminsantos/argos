@@ -233,7 +233,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implantar preço-alvo e validar entrada inteira 150 → R$ 150,00: deploy dep-dak0ihuq1p3s739quj90, commit 9dbe42c; banco confirmou 15000 centavos, awaiting_interval, dados anteriores e duração original preservados, update completed em uma tentativa.
 - [ ] Confirmar aceitação manual de preço inválido, etapa indisponível e cancelamento após preço; não confirmados pelo relato atual.
 - [x] Preparar validação e contrato do intervalo (12 ou 24 horas), sem liberar no bot.
-- [x] Implementar persistência atômica do intervalo, sem migração, com preservação dos dados e expiração; testes PostgreSQL preparados, CI pendente.
+- [x] Implementar persistência atômica do intervalo, sem migração, com preservação dos dados e expiração; testes PostgreSQL preparados, CI 34859065182 aprovado no commit 0e7f6d8, com PostgreSQL 17.
 - [ ] Integrar intervalo à seleção transacional do texto; atualizar instruções e validar bot após deploy manual.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
