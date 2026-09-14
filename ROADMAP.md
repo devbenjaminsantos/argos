@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Definir contrato de remoção confirmada por proprietário
+**Próximo item:** V2.9 — Tornar `/cancelar` transacional e durável por update
 
 **Última atualização:** 14/09/2026
 
@@ -249,7 +249,10 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Validar PostgreSQL no CI: execução 34876514072 aprovada no commit f9dd144, incluindo isolamento de proprietários, snapshot, concorrência e preservação do rascunho.
 - [x] Implantar e aceitar listagem própria de `/produtos`: usuário confirmou; deploy dep-dak3bv2d0e5s738i1m5g, b9be394, live. Consulta independente encontrou um resultado de lista própria completed em uma tentativa e 72 updates completed, sem outros estados. Um produto e um rascunho awaiting_interval expirado permanecem no banco.
 - [ ] Validar manualmente lista vazia com outro usuário e repetição de `/produtos`; cobertas no CI, sem evidência desses casos na consulta de produção.
-- [ ] Definir contrato de `/remover` com seleção por proprietário e confirmação vinculada à identidade do produto, antes de alterar grants ou implementar exclusão.
+- [x] Definir contrato de `/remover` em docs/V2_TELEGRAM_REMOVAL.md: mapa slot/UUID persistido, confirmação vinculada à versão da proposta, remoção lógica, concorrência, replay e migração/grants planejados. Sem implementação ou alteração no banco.
+- [ ] Tornar `/cancelar` transacional por update/lease, com replay preservando operação iniciada após cancelamento anterior.
+- [ ] Preparar removed_at, índices únicos de ativos, filtros de consulta/cadastro e grants UPDATE somente dessa coluna, com testes de migração e downgrade protegido.
+- [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 
 - [ ] Escopar todas as operações ao usuário Telegram.
 

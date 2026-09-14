@@ -117,13 +117,13 @@ AGUARDANDO_PRODUTO_PARA_REMOVER
   │ seleção válida
   ▼
 AGUARDANDO_CONFIRMACAO_DE_REMOCAO
-  ├── remover   ──► produto desativado ──► OCIOSO
+  ├── remover <código> ──► produto desativado ──► OCIOSO
   └── /cancelar ──► OCIOSO
 ```
 
 O bot apresenta uma lista numerada de produtos do proprietário. A seleção usa o número temporário apresentado, mas o servidor resolve e persiste o UUID correspondente no rascunho. Antes de remover, o caso de uso consulta novamente o produto com `owner_id` e UUID.
 
-A remoção é lógica: o produto deixa de ser monitorado, mas o histórico permanece disponível para evolução futura.
+A remoção é lógica: o produto deixa de ser monitorado, mas o histórico permanece disponível para evolução futura. O contrato detalhado está em [V2_TELEGRAM_REMOVAL.md](V2_TELEGRAM_REMOVAL.md), incluindo mapa de seleção persistido, confirmação vinculada à proposta e migração planejada. `/remover` ainda não está disponível.
 
 ## Fluxo de verificação manual
 
