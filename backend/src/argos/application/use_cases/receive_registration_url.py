@@ -10,8 +10,8 @@ from argos.application.ports.telegram_registration_url import (
 )
 from argos.domain.mercado_livre_url import normalize_mercado_livre_product_url
 
-_REPLIES = RegistrationURLReplies(
-    accepted="URL registrada no rascunho de teste. O recebimento do apelido será liberado na próxima etapa.\n\nUse /cancelar para interromper o cadastro.",
+REGISTRATION_URL_REPLIES = RegistrationURLReplies(
+    accepted="URL registrada no rascunho de teste. Envie um apelido de 1 a 60 caracteres para este produto.\n\nUse /cancelar para interromper o cadastro.",
     invalid_url="Envie uma URL HTTPS de anúncio do Mercado Livre Brasil. Links encurtados não são aceitos.\n\nUse /cancelar para interromper o cadastro.",
     no_active_draft="Não há cadastro ativo. Use /adicionar para iniciar um rascunho de teste.",
     unexpected_state="Este rascunho já recebeu a URL ou está em outra etapa. Use /cancelar para reiniciar.",
@@ -43,5 +43,5 @@ class ReceiveTelegramRegistrationURL:
         return self._repository.receive_for_update(
             update_id=update_id, lease_token=lease_token,
             telegram_user_id=telegram_user_id, chat_id=chat_id, text=text,
-            normalized_url=normalized_url, observed_at=observed_at, replies=_REPLIES,
+            normalized_url=normalized_url, observed_at=observed_at, replies=REGISTRATION_URL_REPLIES,
         )

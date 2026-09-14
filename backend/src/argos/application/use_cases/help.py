@@ -7,10 +7,10 @@ _HELP_TEXT = """Comandos disponíveis neste ambiente de testes:
 
 /start - registrar ou atualizar seu acesso
 /ajuda - mostrar esta mensagem
-/adicionar - iniciar um rascunho de teste e enviar a URL
+/adicionar - iniciar um rascunho de teste e enviar URL e apelido
 /cancelar - cancelar a operação em andamento
 
-O recebimento do apelido, o cadastro completo e a consulta de produtos serão liberados nas próximas etapas."""
+O recebimento do preço-alvo, o cadastro completo e a consulta de produtos serão liberados nas próximas etapas."""
 
 
 class HelpTelegramConversation:

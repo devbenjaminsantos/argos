@@ -15,7 +15,7 @@ from argos.application.services.telegram_worker import TelegramInboxWorker
 from argos.application.use_cases.begin_registration import BeginTelegramRegistration
 from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
-from argos.application.use_cases.receive_registration_url import ReceiveTelegramRegistrationURL
+from argos.application.use_cases.receive_registration_text import ReceiveTelegramRegistrationText
 from argos.application.use_cases.start import StartTelegramConversation
 
 _LEASE_TOKEN = UUID("00000000-0000-0000-0000-000000000001")
@@ -128,7 +128,7 @@ class _RegistrationURLStub:
 
     def receive_for_update(self, **kwargs):
         self.calls.append(kwargs)
-        return TelegramMessage(chat_id=kwargs["chat_id"], text=kwargs["replies"].accepted if kwargs["normalized_url"] else kwargs["replies"].invalid_url)
+        return TelegramMessage(chat_id=kwargs["chat_id"], text=kwargs["url_replies"].accepted if kwargs["text"].startswith("https://mercadolivre") else kwargs["url_replies"].invalid_url)
 
 
 class _SenderStub:
@@ -158,7 +158,7 @@ def _worker(
             conversations or _ConversationsStub()
         ),
         begin_registration=BeginTelegramRegistration(registrations or _RegistrationStub()),
-        receive_registration_url=ReceiveTelegramRegistrationURL(urls or _RegistrationURLStub()),
+        receive_registration_text=ReceiveTelegramRegistrationText(urls or _RegistrationURLStub()),
         sender=sender,
         lease_duration=timedelta(seconds=20),
         retry_delay=timedelta(seconds=15),

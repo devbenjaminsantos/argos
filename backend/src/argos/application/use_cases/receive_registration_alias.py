@@ -10,11 +10,11 @@ from argos.application.ports.telegram_registration_alias import (
 )
 from argos.domain.product_alias import normalize_product_alias
 
-_REPLIES = RegistrationAliasReplies(
+REGISTRATION_ALIAS_REPLIES = RegistrationAliasReplies(
     accepted="Apelido registrado no rascunho de teste. O recebimento do preço-alvo será liberado na próxima etapa.\n\nUse /cancelar para interromper o cadastro.",
     invalid_alias="Envie um apelido de 1 a 60 caracteres, sem links ou caracteres de controle.\n\nUse /cancelar para interromper o cadastro.",
     no_active_draft="Não há cadastro ativo. Use /adicionar para iniciar um rascunho de teste.",
-    unexpected_state="Este rascunho não está aguardando um apelido. Use /cancelar para reiniciar.",
+    unexpected_state="Este rascunho está em uma etapa ainda não disponível. Use /cancelar para reiniciar.",
 )
 
 
@@ -43,5 +43,5 @@ class ReceiveTelegramRegistrationAlias:
         return self._repository.receive_for_update(
             update_id=update_id, lease_token=lease_token,
             telegram_user_id=telegram_user_id, chat_id=chat_id, text=text,
-            normalized_alias=normalized_alias, observed_at=observed_at, replies=_REPLIES,
+            normalized_alias=normalized_alias, observed_at=observed_at, replies=REGISTRATION_ALIAS_REPLIES,
         )

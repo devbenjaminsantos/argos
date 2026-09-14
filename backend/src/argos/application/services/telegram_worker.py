@@ -12,7 +12,7 @@ from argos.application.ports.telegram_messages import (
 from argos.application.use_cases.begin_registration import BeginTelegramRegistration
 from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
-from argos.application.use_cases.receive_registration_url import ReceiveTelegramRegistrationURL
+from argos.application.use_cases.receive_registration_text import ReceiveTelegramRegistrationText
 from argos.application.use_cases.start import StartTelegramConversation
 
 
@@ -27,7 +27,7 @@ class TelegramInboxWorker:
         help_conversation: HelpTelegramConversation,
         cancel_conversation: CancelTelegramConversation,
         begin_registration: BeginTelegramRegistration,
-        receive_registration_url: ReceiveTelegramRegistrationURL,
+        receive_registration_text: ReceiveTelegramRegistrationText,
         sender: TelegramMessageSender,
         lease_duration: timedelta = timedelta(seconds=30),
         retry_delay: timedelta = timedelta(seconds=30),
@@ -39,7 +39,7 @@ class TelegramInboxWorker:
         self._help = help_conversation
         self._cancel = cancel_conversation
         self._registration = begin_registration
-        self._registration_url = receive_registration_url
+        self._registration_url = receive_registration_text
         self._sender = sender
         self._lease_duration = lease_duration
         self._retry_delay = retry_delay

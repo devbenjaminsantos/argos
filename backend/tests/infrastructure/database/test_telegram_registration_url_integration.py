@@ -168,7 +168,7 @@ def test_http_to_composed_worker_invalid_valid_duplicate_and_quota(url_context, 
                     assert snapshot(engine) == original
             assert "Envie uma URL" in sender.messages[0].text
             assert "URL registrada" in sender.messages[1].text
-            assert "já recebeu" in sender.messages[2].text
+            assert "Envie um apelido" in sender.messages[2].text
             assert len(sender.messages) == 10
             assert snapshot(engine).state == "awaiting_alias"
             assert snapshot(engine).expires_at == original.expires_at
