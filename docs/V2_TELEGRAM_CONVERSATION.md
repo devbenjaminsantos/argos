@@ -356,3 +356,9 @@ CI da integração 34860141613 aprovado no commit 4d3a42d. Execução anterior 3
 Deploy dep-dak0vj7qj5pc73fdvaug, commit dabb28b, confirmado live. Usuário confirmou funcionamento; consulta independente encontrou oito updates completed em uma tentativa, rejeição de intervalo inválido, intervalo aceito e zero rascunhos após cancelamento. A resposta de confirmação indisponível não apareceu na janela consultada e permanece pendente de aceitação manual.
 
 Validação isolada de ProductRegistration revalida URL, apelido, centavos inteiros e intervalo 12/24; dados incompletos ou incompatíveis são recusados. Decisões confirmar/corrigir toleram espaços externos e caixa, sem aceitar texto adicional. Isso não cria produto nem autoriza coleta. Próximo contrato deve tratar lease, proprietário, estado/versão/expiração, limite de três, unicidade, criação e consumo do rascunho junto com resposta durável. Schema e integração ainda pendentes.
+
+## Schema e contrato da confirmação preparados
+
+20260914_08 cria monitored_products com UUID, proprietário Telegram, slot 1..3, chave Mercado Livre, URL, apelido, centavos, intervalo e criação. Unique proprietário/slot garante até três linhas por usuário no banco; proprietário/chave evita duplicatas mesmo com variações de query ou slug. A futura confirmação deve extrair a chave MLB/MLBU do caminho validado, reservar slot sob bloqueio do usuário e tratar violações como conflito durável. Modelo não equivale a coleta implementada.
+
+Runtime recebe SELECT/INSERT, sem UPDATE/DELETE; roles públicas sem acesso. Migração deve rodar somente no executor administrativo; downgrade recusa tabela populada. Contrato exige criação, consumo de rascunho e resposta juntos; corrigir limpa dados com nova versão mantendo expires_at. Migração em produção, adaptador e bot ainda pendentes. CI preparado para constraints, grants, isolamento de proprietários e downgrade protegido.

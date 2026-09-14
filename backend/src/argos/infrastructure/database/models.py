@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Index, Integer, MetaData, String, text
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Index, Integer, MetaData, String, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PostgreSQLUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -159,4 +159,27 @@ class TelegramRegistrationResult(Base):
     telegram_user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     chat_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     reply_text: Mapped[str] = mapped_column(String(4096), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class MonitoredProductRecord(Base):
+    """Produto confirmado; três slots por proprietário limitam o piloto."""
+    __tablename__ = "monitored_products"
+    __table_args__ = (
+        CheckConstraint("slot BETWEEN 1 AND 3", name="valid_slot"),
+        CheckConstraint("product_key ~ '^MLB(U)?[0-9]+$'", name="valid_product_key"),
+        CheckConstraint("length(alias) BETWEEN 1 AND 60", name="valid_alias"),
+        CheckConstraint("target_price_cents BETWEEN 1 AND 999999999", name="valid_target_price"),
+        CheckConstraint("interval_hours IN (12,24)", name="valid_interval"),
+        UniqueConstraint("telegram_user_id", "slot", name="uq_monitored_products_owner_slot"),
+        UniqueConstraint("telegram_user_id", "product_key", name="uq_monitored_products_owner_key"),
+    )
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
+    telegram_user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("telegram_users.telegram_user_id"), nullable=False)
+    slot: Mapped[int] = mapped_column(Integer, nullable=False)
+    product_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    alias: Mapped[str] = mapped_column(String(60), nullable=False)
+    target_price_cents: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    interval_hours: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
