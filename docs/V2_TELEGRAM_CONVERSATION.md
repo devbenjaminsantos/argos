@@ -368,3 +368,9 @@ Schema validado no CI 34863238232, commit 9e7e02c. Execuções anteriores falhar
 ## Migração de produtos confirmada em produção
 
 Em 14/09/2026, workflow administrativo 34864818265 (commit 8d8bb33) concluiu com sucesso. Consulta independente confirmou revisão 20260914_08, monitored_products vazia, ownership argos_migrator, runtime SELECT/INSERT sem UPDATE/DELETE/TRUNCATE e nenhuma leitura por anon/authenticated/service_role. Constraints de proprietário/slot, proprietário/chave, FK e validações presentes. Adaptador de confirmação/correção e integração pública continuam pendentes; não houve criação de produtos nesta validação.
+
+## Confirmação/correção transacionais implementadas (sem integração pública)
+
+O adaptador confere lease e payload e reutiliza resultado por update antes de avaliar rascunho. Em awaiting_confirmation ativo, confirmar revalida dados, deriva chave MLB/MLBU ignorando slug/query e reserva slot 1..3 sob bloqueio do usuário; criação, remoção do rascunho e resposta são atômicos. Limite e duplicata preservam rascunho com resposta durável. corrigir limpa dados e reinicia awaiting_url com nova versão, mantendo expires_at. Não envia mensagens nem inicia coleta.
+
+Testes PostgreSQL preparados para concorrência no último slot, duplicata por chave, resposta rejeitada com rollback, expiração, lease e replay após reinício/cancelamento. CI pendente. Integração ao texto e resumo apresentado ao usuário antes de confirmar ainda pendentes; o bot continua sem criar produtos.

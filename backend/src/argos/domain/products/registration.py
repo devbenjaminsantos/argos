@@ -44,3 +44,14 @@ def parse_registration_confirmation(text: str) -> Literal["confirmar", "corrigir
     if action == "corrigir":
         return "corrigir"
     raise ValueError("Confirmação inválida.")
+
+
+def mercado_livre_product_key(url: str) -> str:
+    import re
+    from urllib.parse import urlsplit
+    path = urlsplit(normalize_mercado_livre_product_url(url)).path
+    match = re.search(r"/(?:MLB-(\d+)|p/MLB(\d+)|up/MLBU(\d+))", path, re.IGNORECASE)
+    if match is None:
+        raise ValueError("Chave de produto inválida.")
+    digits = match.group(3) or match.group(2) or match.group(1)
+    return ("MLBU" if match.group(3) else "MLB") + str(int(digits))

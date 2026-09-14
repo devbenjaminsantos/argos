@@ -31,3 +31,9 @@ def test_confirmation_actions(raw,expected):
 @pytest.mark.parametrize("raw",["sim","confirmar agora","/cancelar","",None])
 def test_unknown_confirmation_is_rejected(raw):
     with pytest.raises(ValueError): parse_registration_confirmation(raw)
+
+
+@pytest.mark.parametrize("url,key",[("https://mercadolivre.com.br/p/MLB123?variation=7","MLB123"),("https://produto.mercadolivre.com.br/MLB-123-slug","MLB123"),("https://mercadolivre.com.br/up/MLBU123","MLBU123")])
+def test_marketplace_key_ignores_query_and_slug(url,key):
+    from argos.domain.products.registration import mercado_livre_product_key
+    assert mercado_livre_product_key(url)==key

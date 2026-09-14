@@ -1,14 +1,28 @@
 """Contrato atômico de confirmação; implementação ainda pendente."""
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 from uuid import UUID
 from argos.application.ports.telegram_messages import TelegramMessage
 
 
+@dataclass(frozen=True)
+class RegistrationConfirmationReplies:
+    created: str
+    corrected: str
+    duplicate: str
+    limit_reached: str
+    invalid_data: str
+    invalid_action: str
+    no_active_draft: str
+    unexpected_state: str
+
+
 class TelegramRegistrationConfirmationRepository(Protocol):
     def confirm_for_update(
         self, *, update_id: int, lease_token: UUID, telegram_user_id: int,
         chat_id: int, text: str, observed_at: datetime,
+        replies: RegistrationConfirmationReplies,
     ) -> TelegramMessage:
         """Confere lease/payload e consulta resultado por update antes do estado.
 
