@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implantar e validar recebimento da URL no bot
+**Próximo item:** V2.9 — Implementar persistência atômica do apelido
 
 **Última atualização:** 13/09/2026
 
@@ -218,7 +218,10 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar validação sintática da URL do Mercado Livre Brasil e contrato de recebimento por update/lease, sem rede; caso de uso isolado com resposta reutilizada.
 - [x] Implementar adaptador e persistência atômica do avanço e resposta usando telegram_registration_results existente, sem migração; testes PostgreSQL preparados para concorrência, expiração, cancelamento e recuperação. CI `34836132177` aprovado no commit `3316bd6`, com PostgreSQL 17.
 - [x] Integrar recebimento ao worker e admissão de texto ao webhook, com quota compartilhada e instruções públicas atualizadas; CI `34836665232` aprovado no commit `c247e91`, incluindo fluxo HTTP até PostgreSQL e saída falsa.
-- [ ] Implantar manualmente no Render e validar URL inválida → URL válida → nova URL → cancelamento no bot, com conferência no banco.
+- [x] Implantar recebimento da URL e confirmar aceitação do link /up/MLBU no bot e banco: deploy dep-dajuqnqd0e5s73dqpkp0, commit 162c26c; update completed em uma tentativa, awaiting_alias com fragmento removido e duração original de 15 minutos.
+- [ ] Concluir aceitação real de nova URL após avanço e cancelamento nessa sequência; cenários cobertos no CI.
+- [x] Preparar validador de apelido (1–60 caracteres, NFC e espaços normalizados) e contrato transacional de awaiting_alias para awaiting_target_price, sem alterar comportamento público.
+- [ ] Implementar adaptador de apelido com resposta durável, preservação da URL e expiração; validar PostgreSQL antes de integrar ao worker.
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.

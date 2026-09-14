@@ -308,3 +308,9 @@ Texto privado não vazio que não começa por / passa pela mesma admissão de co
 ### Correção do formato /up/MLBU
 
 A aceitação manual revelou rejeição do link de produto fornecido pelo usuário em /caneca-personalizada-hello-kitty/up/MLBU1977786059. O validador agora contempla /up/MLBU seguido de dígitos, com slug opcional; fragmentos de recomendação são removidos. Host, HTTPS, porta e credenciais continuam sob as mesmas restrições. Teste de regressão sintático e fluxo HTTP/worker/PostgreSQL preparados. Não altera o schema nem confirma existência ou coleta do produto. Novo deploy manual e reenvio como nova mensagem são necessários; resultados de updates antigos permanecem imutáveis.
+
+## Aceitação da URL e contrato do apelido
+
+Em 14/09/2026, o usuário confirmou registro do link /up/MLBU. Deploy manual dep-dajuqnqd0e5s73dqpkp0 no commit 162c26c ficou live. Consulta independente confirmou awaiting_alias com URL sem fragmento, expiração original de 15 minutos e update completed em uma tentativa. Aceitação manual de nova URL após avanço e cancelamento nessa sequência ainda não foi confirmada.
+
+O contrato do apelido está preparado, sem integração pública: 1 a 60 caracteres após NFC e normalização de espaços; controles e links são rejeitados. Avanço awaiting_alias → awaiting_target_price deve preservar URL e expiração, renovar versão e persistir resposta na mesma transação. Inputs inválidos também têm resultado durável. O adaptador PostgreSQL e o roteamento por estado ainda serão implementados; o bot continua informando que o apelido é uma próxima etapa.
