@@ -217,7 +217,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 
 - [x] Preparar validação sintática da URL do Mercado Livre Brasil e contrato de recebimento por update/lease, sem rede; caso de uso isolado com resposta reutilizada.
 - [x] Implementar adaptador e persistência atômica do avanço e resposta usando telegram_registration_results existente, sem migração; testes PostgreSQL preparados para concorrência, expiração, cancelamento e recuperação. CI `34836132177` aprovado no commit `3316bd6`, com PostgreSQL 17.
-- [x] Integrar recebimento ao worker e admissão de texto ao webhook, com quota compartilhada e instruções públicas atualizadas; CI pendente.
+- [x] Integrar recebimento ao worker e admissão de texto ao webhook, com quota compartilhada e instruções públicas atualizadas; CI `34836665232` aprovado no commit `c247e91`, incluindo fluxo HTTP até PostgreSQL e saída falsa.
 - [ ] Implantar manualmente no Render e validar URL inválida → URL válida → nova URL → cancelamento no bot, com conferência no banco.
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.

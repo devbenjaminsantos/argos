@@ -6,14 +6,14 @@ Política e contrato de aplicação implementados em 12/09/2026. O adaptador Pos
 
 ## Política inicial do piloto
 
-- Admitir até 10 comandos suportados por `telegram_user_id` em uma janela móvel de 60 segundos; valores poderão entrar pela configuração na composição.
+- Admitir até 10 entradas suportadas (comandos e texto privado para o rascunho) por `telegram_user_id` em uma janela móvel de 60 segundos; valores poderão entrar pela configuração na composição.
 - Contar somente primeiras admissões na janela `(recebimento - 60 segundos, recebimento]`; comandos repetidos e rejeitados não consomem quota.
 - Aplicar a política antes de criar trabalho, inclusive para usuários que ainda não enviaram `/start`, sem exigir uma identidade cadastrada.
 - Usar uma decisão durável por `update_id`: `admitted`, `duplicate` ou `rate_limited`. `duplicate` descreve uma repetição da decisão original, que permanece inalterada.
 - Confirmar excedentes com HTTP `200`, sem execução, entrada na inbox ou resposta pela Bot API. Isso evita novas entregas do mesmo comando e mensagens adicionais durante abuso.
 - Falha de persistência deve produzir `503`; nunca confirmar uma decisão que não foi gravada.
 
-O filtro de segredo, formato, conversa privada e lista fechada precede a admissão. Comandos desconhecidos continuam sendo confirmados sem persistência. A proteção global de capacidade e os limites de operações de coleta são requisitos separados, ainda pendentes.
+O filtro de segredo, formato, conversa privada e entrada suportada precede a admissão. Comandos desconhecidos continuam sendo confirmados sem persistência. A proteção global de capacidade e os limites de operações de coleta são requisitos separados, ainda pendentes.
 
 ## Critérios do adaptador PostgreSQL
 
@@ -40,3 +40,5 @@ A composição usa `AdmitTelegramUpdate` e o adaptador PostgreSQL. `ARGOS_TELEGR
 ## Aceitação da quota em produção
 
 Em 13/09/2026, o usuário enviou onze comandos em menos de 60 segundos e confirmou dez respostas, nenhuma para o 11º e uma nova resposta após aguardar. A leitura independente confirmou dez admissões entre 22:33:20 e 22:33:42 UTC, todas `completed` em uma tentativa, seguidas de `rate_limited` às 22:33:44 UTC sem registro na inbox. Às 22:39:37 UTC, um novo comando foi admitido e concluído. A observação real comprova retomada após expiração; a fronteira exata de 60 segundos foi exercitada no CI. Nenhum ID ou payload foi exibido.
+
+Desde a integração de recebimento da URL, texto privado não vazio que não começa por / compartilha a quota dos comandos. O worker responde conforme o rascunho; comandos desconhecidos e texto vazio não entram na admissão. Integração aprovada no CI `34836665232`, commit `c247e91`; deploy e aceitação real pendentes.
