@@ -82,3 +82,9 @@ Preparação aprovada no CI 34884132074, commit e6afd27, com PostgreSQL real, in
 Workflow administrativo 34885202890, commit 2bcc050, concluiu com sucesso. Consulta independente confirmou revisão 20260914_09, ownership argos_migrator, um produto preservado/ativo e zero removidos. Índices únicos de proprietário/slot e proprietário/chave têm predicado removed_at IS NULL. Login runtime possui SELECT/INSERT e UPDATE somente removed_at; sem UPDATE geral, alias/preço, DELETE/TRUNCATE ou leitura por roles públicas. Não foram expostos IDs/conteúdo pessoal.
 
 Próximo passo: deploy manual da versão com filtros de ativos, seguido de validação de `/produtos` e início/cancelamento de cadastro. A migração não disponibiliza `/remover` nem inicia coleta.
+
+## Início de remoção preparado isoladamente — 14/09/2026
+
+BeginTelegramRemoval e PostgreSQLTelegramRemovalRepository conferem update/lease/payload e retornam resposta durável antes de examinar o estado. Usuário não registrado recebe orientação de acesso; lista ativa vazia não abre rascunho; operação ativa é preservada. Lista própria é ordenada por slot, com mapa products_by_slot slot→UUID persistido em awaiting_product_to_remove, prazo de 15 minutos, junto com a resposta. Nenhum produto é alterado.
+
+Testes preparados para isolamento, histórico omitido, replay após mudança de lista/pool, concorrência do mesmo update e rollback da resposta. Início ainda não integrado ao worker/webhook/ajuda; seleção e confirmação pendentes. Filtros de ativos anteriores estão no deploy dep-dak51quk1f9s73eek950, 79b4b93, live, mas aceitação manual após esse deploy ainda pendente.

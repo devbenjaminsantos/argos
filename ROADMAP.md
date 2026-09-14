@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implantar filtros de produtos ativos e validar cadastro/listagem
+**Próximo item:** V2.9 — Validar início isolado de remoção e preparar seleção por UUID
 
 **Última atualização:** 14/09/2026
 
@@ -257,7 +257,10 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar modelo/migração 20260914_09: removed_at nullable, índices únicos parciais de ativos, filtros de consulta/cadastro e grants UPDATE somente dessa coluna. Downgrade online recusa histórico; produtos ativos preservados.
 - [x] Validar no CI migração/downgrade, grants reais, reutilização de slot/chave e filtros de histórico: execução 34884132074 aprovada no commit e6afd27, com PostgreSQL real. Suíte local aprovada com integrações PostgreSQL puladas.
 - [x] Aplicar 20260914_09 via workflow administrativo 34885202890, commit 2bcc050; consulta independente confirmou revisão, ownership argos_migrator, um produto ativo preservado, índices únicos parciais e runtime UPDATE somente removed_at, sem DELETE/TRUNCATE ou leitura pública.
-- [ ] Implantar manualmente os filtros de ativos e validar `/produtos` e início/cancelamento do cadastro; `/remover` ainda não disponível.
+- [x] Implantar filtros de ativos: deploy dep-dak51quk1f9s73eek950, commit 79b4b93, live.
+- [ ] Confirmar aceitação manual de `/produtos` e início/cancelamento com filtros de ativos; deploy não comprova esses fluxos.
+- [x] Preparar caso de uso e adaptador isolado de início de `/remover`: lista própria ativa e mapa slot→UUID persistidos junto com resposta, preservando operação ativa e prazo no replay. Comando ainda não admitido ou composto no worker.
+- [ ] Validar início de remoção no CI PostgreSQL e preparar seleção por UUID; nenhuma desativação neste incremento.
 - [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 
 - [ ] Escopar todas as operações ao usuário Telegram.
