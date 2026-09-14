@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implantar e validar recebimento do apelido
+**Próximo item:** V2.9 — Preparar contrato e validação do preço-alvo
 
 **Última atualização:** 13/09/2026
 
@@ -223,7 +223,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar validador de apelido (1–60 caracteres, NFC e espaços normalizados) e contrato transacional de awaiting_alias para awaiting_target_price, sem alterar comportamento público.
 - [x] Implementar adaptador de apelido com resposta durável, preservação da URL e expiração e testes PostgreSQL de repetição, concorrência, cancelamento, recuperação e rollback; CI `34849755660` aprovado no commit `406ae1f`, com PostgreSQL 17.
 - [x] Integrar apelido ao worker com seleção transacional do passo após resultado por update; instruções atualizadas, CI `34850769222` aprovado no commit `d59cd43`, com PostgreSQL 17.
-- [ ] Implantar manualmente e validar URL → apelido inválido → apelido válido → etapa indisponível → cancelamento, conferindo banco.
+- [x] Implantar apelido e validar caminho URL → apelido: deploy manual dep-dajvn4ojo6nc73ffi1k0, commit ebb7dcc, live; quatro updates completed em uma tentativa e rascunho awaiting_target_price com URL/apelido e duração original de 15 minutos confirmados no banco em 14/09/2026.
+- [ ] Confirmar aceitação real de apelido inválido, etapa indisponível e cancelamento após apelido. A janela consultada não contém essas respostas e mantém um rascunho; cenários cobertos no CI.
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.

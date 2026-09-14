@@ -318,3 +318,9 @@ O contrato do apelido está preparado, sem integração pública: 1 a 60 caracte
 ## Texto por estado integrado (aguarda deploy)
 
 O worker usa ReceiveTelegramRegistrationText e uma única transação PostgreSQL. Resultado persistido por update é consultado antes da seleção do passo: awaiting_url valida URL; awaiting_alias valida apelido e avança para awaiting_target_price. Outros estados recebem resposta de etapa indisponível, sem alteração. URL e apelido preservam expiração e dados anteriores. Ajuda e resposta da URL agora pedem apelido; preço-alvo continua pendente. Quota compartilhada e webhook permanecem iguais. CI e aceitação real devem preceder o próximo passo.
+
+## Aceitação do apelido (14/09/2026)
+
+Deploy manual dep-dajvn4ojo6nc73ffi1k0 no commit ebb7dcc confirmado live. Usuário confirmou funcionamento; consulta independente encontrou quatro updates completed em uma tentativa, resultados de início, URL e apelido, e um rascunho awaiting_target_price com URL/apelido e duração original de 15 minutos. A consulta não exibiu identificadores ou conteúdo pessoal.
+
+Apelido inválido, etapa indisponível e cancelamento após apelido continuam pendentes de aceitação manual: não aparecem na janela verificada e o rascunho permanece. Essa evidência confirma o caminho principal, sem concluir todos os testes reais propostos. Próximo incremento: contrato e validação monetária do preço-alvo em centavos; entrada ainda não liberada.
