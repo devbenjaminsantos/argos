@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Preparar seleção de remoção pelo mapa UUID
+**Próximo item:** V2.9 — Validar seleção e implementar confirmação de remoção
 
 **Última atualização:** 14/09/2026
 
@@ -261,7 +261,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Confirmar aceitação manual de `/produtos` e início/cancelamento com filtros de ativos; deploy não comprova esses fluxos.
 - [x] Preparar caso de uso e adaptador isolado de início de `/remover`: lista própria ativa e mapa slot→UUID persistidos junto com resposta, preservando operação ativa e prazo no replay. Comando ainda não admitido ou composto no worker.
 - [x] Validar início de remoção no CI 34890173650, commit 786fe29, com PostgreSQL real; oito testes locais novos passaram. Nenhuma desativação neste incremento.
-- [ ] Preparar seleção pelo mapa UUID e confirmação vinculada à proposta antes da integração pública.
+- [x] Preparar seleção pelo mapa UUID: produto próprio ativo revalidado, proposta com nova versão/código completo, prazo original preservado, slot reutilizado recusado e resposta durável. Sem integração pública ou remoção.
+- [ ] Validar seleção no CI PostgreSQL e implementar confirmação vinculada à proposta antes da integração pública.
 - [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 
 - [ ] Escopar todas as operações ao usuário Telegram.

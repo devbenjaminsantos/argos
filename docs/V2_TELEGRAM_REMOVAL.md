@@ -90,3 +90,7 @@ BeginTelegramRemoval e PostgreSQLTelegramRemovalRepository conferem update/lease
 Testes preparados para isolamento, histórico omitido, replay após mudança de lista/pool, concorrência do mesmo update e rollback da resposta. Início ainda não integrado ao worker/webhook/ajuda; seleção e confirmação pendentes. Filtros de ativos anteriores estão no deploy dep-dak51quk1f9s73eek950, 79b4b93, live, mas aceitação manual após esse deploy ainda pendente.
 
 Início isolado aprovado no CI 34890173650, commit 786fe29, com PostgreSQL real; oito testes locais novos passaram. Próximo incremento: seleção pelo mapa UUID. Sem nova migração ou necessidade de deploy deste incremento isolado.
+
+## Seleção preparada isoladamente
+
+Seleção por texto usa o mapa persistido e revalida UUID, proprietário, slot e atividade. Avança para awaiting_removal_confirmation com product_id/slot e nova versão, mantendo prazo original. Resposta apresenta dados e código completo da proposta. Slot reutilizado encerra operação indisponível, sem selecionar substituto. Entrada inválida preserva mapa; replay retorna resposta anterior. Produto não é alterado. Testes preparados para concorrência, rollback, replay, expiração e reutilização de slot; CI pendente. Sem migração ou integração pública.
