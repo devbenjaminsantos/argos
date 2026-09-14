@@ -394,3 +394,5 @@ Próximo incremento: `/produtos`, com leitura por proprietário, lista vazia e a
 Comando privado admitido com a mesma deduplicação e quota dos demais. Exibe somente produtos do proprietário Telegram, ordenados por slot, com apelido, preço-alvo BRL e intervalo; a resposta informa que coleta e alertas permanecem indisponíveis. Lista vazia orienta `/adicionar`; usuário não registrado recebe orientação `/start`. Não altera rascunhos.
 
 A consulta verifica lease e identidade contra a inbox e grava snapshot em telegram_registration_results na mesma transação. Reprocessamento retorna a resposta original, mesmo após alteração da lista. Usa grants existentes, sem migração. Testes locais e CI devem preceder deploy manual; aceitação real ainda pendente. No BotFather, incluir `/produtos` no menu após validação do deploy.
+
+CI 34876514072 aprovado no commit f9dd144, incluindo PostgreSQL real; 41 testes locais focados passaram. Deploy e aceitação manual de `/produtos` continuam pendentes.

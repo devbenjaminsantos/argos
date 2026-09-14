@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Validar CI e implantar `/produtos` no bot
+**Próximo item:** V2.9 — Implantar e validar `/produtos` no bot
 
 **Última atualização:** 14/09/2026
 
@@ -246,7 +246,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [x] Validar entrada e permitir confirmação antes de salvar.
 - [x] Implementar `/produtos` com filtro por proprietário, slots ordenados, lista vazia e instrução `/start` para acesso não registrado. Snapshot durável reutiliza telegram_registration_results, com verificação de payload/lease e sem alterar produtos ou rascunhos; sem nova migração.
-- [ ] Validar PostgreSQL no CI e aceitar `/produtos` no bot após deploy manual: lista própria, usuário sem produtos, repetição e preservação do rascunho.
+- [x] Validar PostgreSQL no CI: execução 34876514072 aprovada no commit f9dd144, incluindo isolamento de proprietários, snapshot, concorrência e preservação do rascunho.
+- [ ] Aceitar `/produtos` no bot após deploy manual: lista própria, usuário sem produtos, repetição e preservação do rascunho.
 
 - [ ] Escopar todas as operações ao usuário Telegram.
 
