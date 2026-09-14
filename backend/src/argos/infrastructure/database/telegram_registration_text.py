@@ -7,8 +7,10 @@ from sqlalchemy import Engine, func, insert, select, update
 
 from argos.application.ports.telegram_messages import TelegramMessage
 from argos.application.ports.telegram_registration_url import RegistrationURLReplies
+from argos.application.ports.telegram_registration_interval import RegistrationIntervalReplies
 from argos.application.ports.telegram_registration_target_price import RegistrationTargetPriceReplies
 from argos.application.ports.telegram_registration_alias import RegistrationAliasReplies
+from argos.domain.collection_interval import parse_collection_interval_hours
 from argos.domain.target_price import parse_target_price_cents, format_target_price_brl
 from argos.domain.product_alias import normalize_product_alias
 from argos.domain.mercado_livre_url import normalize_mercado_livre_product_url
@@ -27,6 +29,7 @@ class PostgreSQLTelegramRegistrationTextRepository:
         chat_id: int, text: str,
         observed_at: datetime, url_replies: RegistrationURLReplies, alias_replies: RegistrationAliasReplies,
         price_replies: RegistrationTargetPriceReplies,
+        interval_replies: RegistrationIntervalReplies,
     ) -> TelegramMessage:
         if observed_at.utcoffset() is None:
             raise ValueError("Horário deve possuir fuso.")
@@ -70,6 +73,7 @@ class PostgreSQLTelegramRegistrationTextRepository:
                     "awaiting_alias": (normalize_product_alias, "alias", "awaiting_target_price", alias_replies.accepted, alias_replies.invalid_alias),
                     "awaiting_target_price": (parse_target_price_cents, "target_price_cents", "awaiting_interval", price_replies.accepted, price_replies.invalid_target_price),
                 }
+                steps["awaiting_interval"] = (parse_collection_interval_hours, "interval_hours", "awaiting_confirmation", interval_replies.accepted, interval_replies.invalid_interval)
                 step = steps.get(state)
                 value = None
                 reply = alias_replies.unexpected_state

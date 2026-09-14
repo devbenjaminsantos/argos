@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Integrar intervalo ao fluxo de texto
+**Próximo item:** V2.9 — Implantar e validar recebimento do intervalo
 
 **Última atualização:** 13/09/2026
 
@@ -234,7 +234,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Confirmar aceitação manual de preço inválido, etapa indisponível e cancelamento após preço; não confirmados pelo relato atual.
 - [x] Preparar validação e contrato do intervalo (12 ou 24 horas), sem liberar no bot.
 - [x] Implementar persistência atômica do intervalo, sem migração, com preservação dos dados e expiração; testes PostgreSQL preparados, CI 34859065182 aprovado no commit 0e7f6d8, com PostgreSQL 17.
-- [ ] Integrar intervalo à seleção transacional do texto; atualizar instruções e validar bot após deploy manual.
+- [x] Integrar intervalo à seleção transacional do texto e atualizar instruções; CI pendente.
+- [ ] Implantar manualmente e validar intervalo inválido → 12 ou 24 → confirmação indisponível → cancelamento, conferindo banco.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
 - [ ] Escopar todas as operações ao usuário Telegram.

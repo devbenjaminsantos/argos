@@ -344,3 +344,7 @@ Contrato do intervalo preparado isoladamente: texto 12 ou 24, com espaços exter
 ## Persistência do intervalo preparada
 
 PostgreSQLTelegramRegistrationIntervalRepository implementado, sem migração: usa resultados existentes, reconfirma horas contra texto da inbox, exige lease válido e escopo do proprietário, e grava interval_hours como inteiro e resposta juntos ao avançar para awaiting_confirmation com nova versão. Preserva URL, apelido, preço, demais dados e expiração original. Replay reutiliza resposta antes de avaliar o estado; respostas negativas são duráveis. Testes PostgreSQL preparados para 12/24, concorrência, expiração, cancelamento, recuperação e rollback; CI 34859065182 aprovado no commit 0e7f6d8, com PostgreSQL 17. Integração ao worker ainda pendente; não cria produto nem inicia coleta.
+
+## Intervalo integrado (aguarda deploy)
+
+A seleção transacional do texto contempla awaiting_interval e grava interval_hours e resposta juntos, avançando para awaiting_confirmation sem renovar a expiração ou modificar dados anteriores. Resposta do preço pede 12 ou 24; ajuda lista intervalo. A confirmação e criação do produto ainda não estão disponíveis: confirmar recebe resposta durável de etapa indisponível e preserva o rascunho. Replay é consultado antes de selecionar estado. Testes de 12/24, inválido, replay e worker na confirmação preparados; CI e aceitação real pendentes.
