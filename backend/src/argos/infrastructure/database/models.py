@@ -148,7 +148,7 @@ class TelegramAdmissionRecord(Base):
 
 
 class TelegramRegistrationResult(Base):
-    """Resposta imutável do início de cadastro por update."""
+    """Resposta imutável de um passo de cadastro por update."""
     __tablename__ = "telegram_registration_results"
     __table_args__ = (
         CheckConstraint("telegram_user_id > 0 AND chat_id > 0", name="positive_identity"),
