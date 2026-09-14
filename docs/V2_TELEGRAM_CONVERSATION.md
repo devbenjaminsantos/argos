@@ -348,3 +348,5 @@ PostgreSQLTelegramRegistrationIntervalRepository implementado, sem migração: u
 ## Intervalo integrado (aguarda deploy)
 
 A seleção transacional do texto contempla awaiting_interval e grava interval_hours e resposta juntos, avançando para awaiting_confirmation sem renovar a expiração ou modificar dados anteriores. Resposta do preço pede 12 ou 24; ajuda lista intervalo. A confirmação e criação do produto ainda não estão disponíveis: confirmar recebe resposta durável de etapa indisponível e preserva o rascunho. Replay é consultado antes de selecionar estado. Testes de 12/24, inválido, replay e worker na confirmação preparados; CI e aceitação real pendentes.
+
+CI da integração 34860141613 aprovado no commit 4d3a42d. Execução anterior 34859916708 falhou em dois testes por JSON literal interpretado como bind SQLAlchemy; preparação corrigida para JSON parametrizado, sem alteração da lógica de produção. Deploy e aceitação real pendentes.

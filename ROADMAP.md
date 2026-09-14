@@ -234,7 +234,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Confirmar aceitação manual de preço inválido, etapa indisponível e cancelamento após preço; não confirmados pelo relato atual.
 - [x] Preparar validação e contrato do intervalo (12 ou 24 horas), sem liberar no bot.
 - [x] Implementar persistência atômica do intervalo, sem migração, com preservação dos dados e expiração; testes PostgreSQL preparados, CI 34859065182 aprovado no commit 0e7f6d8, com PostgreSQL 17.
-- [x] Integrar intervalo à seleção transacional do texto e atualizar instruções; CI pendente.
+- [x] Integrar intervalo à seleção transacional do texto e atualizar instruções; CI 34860141613 aprovado no commit 4d3a42d, com PostgreSQL 17.
 - [ ] Implantar manualmente e validar intervalo inválido → 12 ou 24 → confirmação indisponível → cancelamento, conferindo banco.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
