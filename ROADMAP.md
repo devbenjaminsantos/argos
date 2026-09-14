@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implementar persistência atômica do preço-alvo
+**Próximo item:** V2.9 — Integrar preço-alvo ao fluxo de texto
 
 **Última atualização:** 13/09/2026
 
@@ -228,7 +228,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
 - [x] Preparar validação BRL em centavos e contrato por update/lease do preço-alvo, limite inicial R$ 9.999.999,99, sem liberar no bot.
-- [ ] Implementar persistência atômica do preço-alvo, preservando URL, apelido e expiração; validar PostgreSQL antes de integrar.
+- [x] Implementar persistência atômica do preço-alvo, preservando URL, apelido e expiração, sem migração; testes PostgreSQL preparados, CI pendente.
+- [ ] Integrar preço-alvo à seleção transacional do passo; atualizar instruções e validar bot após CI e deploy manual.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
 - [ ] Escopar todas as operações ao usuário Telegram.
