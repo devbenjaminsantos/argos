@@ -216,7 +216,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 ### V2.9 — Cadastro de produtos pelo Telegram
 
 - [x] Preparar validação sintática da URL do Mercado Livre Brasil e contrato de recebimento por update/lease, sem rede; caso de uso isolado com resposta reutilizada.
-- [x] Implementar adaptador e persistência atômica do avanço e resposta usando telegram_registration_results existente, sem migração; testes PostgreSQL preparados para concorrência, expiração, cancelamento e recuperação. Resultado do CI pendente.
+- [x] Implementar adaptador e persistência atômica do avanço e resposta usando telegram_registration_results existente, sem migração; testes PostgreSQL preparados para concorrência, expiração, cancelamento e recuperação. CI `34836132177` aprovado no commit `3316bd6`, com PostgreSQL 17.
 - [ ] Integrar recebimento ao worker e admissão de texto ao webhook; só então atualizar as instruções públicas e validar no bot.
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
