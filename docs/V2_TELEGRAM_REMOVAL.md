@@ -88,3 +88,5 @@ Próximo passo: deploy manual da versão com filtros de ativos, seguido de valid
 BeginTelegramRemoval e PostgreSQLTelegramRemovalRepository conferem update/lease/payload e retornam resposta durável antes de examinar o estado. Usuário não registrado recebe orientação de acesso; lista ativa vazia não abre rascunho; operação ativa é preservada. Lista própria é ordenada por slot, com mapa products_by_slot slot→UUID persistido em awaiting_product_to_remove, prazo de 15 minutos, junto com a resposta. Nenhum produto é alterado.
 
 Testes preparados para isolamento, histórico omitido, replay após mudança de lista/pool, concorrência do mesmo update e rollback da resposta. Início ainda não integrado ao worker/webhook/ajuda; seleção e confirmação pendentes. Filtros de ativos anteriores estão no deploy dep-dak51quk1f9s73eek950, 79b4b93, live, mas aceitação manual após esse deploy ainda pendente.
+
+Início isolado aprovado no CI 34890173650, commit 786fe29, com PostgreSQL real; oito testes locais novos passaram. Próximo incremento: seleção pelo mapa UUID. Sem nova migração ou necessidade de deploy deste incremento isolado.
