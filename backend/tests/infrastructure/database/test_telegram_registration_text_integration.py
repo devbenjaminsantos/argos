@@ -124,8 +124,8 @@ def test_interval_invalid_valid_replay_and_confirmation_unavailable(url_context,
     assert "Envie somente 12 ou 24" in invalid.text
     assert snapshot(engine)==original
     accepted=receive(url_context,2,str(hours))
-    assert "Intervalo registrado" in accepted.text
-    assert "confirmação e a criação do produto serão liberadas" in accepted.text
+    assert "Confira o cadastro" in accepted.text
+    assert "Envie confirmar" in accepted.text
     final=snapshot(engine)
     assert final.state=="awaiting_confirmation"
     assert final.data=={**original.data,"interval_hours":hours}
@@ -141,5 +141,58 @@ def test_interval_invalid_valid_replay_and_confirmation_unavailable(url_context,
         def send(self,message): self.messages.append(message)
     sender=Sender()
     assert build_worker(Settings(environment="test"),engine=engine,sender=sender).process_next(now=datetime.now(UTC))
-    assert "etapa ainda não disponível" in sender.messages[0].text
-    assert snapshot(engine)==final
+    assert "Produto cadastrado" in sender.messages[0].text
+    assert snapshot(engine) is None
+
+
+@pytest.mark.parametrize("decision",["confirmar","corrigir"])
+def test_http_composed_registration_summary_and_decision(url_context,decision):
+    from datetime import UTC,datetime
+    from fastapi.testclient import TestClient
+    from pydantic import SecretStr
+    from argos.config import Settings
+    from argos.main import create_app
+    from argos.telegram_worker import build_worker
+    from argos.application.use_cases.admit_telegram_update import AdmitTelegramUpdate
+    from argos.infrastructure.database.telegram_admission import PostgreSQLTelegramAdmissionRepository
+    engine=url_context[0]
+    with engine.begin() as c:
+        c.execute(text("DELETE FROM telegram_update_inbox"))
+        c.execute(text("DELETE FROM telegram_conversation_drafts"))
+        c.execute(text("DELETE FROM telegram_admissions"))
+        c.execute(text("DELETE FROM telegram_admission_owners"))
+    class Sender:
+        def __init__(self): self.messages=[]
+        def send(self,message): self.messages.append(message)
+    sender=Sender()
+    settings=Settings(environment="test",telegram_webhook_secret=SecretStr("integration-secret"))
+    app=create_app(settings,telegram_admission=AdmitTelegramUpdate(PostgreSQLTelegramAdmissionRepository(engine)))
+    worker=build_worker(settings,engine=engine,sender=sender)
+    try:
+        with TestClient(app) as client:
+            for id,raw in enumerate(["/adicionar",_URL,"Caneca Kitty","150","12",decision],start=10):
+                payload={"update_id":id,"message":{"message_id":1,"from":{"id":700},"chat":{"id":800,"type":"private"},"text":raw}}
+                for _ in range(2):
+                    assert client.post("/webhooks/telegram",headers={"X-Telegram-Bot-Api-Secret-Token":"integration-secret"},json=payload).status_code==200
+                assert worker.process_next(now=datetime.now(UTC))
+                assert not worker.process_next(now=datetime.now(UTC))
+                if id==14:
+                    summary=sender.messages[-1].text
+                    assert all(value in summary for value in [_URL,"Caneca Kitty","R$ 150,00","12 horas","confirmar","corrigir"])
+                    original=snapshot(engine)
+            assert len(sender.messages)==6
+            with engine.connect() as c:
+                assert c.scalar(text("SELECT count(*) FROM monitored_products"))==(1 if decision=="confirmar" else 0)
+                assert c.scalar(text("SELECT count(*) FROM telegram_update_inbox WHERE status='completed'"))==6
+            if decision=="confirmar":
+                assert "Produto cadastrado" in sender.messages[-1].text
+                assert snapshot(engine) is None
+            else:
+                assert "Vamos corrigir" in sender.messages[-1].text
+                final=snapshot(engine)
+                assert final.state=="awaiting_url" and final.data=={}
+                assert final.version!=original.version and final.expires_at==original.expires_at
+    finally:
+        with engine.begin() as c:
+            c.execute(text("DELETE FROM telegram_admissions"))
+            c.execute(text("DELETE FROM telegram_admission_owners"))

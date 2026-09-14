@@ -374,3 +374,7 @@ Em 14/09/2026, workflow administrativo 34864818265 (commit 8d8bb33) concluiu com
 O adaptador confere lease e payload e reutiliza resultado por update antes de avaliar rascunho. Em awaiting_confirmation ativo, confirmar revalida dados, deriva chave MLB/MLBU ignorando slug/query e reserva slot 1..3 sob bloqueio do usuário; criação, remoção do rascunho e resposta são atômicos. Limite e duplicata preservam rascunho com resposta durável. corrigir limpa dados e reinicia awaiting_url com nova versão, mantendo expires_at. Não envia mensagens nem inicia coleta.
 
 Testes PostgreSQL preparados para concorrência no último slot, duplicata por chave, resposta rejeitada com rollback, expiração, lease e replay após reinício/cancelamento. CI 34865501539 aprovado no commit 3b9270d, com PostgreSQL 17. Integração ao texto e resumo apresentado ao usuário antes de confirmar ainda pendentes; o bot continua sem criar produtos.
+
+## Cadastro confirmado integrado (aguarda deploy)
+
+Após intervalo válido, resposta durável mostra URL, apelido, preço BRL e horas, pedindo confirmar/corrigir. Texto em awaiting_confirmation chama o adaptador de confirmação na mesma conexão e transação; não abre transação independente. Resultado por update precede seleção do estado. Confirmar cadastra e consome rascunho; corrigir limpa dados com nova versão e expiração original. Respostas esclarecem que coleta e alertas seguem indisponíveis. Ajuda atualizada; consulta e remoção continuam pendentes. CI e aceitação real do cadastro/correção pendentes.

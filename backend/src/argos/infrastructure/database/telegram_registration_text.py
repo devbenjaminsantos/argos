@@ -10,6 +10,10 @@ from argos.application.ports.telegram_registration_url import RegistrationURLRep
 from argos.application.ports.telegram_registration_interval import RegistrationIntervalReplies
 from argos.application.ports.telegram_registration_target_price import RegistrationTargetPriceReplies
 from argos.application.ports.telegram_registration_alias import RegistrationAliasReplies
+from argos.application.ports.telegram_registration_confirmation import RegistrationConfirmationReplies
+from argos.application.use_cases.registration_confirmation_messages import registration_confirmation_summary
+from argos.domain.products.registration import validate_product_registration
+from argos.infrastructure.database.telegram_registration_confirmation import PostgreSQLTelegramRegistrationConfirmationRepository
 from argos.domain.collection_interval import parse_collection_interval_hours
 from argos.domain.target_price import parse_target_price_cents, format_target_price_brl
 from argos.domain.product_alias import normalize_product_alias
@@ -23,6 +27,7 @@ from argos.infrastructure.database.models import (
 class PostgreSQLTelegramRegistrationTextRepository:
     def __init__(self, engine: Engine) -> None:
         self._engine = engine
+        self._confirmation = PostgreSQLTelegramRegistrationConfirmationRepository(engine)
 
     def receive_for_update(
         self, *, update_id: int, lease_token: UUID, telegram_user_id: int,
@@ -30,6 +35,7 @@ class PostgreSQLTelegramRegistrationTextRepository:
         observed_at: datetime, url_replies: RegistrationURLReplies, alias_replies: RegistrationAliasReplies,
         price_replies: RegistrationTargetPriceReplies,
         interval_replies: RegistrationIntervalReplies,
+        confirmation_replies: RegistrationConfirmationReplies,
     ) -> TelegramMessage:
         if observed_at.utcoffset() is None:
             raise ValueError("Horário deve possuir fuso.")
@@ -68,6 +74,12 @@ class PostgreSQLTelegramRegistrationTextRepository:
             reply = url_replies.no_active_draft
             if user is not None and draft is not None and draft["expires_at"] > effective_at:
                 state = draft["state"]
+                if state == "awaiting_confirmation":
+                    return self._confirmation.confirm_in_transaction(
+                        connection=connection, update_id=update_id, lease_token=lease_token,
+                        telegram_user_id=telegram_user_id, chat_id=chat_id, text=text,
+                        observed_at=observed_at, replies=confirmation_replies,
+                    )
                 steps = {
                     "awaiting_url": (normalize_mercado_livre_product_url, "url", "awaiting_alias", url_replies.accepted, url_replies.invalid_url),
                     "awaiting_alias": (normalize_product_alias, "alias", "awaiting_target_price", alias_replies.accepted, alias_replies.invalid_alias),
@@ -84,6 +96,12 @@ class PostgreSQLTelegramRegistrationTextRepository:
                     except ValueError:
                         pass
                     reply = invalid
+                if value is not None and state == "awaiting_interval":
+                    try:
+                        accepted = registration_confirmation_summary(validate_product_registration({**draft["data"], key: value}))
+                    except ValueError:
+                        value = None
+                        reply = confirmation_replies.invalid_data
                 if value is not None:
                     changed = connection.scalar(update(table).where(
                         table.telegram_user_id == telegram_user_id,

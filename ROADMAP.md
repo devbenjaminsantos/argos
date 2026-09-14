@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Integrar confirmação e correção ao fluxo de texto
+**Próximo item:** V2.9 — Implantar e validar cadastro confirmado no bot
 
 **Última atualização:** 13/09/2026
 
@@ -241,7 +241,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Definir contrato transacional de confirmação e preparar schema monitored_products (20260914_08), com três slots por proprietário, chave única por proprietário, grants SELECT/INSERT e downgrade protegido; CI 34863238232 aprovado no commit 9e7e02c, com PostgreSQL 17.
 - [x] Aplicar 20260914_08 pelo workflow 34864818265 (commit 8d8bb33); consulta independente confirmou monitored_products vazia, ownership argos_migrator, runtime SELECT/INSERT sem UPDATE/DELETE/TRUNCATE e nenhuma leitura pública, constraints de slots e chave presentes.
 - [x] Implementar confirmação/correção atômicas: limite por slots, chave MLB/MLBU, criação/consumo/resposta juntos e correção com nova versão sem renovar expiração; testes PostgreSQL preparados, CI 34865501539 aprovado no commit 3b9270d, com PostgreSQL 17.
-- [ ] Integrar confirmação/correção à seleção transacional do texto e resumo de dados antes da confirmação; validar bot após CI e deploy manual.
+- [x] Integrar confirmação/correção à seleção transacional do texto com resumo dos dados, mantendo coleta/alertas pendentes; CI pendente.
+- [ ] Implantar manualmente e validar resumo → corrigir → novo preenchimento → confirmar → nova mensagem confirmar, conferindo produto e rascunho no banco.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
 - [ ] Escopar todas as operações ao usuário Telegram.
