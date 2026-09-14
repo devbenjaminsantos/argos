@@ -122,3 +122,12 @@ def test_expired_lease_rolls_back(confirming):
         c.execute(text("UPDATE telegram_update_inbox SET lease_expires_at=clock_timestamp()-interval '1 second'"))
     with pytest.raises(RuntimeError,match="Lease"): confirm(confirming)
     assert snapshot(confirming[0])==original and count(confirming[0])==0
+
+
+def test_registration_ignores_removed_key_and_slot(confirming):
+    from tests.infrastructure.database.test_monitored_products_integration import add
+    add(confirming,removed_at=confirming[1])
+    assert confirm(confirming).text=="created"
+    with confirming[0].connect() as c:
+        assert c.scalar(text("SELECT count(*) FROM monitored_products"))==2
+        assert c.scalar(text("SELECT slot FROM monitored_products WHERE removed_at IS NULL"))==1

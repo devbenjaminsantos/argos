@@ -122,3 +122,12 @@ def test_three_slots_are_listed_in_order(context):
         add_product(context,alias=f"Produto {slot}",slot=slot)
     reply=listing(context).text
     assert reply.index("1. Produto 1")<reply.index("2. Produto 2")<reply.index("3. Produto 3")
+
+
+def test_listing_omits_history_and_includes_reused_slot(context):
+    add_product(context,alias="Histórico")
+    with context[0].begin() as c:
+        c.execute(text("UPDATE monitored_products SET removed_at=clock_timestamp()"))
+    add_product(context,alias="Ativo")
+    reply=listing(context).text
+    assert "Ativo" in reply and "Histórico" not in reply

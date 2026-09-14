@@ -68,3 +68,9 @@ Cancelamento durável implementado no runtime em 14/09/2026, ainda aguardando CI
 Cancelamento durável aprovado no CI 34880965589, commit a3e0cfa, com PostgreSQL real. Suíte local aprovada (PostgreSQL pulado localmente); deploy e aceitação no bot permanecem pendentes.
 
 Em 14/09/2026, usuário aprovou o processo após deploy dep-dak3rcbl550s73buab9g, 7970d42, live. Consulta agregada independente confirmou um cancelamento durável completed em uma tentativa, 85 updates completed sem outros estados, um produto e um rascunho presentes. Não houve exposição de IDs/payload nem alteração de dados durante a validação. A sequência completa com dois cancelamentos não foi comprovada nessa consulta; permanece pendência de evidência manual. Recuperação após interrupção está comprovada no CI. Próximo incremento: preparar modelo e migração de remoção lógica, sem aplicar em produção durante a preparação.
+
+## Modelo e migração preparados — 14/09/2026
+
+Revisão 20260914_09 adiciona removed_at nullable, troca unicidades por índices únicos parciais de ativos e concede UPDATE somente nessa coluna ao runtime. Modelo e filtros de `/produtos` e confirmação de cadastro atualizados. Downgrade online recusa qualquer produto removido e preserva ativos; downgrade offline recusado por exigir inspeção dos dados.
+
+Testes PostgreSQL preparados para execução real como argos_runtime, bloqueio de alteração de alias/preço e DELETE/TRUNCATE, reutilização de slot/chave, histórico omitido, cadastro com chave removida e upgrade/downgrade com ativo preservado. CI ainda pendente; nada aplicado em produção, que permanece em 20260914_08. O próximo deploy depende da migração administrativa 09. Ainda não há comando de remoção ou desativação automática.

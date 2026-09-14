@@ -53,7 +53,7 @@ class PostgreSQLTelegramProductsRepository:
                 product = MonitoredProductRecord
                 rows = connection.execute(select(product.slot, product.alias,
                     product.target_price_cents, product.interval_hours).where(
-                    product.telegram_user_id == telegram_user_id
+                    product.telegram_user_id == telegram_user_id, product.removed_at.is_(None)
                 ).order_by(product.slot).limit(3)).all()
                 reply = format_products([tuple(row) for row in rows])
             connection.execute(insert(TelegramRegistrationResult).values(

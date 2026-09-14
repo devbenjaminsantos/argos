@@ -96,7 +96,8 @@ class PostgreSQLTelegramRegistrationConfirmationRepository:
                     if proposal is not None:
                         products = connection.execute(select(
                             MonitoredProductRecord.slot, MonitoredProductRecord.product_key,
-                        ).where(MonitoredProductRecord.telegram_user_id == telegram_user_id)).all()
+                        ).where(MonitoredProductRecord.telegram_user_id == telegram_user_id,
+                                MonitoredProductRecord.removed_at.is_(None))).all()
                         if any(product.product_key == key for product in products):
                             reply = replies.duplicate
                         else:

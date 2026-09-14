@@ -171,8 +171,8 @@ class MonitoredProductRecord(Base):
         CheckConstraint("length(alias) BETWEEN 1 AND 60", name="valid_alias"),
         CheckConstraint("target_price_cents BETWEEN 1 AND 999999999", name="valid_target_price"),
         CheckConstraint("interval_hours IN (12,24)", name="valid_interval"),
-        UniqueConstraint("telegram_user_id", "slot", name="uq_monitored_products_owner_slot"),
-        UniqueConstraint("telegram_user_id", "product_key", name="uq_monitored_products_owner_key"),
+        Index("uq_monitored_products_owner_slot", "telegram_user_id", "slot", unique=True, postgresql_where=text("removed_at IS NULL")),
+        Index("uq_monitored_products_owner_key", "telegram_user_id", "product_key", unique=True, postgresql_where=text("removed_at IS NULL")),
     )
     id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
     telegram_user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("telegram_users.telegram_user_id"), nullable=False)
@@ -183,3 +183,4 @@ class MonitoredProductRecord(Base):
     target_price_cents: Mapped[int] = mapped_column(BigInteger, nullable=False)
     interval_hours: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

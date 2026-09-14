@@ -118,7 +118,7 @@ def test_expired_lease_preserves_draft(context):
 def test_other_owner_and_products_are_preserved(context):
     with context[0].begin() as c:
         c.execute(text("INSERT INTO telegram_users VALUES (701,801,:now,:now)"),dict(now=context[1]))
-        c.execute(text("INSERT INTO monitored_products VALUES (:id,700,1,'MLB123','https://www.mercadolivre.com.br/p/MLB123','Caneca',15000,12,:now)"),dict(id=uuid4(),now=context[1]))
+        c.execute(text("INSERT INTO monitored_products (id,telegram_user_id,slot,product_key,url,alias,target_price_cents,interval_hours,created_at) VALUES (:id,700,1,'MLB123','https://www.mercadolivre.com.br/p/MLB123','Caneca',15000,12,:now)"),dict(id=uuid4(),now=context[1]))
     new_draft(context)
     other=new_draft(context,701)
     assert cancel(context).text=='cancelled'

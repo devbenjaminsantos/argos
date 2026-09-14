@@ -15,7 +15,7 @@ def _alembic_config() -> Config:
 def test_migrations_have_a_single_head() -> None:
     scripts = ScriptDirectory.from_config(_alembic_config())
 
-    assert scripts.get_heads() == ["20260914_08"]
+    assert scripts.get_heads() == ["20260914_09"]
 
 
 def test_initial_migration_compiles_for_postgresql(
