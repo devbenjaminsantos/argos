@@ -402,3 +402,9 @@ CI 34876514072 aprovado no commit f9dd144, incluindo PostgreSQL real; 41 testes 
 Usuário confirmou funcionamento após deploy manual dep-dak3bv2d0e5s738i1m5g, commit b9be394, live. Consulta agregada independente encontrou uma resposta de lista própria, update completed em uma tentativa e 72 updates completed, sem pending, processing ou dead_letter. Permanecem um produto e um rascunho awaiting_interval expirado; nenhum deles foi alterado pela validação. Sem exposição de IDs ou conteúdo pessoal.
 
 Lista vazia com outro usuário e repetição não apareceram nessa consulta: permanecem pendências de aceitação manual, embora cobertas no CI. Próximo incremento: definir contrato de remoção por proprietário, com confirmação vinculada ao produto selecionado; runtime ainda não possui DELETE em monitored_products.
+
+## Cancelamento durável implementado — aguarda validação
+
+`/cancelar` agora verifica identidade e lease contra a inbox e grava resposta e consumo do rascunho na mesma transação. Reprocessamento retorna a resposta original antes de examinar a operação atual; uma nova operação iniciada depois do cancelamento permanece intacta. Mensagens preservadas, inclusive cancelamento de rascunho expirado, sem alteração de produtos. Sem migração ou novos privilégios.
+
+Testes PostgreSQL preparados para recuperação após interrupção no envio, concorrência do mesmo update e updates distintos, rollback da resposta, identidade divergente, isolamento de proprietários e lease expirado. CI e aceitação do deploy ainda pendentes.

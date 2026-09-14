@@ -38,7 +38,7 @@ Runtime mantém SELECT/INSERT e recebe somente UPDATE da coluna removed_at; sem 
 
 ## Pré-requisito identificado no código atual
 
-CancelTelegramConversation e cancel_for_owner hoje excluem rascunho sem lease, registro por update ou bloqueio de usuário. Se o processo cair após cancelar, reprocessar o mesmo update pode cancelar uma operação iniciada depois; a resposta também muda. Corrigir isso antes de integrar `/remover`: cancelamento deve validar a inbox, bloquear usuário/rascunho e persistir resposta e consumo juntos. Replay retorna a resposta anterior sem alcançar o novo rascunho. A proteção beneficia também `/adicionar`.
+Na inspeção anterior a este incremento, CancelTelegramConversation e cancel_for_owner excluíam rascunho sem lease, registro por update ou bloqueio de usuário. Se o processo cair após cancelar, reprocessar o mesmo update pode cancelar uma operação iniciada depois; a resposta também muda. Corrigir isso antes de integrar `/remover`: cancelamento deve validar a inbox, bloquear usuário/rascunho e persistir resposta e consumo juntos. Replay retorna a resposta anterior sem alcançar o novo rascunho. A proteção beneficia também `/adicionar`.
 
 ## Critérios de aceitação
 
@@ -62,3 +62,5 @@ CancelTelegramConversation e cancel_for_owner hoje excluem rascunho sem lease, r
 4. Integrar webhook/worker/ajuda, validar CI, aplicar migração pelo executor administrativo e realizar deploy manual; validar no bot antes de atualizar menu.
 
 O contrato não conclui implementação, CI de remoção, migração, deploy ou aceitação manual. Coleta e alertas permanecem pendentes.
+
+Cancelamento durável implementado no runtime em 14/09/2026, ainda aguardando CI/deploy/aceitação. Usa o repositório dedicado PostgreSQLTelegramCancellationRepository; cancel_for_owner permanece como operação de baixo nível fora da composição do worker. Sem migração ou novos grants.

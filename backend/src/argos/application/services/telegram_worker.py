@@ -71,6 +71,8 @@ class TelegramInboxWorker:
                 )
             elif command == "/cancelar":
                 reply = self._cancel.execute(
+                    update_id=claimed.update_id, lease_token=claimed.lease_token,
+                    observed_at=now,
                     telegram_user_id=telegram_user_id,
                     chat_id=chat_id,
                     text=text,

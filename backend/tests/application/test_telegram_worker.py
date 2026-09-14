@@ -114,9 +114,9 @@ class _ConversationsStub:
         self.exists = exists
         self.cancelled_for: list[int] = []
 
-    def cancel_for_owner(self, *, telegram_user_id: int) -> bool:
+    def cancel_for_update(self, *, telegram_user_id: int, chat_id: int, replies, **kwargs):
         self.cancelled_for.append(telegram_user_id)
-        return self.exists
+        return TelegramMessage(chat_id=chat_id, text=replies.cancelled if self.exists else replies.nothing_to_cancel)
 
 
 class _RegistrationStub:

@@ -16,9 +16,7 @@ from argos.application.use_cases.start import StartTelegramConversation
 from argos.config import Settings
 from argos.infrastructure.database.config import create_database_engine
 from argos.infrastructure.database.telegram_inbox import PostgreSQLTelegramInbox
-from argos.infrastructure.database.telegram_conversations import (
-    PostgreSQLTelegramConversationDraftRepository,
-)
+from argos.infrastructure.database.telegram_cancellation import PostgreSQLTelegramCancellationRepository
 from argos.infrastructure.database.telegram_registration import (
     PostgreSQLTelegramRegistrationRepository,
 )
@@ -46,12 +44,11 @@ def build_worker(
         )
 
     users = PostgreSQLTelegramUserRepository(engine)
-    conversations = PostgreSQLTelegramConversationDraftRepository(engine)
     return TelegramInboxWorker(
         inbox=PostgreSQLTelegramInbox(engine),
         start=StartTelegramConversation(users),
         help_conversation=HelpTelegramConversation(),
-        cancel_conversation=CancelTelegramConversation(conversations),
+        cancel_conversation=CancelTelegramConversation(PostgreSQLTelegramCancellationRepository(engine)),
         begin_registration=BeginTelegramRegistration(
             PostgreSQLTelegramRegistrationRepository(engine)
         ),
