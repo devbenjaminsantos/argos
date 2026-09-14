@@ -130,7 +130,8 @@ def test_cancel_concurrent_with_receive_never_recreates_draft(url_context):
     assert snapshot(engine) is None
 
 
-def test_http_to_composed_worker_invalid_valid_duplicate_and_quota(url_context):
+@pytest.mark.parametrize("product_url", [_URL, "https://www.mercadolivre.com.br/caneca-personalizada-hello-kitty/up/MLBU1977786059#reco_item_pos=0"])
+def test_http_to_composed_worker_invalid_valid_duplicate_and_quota(url_context, product_url):
     from datetime import UTC, datetime
     from fastapi.testclient import TestClient
     from pydantic import SecretStr
@@ -157,7 +158,7 @@ def test_http_to_composed_worker_invalid_valid_duplicate_and_quota(url_context):
     original = snapshot(engine)
     try:
         with TestClient(app) as client:
-            for update_id, raw in enumerate(["https://evil.test/x", _URL] + [_URL] * 9, start=10):
+            for update_id, raw in enumerate(["https://evil.test/x", product_url] + [product_url] * 9, start=10):
                 payload = {"update_id": update_id, "message": {"message_id": 1, "from": {"id": 700}, "chat": {"id": 800, "type": "private"}, "text": raw}}
                 headers = {"X-Telegram-Bot-Api-Secret-Token": "integration-secret"}
                 assert client.post("/webhooks/telegram", headers=headers, json=payload).status_code == 200

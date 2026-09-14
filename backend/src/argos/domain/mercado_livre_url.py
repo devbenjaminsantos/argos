@@ -3,7 +3,7 @@
 import re
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-_PRODUCT_PATH = re.compile(r"^/(?:MLB-\d+(?:-[^/]*)?|(?:[^/]+/)?p/MLB\d+)/?$", re.IGNORECASE)
+_PRODUCT_PATH = re.compile(r"^/(?:MLB-\d+(?:-[^/]*)?|(?:[^/]+/)?(?:p/MLB\d+|up/MLBU\d+))/?$", re.IGNORECASE)
 _HOST = re.compile(r"^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)*mercadolivre\.com\.br$")
 _TRACKING = {
     "matt_tool", "matt_word", "matt_source", "matt_campaign", "matt_ad_group",
