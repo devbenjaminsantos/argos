@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Preparar recebimento e validação da URL no rascunho
+**Próximo item:** V2.9 — Implementar persistência atômica do recebimento da URL
 
 **Última atualização:** 13/09/2026
 
@@ -214,6 +214,10 @@ Decisões relacionadas:
 O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
 
 ### V2.9 — Cadastro de produtos pelo Telegram
+
+- [x] Preparar validação sintática da URL do Mercado Livre Brasil e contrato de recebimento por update/lease, sem rede; caso de uso isolado com resposta reutilizada.
+- [ ] Implementar adaptador e persistência atômica do avanço e resposta; validar concorrência, expiração, cancelamento e recuperação em PostgreSQL.
+- [ ] Integrar recebimento ao worker e admissão de texto ao webhook; só então atualizar as instruções públicas e validar no bot.
 
 - [ ] Implementar `/adicionar`, `/produtos` e `/remover`.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
