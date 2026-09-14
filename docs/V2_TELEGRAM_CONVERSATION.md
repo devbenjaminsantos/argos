@@ -380,3 +380,11 @@ Testes PostgreSQL preparados para concorrência no último slot, duplicata por c
 Após intervalo válido, resposta durável mostra URL, apelido, preço BRL e horas, pedindo confirmar/corrigir. Texto em awaiting_confirmation chama o adaptador de confirmação na mesma conexão e transação; não abre transação independente. Resultado por update precede seleção do estado. Confirmar cadastra e consome rascunho; corrigir limpa dados com nova versão e expiração original. Respostas esclarecem que coleta e alertas seguem indisponíveis. Ajuda atualizada; consulta e remoção continuam pendentes. CI e aceitação real do cadastro/correção pendentes.
 
 Integração aprovada no CI 34865934346, commit c2495c7, incluindo fluxo HTTP até worker/PostgreSQL para confirmar e corrigir, resumo, deduplicação e preservação de expires_at. Deploy e aceitação real pendentes.
+
+## Aceitação real do cadastro confirmado — 14/09/2026
+
+O usuário confirmou o fluxo. Consulta independente, somente agregada, encontrou dois resumos, uma correção, um produto cadastrado e duas respostas sem cadastro ativo. O update de criação está completed em uma tentativa; os 70 registros da inbox estão completed, sem pending, processing ou dead_letter. Dados estruturais do produto atendem slots, preço positivo e intervalo 12/24. Não foram expostos IDs, URLs, apelidos ou payloads.
+
+O produto e os resultados de confirmação foram gravados antes do redeploy atual dep-dak2oje743jc73fojcig (af6068d), live desde 17:19 UTC. Entre c2495c7, aprovado no CI 34865934346, e af6068d houve somente alterações documentais. Existe um novo rascunho awaiting_interval iniciado às 17:22 UTC, depois da criação do produto às 16:18 UTC; foi preservado. Não confundir esse novo cadastro com falha de consumo do anterior.
+
+Próximo incremento: `/produtos`, com leitura por proprietário, lista vazia e apresentação dos dados persistidos. Remoção, coleta de preços e alertas continuam pendentes.

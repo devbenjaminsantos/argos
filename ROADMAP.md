@@ -14,9 +14,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implantar e validar cadastro confirmado no bot
+**Próximo item:** V2.9 — Implementar `/produtos` com consulta escopada ao proprietário
 
-**Última atualização:** 13/09/2026
+**Última atualização:** 14/09/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -236,15 +236,15 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implementar persistência atômica do intervalo, sem migração, com preservação dos dados e expiração; testes PostgreSQL preparados, CI 34859065182 aprovado no commit 0e7f6d8, com PostgreSQL 17.
 - [x] Integrar intervalo à seleção transacional do texto e atualizar instruções; CI 34860141613 aprovado no commit 4d3a42d, com PostgreSQL 17.
 - [x] Implantar intervalo: deploy dep-dak0vj7qj5pc73fdvaug, commit dabb28b. Usuário confirmou; banco encontrou oito updates completed em uma tentativa, intervalo inválido e aceito persistidos e zero rascunhos após cancelamento.
-- [ ] Confirmar manualmente resposta de confirmação indisponível; não encontrada na janela consultada.
+- [x] Encerrar a pendência histórica de confirmação indisponível: comportamento substituído pelo resumo e confirmação funcional, aceitos em 14/09/2026.
 - [x] Preparar validação dos dados completos do rascunho e decisões confirmar/corrigir no domínio, sem criar produto.
 - [x] Definir contrato transacional de confirmação e preparar schema monitored_products (20260914_08), com três slots por proprietário, chave única por proprietário, grants SELECT/INSERT e downgrade protegido; CI 34863238232 aprovado no commit 9e7e02c, com PostgreSQL 17.
 - [x] Aplicar 20260914_08 pelo workflow 34864818265 (commit 8d8bb33); consulta independente confirmou monitored_products vazia, ownership argos_migrator, runtime SELECT/INSERT sem UPDATE/DELETE/TRUNCATE e nenhuma leitura pública, constraints de slots e chave presentes.
 - [x] Implementar confirmação/correção atômicas: limite por slots, chave MLB/MLBU, criação/consumo/resposta juntos e correção com nova versão sem renovar expiração; testes PostgreSQL preparados, CI 34865501539 aprovado no commit 3b9270d, com PostgreSQL 17.
 - [x] Integrar confirmação/correção à seleção transacional do texto com resumo dos dados, mantendo coleta/alertas pendentes; CI 34865934346 aprovado no commit c2495c7, com PostgreSQL 17.
-- [ ] Implantar manualmente e validar resumo → corrigir → novo preenchimento → confirmar → nova mensagem confirmar, conferindo produto e rascunho no banco.
-- [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
-- [ ] Validar entrada e permitir confirmação antes de salvar.
+- [x] Validar resumo → corrigir → novo preenchimento → confirmar → nova mensagem confirmar. Usuário confirmou; consulta independente em 14/09/2026 encontrou dois resumos, uma correção, um produto e duas respostas sem cadastro ativo; confirmação completed em uma tentativa. Deploy atual dep-dak2oje743jc73fojcig, commit af6068d, live. Evidências de confirmação são anteriores a esse redeploy, cujo código não mudou. Novo rascunho awaiting_interval iniciado depois do cadastro foi preservado.
+- [x] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
+- [x] Validar entrada e permitir confirmação antes de salvar.
 - [ ] Escopar todas as operações ao usuário Telegram.
 
 **Critério de conclusão:** dois usuários gerenciam listas isoladas com limite individual de três produtos.
