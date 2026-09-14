@@ -334,3 +334,9 @@ A porta transacional deve reutilizar resposta por update antes de avaliar estado
 ## Preço-alvo integrado (aguarda deploy)
 
 A seleção do texto na mesma transação contempla awaiting_target_price. O valor é validado exatamente em centavos, armazenado como inteiro em target_price_cents, e a resposta persistida confirma BRL. URL, apelido e expires_at permanecem; estado avança para awaiting_interval com nova versão. Resultado por update continua consultado antes do estado, incluindo respostas negativas. Ajuda e resposta do apelido pedem preço-alvo; intervalo continua indisponível. Integração ao worker validada no CI 34854438746, commit 15a602d; deploy e aceitação real pendentes.
+
+## Aceitação do preço e contrato do intervalo
+
+Em 14/09/2026, deploy manual dep-dak0ihuq1p3s739quj90 (9dbe42c) confirmado live. Entrada 150 aceita como R$ 150,00; consulta independente confirmou 15000 centavos numéricos, awaiting_interval, URL/apelido e duração original preservados, update completed em uma tentativa. Cenários inválido, etapa indisponível e cancelamento após preço não foram confirmados no relato atual.
+
+Contrato do intervalo preparado isoladamente: texto 12 ou 24, com espaços externos tolerados; sem unidades, decimais ou outros valores. Persistência futura deve gravar interval_hours e resposta juntos, nova versão, dados e expiração preservados ao avançar para awaiting_confirmation. Confirmação e criação do produto continuarão indisponíveis nesse passo; não iniciar coleta. Nenhuma mudança pública neste incremento.

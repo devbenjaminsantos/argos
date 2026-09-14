@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implantar e validar recebimento do preço-alvo
+**Próximo item:** V2.9 — Implementar persistência atômica do intervalo
 
 **Última atualização:** 13/09/2026
 
@@ -230,7 +230,10 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar validação BRL em centavos e contrato por update/lease do preço-alvo, limite inicial R$ 9.999.999,99, sem liberar no bot.
 - [x] Implementar persistência atômica do preço-alvo, preservando URL, apelido e expiração, sem migração; testes PostgreSQL preparados, CI 34852857248 aprovado no commit f6f2c63, com PostgreSQL 17.
 - [x] Integrar preço-alvo à seleção transacional do passo, com instruções e confirmação BRL atualizadas; CI 34854438746 aprovado no commit 15a602d, com PostgreSQL 17.
-- [ ] Implantar manualmente e validar preço inválido → válido → etapa indisponível → cancelamento, com conferência no banco.
+- [x] Implantar preço-alvo e validar entrada inteira 150 → R$ 150,00: deploy dep-dak0ihuq1p3s739quj90, commit 9dbe42c; banco confirmou 15000 centavos, awaiting_interval, dados anteriores e duração original preservados, update completed em uma tentativa.
+- [ ] Confirmar aceitação manual de preço inválido, etapa indisponível e cancelamento após preço; não confirmados pelo relato atual.
+- [x] Preparar validação e contrato do intervalo (12 ou 24 horas), sem liberar no bot.
+- [ ] Implementar persistência atômica do intervalo e validar PostgreSQL antes de integrar.
 - [ ] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
 - [ ] Validar entrada e permitir confirmação antes de salvar.
 - [ ] Escopar todas as operações ao usuário Telegram.
