@@ -378,3 +378,5 @@ Testes PostgreSQL preparados para concorrência no último slot, duplicata por c
 ## Cadastro confirmado integrado (aguarda deploy)
 
 Após intervalo válido, resposta durável mostra URL, apelido, preço BRL e horas, pedindo confirmar/corrigir. Texto em awaiting_confirmation chama o adaptador de confirmação na mesma conexão e transação; não abre transação independente. Resultado por update precede seleção do estado. Confirmar cadastra e consome rascunho; corrigir limpa dados com nova versão e expiração original. Respostas esclarecem que coleta e alertas seguem indisponíveis. Ajuda atualizada; consulta e remoção continuam pendentes. CI e aceitação real do cadastro/correção pendentes.
+
+Integração aprovada no CI 34865934346, commit c2495c7, incluindo fluxo HTTP até worker/PostgreSQL para confirmar e corrigir, resumo, deduplicação e preservação de expires_at. Deploy e aceitação real pendentes.
