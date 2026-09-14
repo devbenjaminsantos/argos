@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Implantar e aceitar cancelamento durável
+**Próximo item:** V2.9 — Preparar modelo e migração de remoção lógica
 
 **Última atualização:** 14/09/2026
 
@@ -252,7 +252,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Definir contrato de `/remover` em docs/V2_TELEGRAM_REMOVAL.md: mapa slot/UUID persistido, confirmação vinculada à versão da proposta, remoção lógica, concorrência, replay e migração/grants planejados. Sem implementação ou alteração no banco.
 - [x] Implementar `/cancelar` transacional por update/lease: consumo do rascunho e resposta juntos, resultado consultado antes do estado; bloqueios inbox/usuário/rascunho. Sem migração, mensagens preservadas.
 - [x] Validar cancelamento durável no CI 34880965589, commit a3e0cfa, com PostgreSQL real: recuperação preservando nova operação, concorrência, isolamento, lease e rollback. Suíte local também aprovada; testes PostgreSQL pulados localmente por falta de banco.
-- [ ] Aceitar cancelamento durável no bot após deploy manual: iniciar/cancelar, iniciar novo rascunho, consultar produtos sem interromper e cancelar novamente. Recuperação de update antigo comprovada no CI, sem injeção no bot real.
+- [x] Implantar e aceitar cancelamento durável: usuário aprovou; deploy dep-dak3rcbl550s73buab9g, 7970d42, live. Banco confirmou um cancelamento durável completed em uma tentativa, 85 updates completed sem outros estados, um produto e um rascunho presentes. Recuperação antiga comprovada no CI, sem injeção em produção.
+- [ ] Concluir evidência manual da sequência completa de dois cancelamentos; consulta agregada encontrou somente um resultado durável. Preservar rascunho existente.
 - [ ] Preparar removed_at, índices únicos de ativos, filtros de consulta/cadastro e grants UPDATE somente dessa coluna, com testes de migração e downgrade protegido.
 - [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 

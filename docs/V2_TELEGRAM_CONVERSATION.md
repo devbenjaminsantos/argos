@@ -410,3 +410,5 @@ Lista vazia com outro usuário e repetição não apareceram nessa consulta: per
 Testes PostgreSQL preparados para recuperação após interrupção no envio, concorrência do mesmo update e updates distintos, rollback da resposta, identidade divergente, isolamento de proprietários e lease expirado. CI e aceitação do deploy ainda pendentes.
 
 Cancelamento durável aprovado no CI 34880965589, commit a3e0cfa, com PostgreSQL real. Suíte local aprovada (PostgreSQL pulado localmente); deploy e aceitação no bot permanecem pendentes.
+
+Em 14/09/2026, usuário aprovou o processo após deploy dep-dak3rcbl550s73buab9g, 7970d42, live. Consulta agregada independente confirmou um cancelamento durável completed em uma tentativa, 85 updates completed sem outros estados, um produto e um rascunho presentes. Não houve exposição de IDs/payload nem alteração de dados durante a validação. A sequência completa com dois cancelamentos não foi comprovada nessa consulta; permanece pendência de evidência manual. Recuperação após interrupção está comprovada no CI. Próximo incremento: preparar modelo e migração de remoção lógica, sem aplicar em produção durante a preparação.
