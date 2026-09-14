@@ -76,3 +76,9 @@ Revisão 20260914_09 adiciona removed_at nullable, troca unicidades por índices
 Testes PostgreSQL preparados para execução real como argos_runtime, bloqueio de alteração de alias/preço e DELETE/TRUNCATE, reutilização de slot/chave, histórico omitido, cadastro com chave removida e upgrade/downgrade com ativo preservado. CI ainda pendente; nada aplicado em produção, que permanece em 20260914_08. O próximo deploy depende da migração administrativa 09. Ainda não há comando de remoção ou desativação automática.
 
 Preparação aprovada no CI 34884132074, commit e6afd27, com PostgreSQL real, incluindo upgrade/downgrade preservando ativo, histórico protegido, grants de coluna e filtros de listagem/cadastro. Suíte local aprovada com integrações PostgreSQL puladas. Próximo passo operacional: aplicar 20260914_09 pelo executor administrativo, verificar revisão/grants/índices e somente então realizar deploy manual. Migração e deploy não executados nesta preparação.
+
+## Migração aplicada em produção — 14/09/2026
+
+Workflow administrativo 34885202890, commit 2bcc050, concluiu com sucesso. Consulta independente confirmou revisão 20260914_09, ownership argos_migrator, um produto preservado/ativo e zero removidos. Índices únicos de proprietário/slot e proprietário/chave têm predicado removed_at IS NULL. Login runtime possui SELECT/INSERT e UPDATE somente removed_at; sem UPDATE geral, alias/preço, DELETE/TRUNCATE ou leitura por roles públicas. Não foram expostos IDs/conteúdo pessoal.
+
+Próximo passo: deploy manual da versão com filtros de ativos, seguido de validação de `/produtos` e início/cancelamento de cadastro. A migração não disponibiliza `/remover` nem inicia coleta.
