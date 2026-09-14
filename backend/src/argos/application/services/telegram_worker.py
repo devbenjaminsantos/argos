@@ -12,6 +12,7 @@ from argos.application.ports.telegram_messages import (
 from argos.application.use_cases.begin_registration import BeginTelegramRegistration
 from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
+from argos.application.use_cases.list_products import ListTelegramProducts
 from argos.application.use_cases.receive_registration_text import ReceiveTelegramRegistrationText
 from argos.application.use_cases.start import StartTelegramConversation
 
@@ -28,6 +29,7 @@ class TelegramInboxWorker:
         cancel_conversation: CancelTelegramConversation,
         begin_registration: BeginTelegramRegistration,
         receive_registration_text: ReceiveTelegramRegistrationText,
+        list_products: ListTelegramProducts,
         sender: TelegramMessageSender,
         lease_duration: timedelta = timedelta(seconds=30),
         retry_delay: timedelta = timedelta(seconds=30),
@@ -40,6 +42,7 @@ class TelegramInboxWorker:
         self._cancel = cancel_conversation
         self._registration = begin_registration
         self._registration_url = receive_registration_text
+        self._products = list_products
         self._sender = sender
         self._lease_duration = lease_duration
         self._retry_delay = retry_delay
@@ -60,6 +63,12 @@ class TelegramInboxWorker:
             command = text.strip().casefold()
             if command == "/ajuda":
                 reply = self._help.execute(chat_id=chat_id, text=text)
+            elif command == "/produtos":
+                reply = self._products.execute(
+                    update_id=claimed.update_id, lease_token=claimed.lease_token,
+                    telegram_user_id=telegram_user_id, chat_id=chat_id,
+                    text=text, observed_at=now,
+                )
             elif command == "/cancelar":
                 reply = self._cancel.execute(
                     telegram_user_id=telegram_user_id,

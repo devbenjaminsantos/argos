@@ -15,6 +15,7 @@ from argos.application.services.telegram_worker import TelegramInboxWorker
 from argos.application.use_cases.begin_registration import BeginTelegramRegistration
 from argos.application.use_cases.cancel import CancelTelegramConversation
 from argos.application.use_cases.help import HelpTelegramConversation
+from argos.application.use_cases.list_products import ListTelegramProducts
 from argos.application.use_cases.receive_registration_text import ReceiveTelegramRegistrationText
 from argos.application.use_cases.start import StartTelegramConversation
 
@@ -78,6 +79,11 @@ class _InboxStub:
     ) -> bool:
         self.dead_letters.append((update_id, lease_token, error_code))
         return True
+
+
+class _ProductsStub:
+    def list_for_update(self, **kwargs):
+        return TelegramMessage(chat_id=kwargs["chat_id"], text="Lista de produtos")
 
 
 class _UsersStub:
@@ -159,6 +165,7 @@ def _worker(
         ),
         begin_registration=BeginTelegramRegistration(registrations or _RegistrationStub()),
         receive_registration_text=ReceiveTelegramRegistrationText(urls or _RegistrationURLStub()),
+        list_products=ListTelegramProducts(_ProductsStub()),
         sender=sender,
         lease_duration=timedelta(seconds=20),
         retry_delay=timedelta(seconds=15),
@@ -333,3 +340,13 @@ def test_worker_routes_text_to_registration_url_with_claim(raw, expected):
     assert users.upserts == []
     assert expected in sender.messages[0].text
     assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]
+
+
+def test_worker_routes_products_to_private_listing():
+    payload={**_PAYLOAD,"message":{**_PAYLOAD["message"],"text":"/produtos"}}
+    inbox=_InboxStub(payload)
+    sender=_SenderStub()
+    worker=_worker(inbox=inbox,sender=sender)
+    assert worker.process_next(now=_NOW)
+    assert sender.messages[0].text=="Lista de produtos"
+    assert len(inbox.completed)==1

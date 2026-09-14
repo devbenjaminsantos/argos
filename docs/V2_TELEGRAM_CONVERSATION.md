@@ -388,3 +388,9 @@ O usuário confirmou o fluxo. Consulta independente, somente agregada, encontrou
 O produto e os resultados de confirmação foram gravados antes do redeploy atual dep-dak2oje743jc73fojcig (af6068d), live desde 17:19 UTC. Entre c2495c7, aprovado no CI 34865934346, e af6068d houve somente alterações documentais. Existe um novo rascunho awaiting_interval iniciado às 17:22 UTC, depois da criação do produto às 16:18 UTC; foi preservado. Não confundir esse novo cadastro com falha de consumo do anterior.
 
 Próximo incremento: `/produtos`, com leitura por proprietário, lista vazia e apresentação dos dados persistidos. Remoção, coleta de preços e alertas continuam pendentes.
+
+## `/produtos` implementado — aguarda CI e deploy
+
+Comando privado admitido com a mesma deduplicação e quota dos demais. Exibe somente produtos do proprietário Telegram, ordenados por slot, com apelido, preço-alvo BRL e intervalo; a resposta informa que coleta e alertas permanecem indisponíveis. Lista vazia orienta `/adicionar`; usuário não registrado recebe orientação `/start`. Não altera rascunhos.
+
+A consulta verifica lease e identidade contra a inbox e grava snapshot em telegram_registration_results na mesma transação. Reprocessamento retorna a resposta original, mesmo após alteração da lista. Usa grants existentes, sem migração. Testes locais e CI devem preceder deploy manual; aceitação real ainda pendente. No BotFather, incluir `/produtos` no menu após validação do deploy.
