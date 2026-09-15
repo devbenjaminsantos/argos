@@ -370,3 +370,5 @@ Revisão de continuidade: docs/REPOSITORY_REVIEW_2026-09-15.md. Sem segunda cont
 Mensagens de `/start` e `/adicionar` atualizadas para cadastro/listagem/remoção disponíveis e coleta/alertas indisponíveis; CI e deploy desse ajuste pendentes.
 
 CI das mensagens 34990105419 aprovado em 9008db6; 33 testes focados passaram. Deploy e aceitação das mensagens pendentes.
+
+Conexão TLS ao IP validado preparada isoladamente em infrastructure/scrapers/pinned_tls.py, sem DNS implícito, mantendo SNI/certificado pelo hostname. Seis testes locais com sockets falsos passaram; CI pendente. Falhas fecham socket; prazo TCP/TLS compartilhado de até cinco segundos. Ainda faltam resolvedor, HTTP, redirects, streaming limitado e teste controlado real; componente não integrado ao bot.

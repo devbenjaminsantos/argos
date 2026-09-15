@@ -51,3 +51,5 @@ Falhas devem ser tipadas: invalid_url, host_not_allowed, dns_failed, forbidden_a
 Esta preparação não conclui V2.10, não habilita `/verificar` e não substitui a aceitação com dois usuários da V2.9. Próximo incremento: política pura de destinos e suíte negativa, sem chamadas externas.
 
 Política pura implementada em domain/safe_fetch.py: valida hosts exatos e conjuntos DNS completos (máximo 16), rejeita ranges especiais e normaliza IPv4 mapeado. 44 testes locais passaram; CI 34992039718 aprovado em 5489150. Sem resolvedor/transporte ou tráfego externo. Próximo incremento: transporte ao IP validado com TLS/SNI.
+
+Conexão TLS ao IP validado preparada isoladamente em infrastructure/scrapers/pinned_tls.py, sem DNS implícito, mantendo SNI/certificado pelo hostname. Seis testes locais com sockets falsos passaram; CI pendente. Falhas fecham socket; prazo TCP/TLS compartilhado de até cinco segundos. Ainda faltam resolvedor, HTTP, redirects, streaming limitado e teste controlado real; componente não integrado ao bot.
