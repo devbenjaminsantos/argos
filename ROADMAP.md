@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.10 — Preparar resultado com HTML e URL final validada
+**Próximo item:** V2.11 — Preparar fixtures e contrato do extrator Mercado Livre
 
 **Última atualização:** 15/09/2026
 
@@ -287,7 +287,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Resolver DNS e bloquear destinos privados, locais ou reservados.
 - [x] Validar cada redirecionamento e limitar tamanho e duração no transporte isolado; até três saltos, nova resolução/IP fixado, ciclos recusados e deadline compartilhado. 53 testes relacionados passaram localmente; CI 35004734079 aprovado em 2fdb00a.
 - [x] Revisar framing HTTP e rejeição de respostas truncadas antes de integrar ao coletor; 68 testes relacionados passaram localmente; CI 35005275274 aprovado em 86d7951.
-- [ ] Preparar resultado de transporte com HTML limitado e URL final validada para o extrator.
+- [x] Preparar resultado de transporte com HTML limitado e URL final validada para o extrator; FetchedHTML imutável, 68 testes relacionados passaram localmente.
 - [ ] Criar testes com URLs maliciosas.
 
 **Critério de conclusão:** o coletor não funciona como proxy genérico nem alcança rede interna.

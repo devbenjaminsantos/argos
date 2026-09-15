@@ -18,7 +18,9 @@ def test_relative_redirect_is_followed(transport, status):
             transport.status = 200
         original_begin()
     transport.begin = begin
-    assert module.fetch_html_once(BASE, resolver=Resolver()) == b'<html>ok</html>'
+    result = module.fetch_html_once(BASE, resolver=Resolver())
+    assert result.html == b'<html>ok</html>'
+    assert result.final_url == 'https://www.mercadolivre.com.br/p/MLB456'
     assert len(calls) == 2
 
 @pytest.mark.parametrize('location', ['', 'http://www.mercadolivre.com.br/p/MLB456',
@@ -92,7 +94,9 @@ def test_cross_host_uses_new_ip_and_host_header(transport, monkeypatch):
             return ['8.8.8.8']
     monkeypatch.setattr(module, 'PinnedTLSConnection', Pinned)
     monkeypatch.setattr(module.http.client, 'HTTPConnection', Connection)
-    assert module.fetch_html_once(BASE, resolver=ChangingResolver()) == b'<html>ok</html>'
+    result = module.fetch_html_once(BASE, resolver=ChangingResolver())
+    assert result.html == b'<html>ok</html>'
+    assert result.final_url == target
     assert opened == [(BASE, '8.8.8.8'), (target, '1.1.1.1')]
     assert headers == ['www.mercadolivre.com.br', 'produto.mercadolivre.com.br']
     assert len(closed) == 2

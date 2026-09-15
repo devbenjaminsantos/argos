@@ -31,7 +31,7 @@ def test_real_http_stream_survives_connection_close(monkeypatch,response,expecte
     thread=threading.Thread(target=serve)
     thread.start()
     try:
-        assert module.fetch_html_once('https://www.mercadolivre.com.br/p/MLB123',resolver=Resolver())==expected
+        assert module.fetch_html_once('https://www.mercadolivre.com.br/p/MLB123',resolver=Resolver()).html==expected
     finally:
         client.close();thread.join(timeout=2)
     assert not thread.is_alive()

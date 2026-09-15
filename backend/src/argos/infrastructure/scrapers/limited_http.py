@@ -3,7 +3,7 @@ import http.client
 import socket
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from urllib.parse import urljoin, urlsplit
 from argos.domain.safe_fetch import FetchPolicyError, validate_fetch_url
 from argos.infrastructure.scrapers.resolved_destination import resolve_destination
@@ -23,11 +23,18 @@ def _interrupt(sock):
 
 
 @dataclass(frozen=True)
+class FetchedHTML:
+    """Conteúdo limitado e destino efetivamente validado, sem exposição no repr."""
+    html: bytes = field(repr=False)
+    final_url: str = field(repr=False)
+
+
+@dataclass(frozen=True)
 class _Redirect:
     url: str
 
 
-def fetch_html_once(url: str, *, resolver=None) -> bytes:
+def fetch_html_once(url: str, *, resolver=None) -> FetchedHTML:
     """Uma coleta, sem retries, com até três redirecionamentos."""
     deadline = time.monotonic() + TOTAL_TIMEOUT_SECONDS
     resolver = resolver or SystemDestinationResolver()
@@ -38,7 +45,7 @@ def fetch_html_once(url: str, *, resolver=None) -> bytes:
             raise FetchPolicyError("redirect_rejected")
         seen.add(current)
         result = _fetch_hop(current, resolver=resolver, deadline=deadline)
-        if isinstance(result, bytes):
+        if isinstance(result, FetchedHTML):
             return result
         if hop == 3:
             raise FetchPolicyError("redirect_limit")
@@ -46,7 +53,7 @@ def fetch_html_once(url: str, *, resolver=None) -> bytes:
     raise FetchPolicyError("redirect_limit")
 
 
-def _fetch_hop(url: str, *, resolver, deadline: float) -> bytes | _Redirect:
+def _fetch_hop(url: str, *, resolver, deadline: float) -> FetchedHTML | _Redirect:
     destination = resolve_destination(url, resolver or SystemDestinationResolver(), deadline=deadline)
     remaining = deadline - time.monotonic()
     if remaining <= 0:
@@ -116,7 +123,7 @@ def _fetch_hop(url: str, *, resolver, deadline: float) -> bytes | _Redirect:
                 raise FetchPolicyError("timeout")
             if declared is not None and len(body) != declared:
                 raise FetchPolicyError("http_failed")
-            return bytes(body)
+            return FetchedHTML(html=bytes(body), final_url=destination.url)
         except FetchPolicyError:
             raise
         except http.client.IncompleteRead:

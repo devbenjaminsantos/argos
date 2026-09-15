@@ -41,7 +41,12 @@ class Resolver:
 
 def fetch(): return module.fetch_html_once('https://www.mercadolivre.com.br/p/MLB123',resolver=Resolver())
 
-def test_html_success(transport): assert fetch()==b'<html>ok</html>'
+def test_html_success(transport):
+    result = fetch()
+    assert result.html == b'<html>ok</html>'
+    assert result.final_url == 'https://www.mercadolivre.com.br/p/MLB123'
+    assert repr(result) == 'FetchedHTML()'
+
 
 @pytest.mark.parametrize('status,headers,code',[
  (302,{},'redirect_rejected'),(403,{},'http_failed'),
