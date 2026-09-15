@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Concluir evidência da remoção no bot
+**Próximo item:** V2.9 — Revisar pendências de aceitação e isolamento entre dois usuários
 
 **Última atualização:** 14/09/2026
 
@@ -268,7 +268,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Integrar início/seleção/confirmação ao worker, webhook e ajuda; texto delega seleção/confirmação na mesma transação após resultado por update e bloqueio do estado.
 - [x] Validar fluxo HTTP completo de remoção/cancelamento no CI 34978574492, commit 072d5b0, com PostgreSQL real e updates repetidos; 166 testes locais de aplicação/API aprovados.
 - [x] Implantar remoção: deploy dep-dakl6e8u01pc73fhdp20, commit c3f9a85, live.
-- [ ] Concluir evidência de remoção após deploy: usuário relatou fluxo operante em 15/09/2026; consulta independente encontrou um produto ativo, zero removidos, zero rascunhos, 89 updates completed e somente dois resultados de cancelamento entre as categorias consultadas. Sem proposta/código incorreto/remoção/lista vazia persistidos nessa consulta; manter aceitação completa pendente.
+- [x] Concluir evidência de remoção após deploy (confirmada pela nova consulta abaixo; registro anterior preservado como histórico): usuário relatou fluxo operante em 15/09/2026; consulta independente encontrou um produto ativo, zero removidos, zero rascunhos, 89 updates completed e somente dois resultados de cancelamento entre as categorias consultadas. Sem proposta/código incorreto/remoção/lista vazia persistidos nessa consulta; manter aceitação completa pendente.
 - [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 
 - [ ] Escopar todas as operações ao usuário Telegram.
@@ -356,3 +356,5 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Gráficos avançados de histórico.
 - [ ] Suporte à Shopee e a outras lojas.
 - [ ] Extração de componentes para microsserviços, somente se houver necessidade comprovada.
+
+Em 15/09/2026, nova consulta confirmou aceitação da remoção: uma proposta, código incorreto recusado, remoção e lista vazia, todos completed em uma tentativa; zero ativos, um removido preservado, zero rascunhos e 94 updates completed sem outros estados. Pendência de evidência da desativação encerrada; isolamento manual entre dois usuários ainda não comprovado.

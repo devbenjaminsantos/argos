@@ -110,3 +110,5 @@ Integração aprovada no CI 34978574492, commit 072d5b0, com PostgreSQL real, fl
 ## Relato manual e evidência de produção — 15/09/2026
 
 Usuário relatou fluxo operante. Deploy dep-dakl6e8u01pc73fhdp20, c3f9a85, está live. Consulta agregada independente encontrou um produto ativo, zero removidos, zero rascunhos e 89 updates completed, sem outros estados. Nas categorias consultadas, somente dois resultados de cancelamento; nenhum resumo de proposta, código incorreto, remoção ou lista vazia persistido. Assim, relato registrado, mas aceitação completa da remoção continua pendente de evidência. Não houve mutação de dados durante essa verificação.
+
+Nova consulta em 15/09/2026 encerrou a divergência anterior: proposta, código incorreto recusado, remoção e lista vazia persistidos, cada um completed em uma tentativa. Zero ativos, um removido preservado no histórico, zero rascunhos e 94 updates completed sem outros estados. Aceitação da remoção confirmada; isolamento manual entre dois proprietários continua pendente.
