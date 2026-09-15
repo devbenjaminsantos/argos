@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.10 — Preparar transporte com destino fixado e TLS
+**Próximo item:** V2.10 — Preparar resolvedor e requisição HTTP limitada
 
 **Última atualização:** 15/09/2026
 
@@ -371,4 +371,4 @@ Mensagens de `/start` e `/adicionar` atualizadas para cadastro/listagem/remoçã
 
 CI das mensagens 34990105419 aprovado em 9008db6; 33 testes focados passaram. Deploy e aceitação das mensagens pendentes.
 
-Conexão TLS ao IP validado preparada isoladamente em infrastructure/scrapers/pinned_tls.py, sem DNS implícito, mantendo SNI/certificado pelo hostname. Seis testes locais com sockets falsos passaram; CI pendente. Falhas fecham socket; prazo TCP/TLS compartilhado de até cinco segundos. Ainda faltam resolvedor, HTTP, redirects, streaming limitado e teste controlado real; componente não integrado ao bot.
+Conexão TLS ao IP validado preparada isoladamente em infrastructure/scrapers/pinned_tls.py, sem DNS implícito, mantendo SNI/certificado pelo hostname. Seis testes locais com sockets falsos passaram; CI 34992693219 aprovado em c8a288b. Falhas fecham socket; prazo TCP/TLS compartilhado de até cinco segundos. Ainda faltam resolvedor, HTTP, redirects, streaming limitado e teste controlado real; componente não integrado ao bot.
