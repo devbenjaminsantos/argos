@@ -364,3 +364,5 @@ Em 15/09/2026, nova consulta confirmou aceitação da remoção: uma proposta, c
 Revisão de continuidade: docs/REPOSITORY_REVIEW_2026-09-15.md. Sem segunda conta, próximo incremento é corrigir textos de `/start` e `/adicionar` que ainda anunciam cadastro futuro. Depois preparar contrato e testes de fetch seguro/SSRF antes do coletor. Aceitação V2.9 continua pendente em paralelo.
 
 Mensagens de `/start` e `/adicionar` atualizadas para cadastro/listagem/remoção disponíveis e coleta/alertas indisponíveis; CI e deploy desse ajuste pendentes.
+
+CI das mensagens 34990105419 aprovado em 9008db6; 33 testes focados passaram. Deploy e aceitação das mensagens pendentes.
