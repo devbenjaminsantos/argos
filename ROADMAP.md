@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Atualizar mensagens públicas enquanto a aceitação com duas contas aguarda
+**Próximo item:** V2.10 — Preparar contrato de fetch seguro; duas contas pendentes
 
 **Última atualização:** 15/09/2026
 
@@ -362,3 +362,5 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 Em 15/09/2026, nova consulta confirmou aceitação da remoção: uma proposta, código incorreto recusado, remoção e lista vazia, todos completed em uma tentativa; zero ativos, um removido preservado, zero rascunhos e 94 updates completed sem outros estados. Pendência de evidência da desativação encerrada; isolamento manual entre dois usuários ainda não comprovado.
 
 Revisão de continuidade: docs/REPOSITORY_REVIEW_2026-09-15.md. Sem segunda conta, próximo incremento é corrigir textos de `/start` e `/adicionar` que ainda anunciam cadastro futuro. Depois preparar contrato e testes de fetch seguro/SSRF antes do coletor. Aceitação V2.9 continua pendente em paralelo.
+
+Mensagens de `/start` e `/adicionar` atualizadas para cadastro/listagem/remoção disponíveis e coleta/alertas indisponíveis; CI e deploy desse ajuste pendentes.

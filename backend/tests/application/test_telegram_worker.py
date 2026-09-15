@@ -333,7 +333,7 @@ def test_worker_dispatches_registration_with_claimed_update_and_lease():
     assert (call["update_id"], call["lease_token"], call["telegram_user_id"], call["chat_id"], call["observed_at"]) == (10, _LEASE_TOKEN, 700, 800, _NOW)
     assert users.upserts == []
     assert "Rascunho de teste" in sender.messages[0].text
-    assert "próximas etapas" in sender.messages[0].text
+    assert "confirmar o cadastro" in sender.messages[0].text
     assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]
 
 
