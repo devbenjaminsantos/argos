@@ -18,6 +18,8 @@ def transport(monkeypatch):
         headers={'Content-Type':'text/html'}
         body=b'<html>ok</html>'
         def getheader(self,key,default=None): return self.headers.get(key,default)
+        def begin(self): pass
+        def close(self): pass
         def read(self,size):
             value=self.body[:size];self.body=self.body[size:];return value
     response=Response()
@@ -30,6 +32,7 @@ def transport(monkeypatch):
         def close(self): pass
     monkeypatch.setattr(module,'PinnedTLSConnection',Pinned)
     monkeypatch.setattr(module.http.client,'HTTPConnection',Connection)
+    monkeypatch.setattr(module.http.client,'HTTPResponse',lambda sock:response)
     return response
 
 class Resolver:

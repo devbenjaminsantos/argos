@@ -32,12 +32,16 @@ def fetch_html_once(url: str, *, resolver=None) -> bytes:
         timer = threading.Timer(max(0, deadline-time.monotonic()), _interrupt, args=(pinned.socket,))
         timer.daemon = True
         timer.start()
+        response = None
         try:
             pinned.socket.settimeout(min(5, max(0.001, deadline-time.monotonic())))
             path = parsed.path + (f"?{parsed.query}" if parsed.query else "")
             connection.request("GET", path, headers={"Host": parsed.hostname,
                 "Accept": "text/html", "Accept-Encoding": "identity", "Connection": "close"})
-            response = connection.getresponse()
+            # Parse directly: getresponse() closes its socket for Connection: close,
+            # while streaming still needs timeout control on that socket.
+            response = http.client.HTTPResponse(pinned.socket)
+            response.begin()
             if response.status != 200:
                 raise FetchPolicyError("redirect_rejected" if 300 <= response.status < 400 else "http_failed")
             if response.getheader("Content-Type", "").split(";",1)[0].strip().lower() != "text/html":
@@ -75,4 +79,6 @@ def fetch_html_once(url: str, *, resolver=None) -> bytes:
             raise FetchPolicyError("timeout" if time.monotonic() >= deadline else "transport_failed") from None
         finally:
             timer.cancel()
+            if response is not None:
+                response.close()
             connection.close()
