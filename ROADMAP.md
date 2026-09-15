@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.10 — Preparar resolvedor e requisição HTTP limitada
+**Próximo item:** V2.10 — Compor DNS/TLS com requisição HTTP limitada
 
 **Última atualização:** 15/09/2026
 
@@ -374,3 +374,5 @@ CI das mensagens 34990105419 aprovado em 9008db6; 33 testes focados passaram. De
 Conexão TLS ao IP validado preparada isoladamente em infrastructure/scrapers/pinned_tls.py, sem DNS implícito, mantendo SNI/certificado pelo hostname. Seis testes locais com sockets falsos passaram; CI 34992693219 aprovado em c8a288b. Falhas fecham socket; prazo TCP/TLS compartilhado de até cinco segundos. Ainda faltam resolvedor, HTTP, redirects, streaming limitado e teste controlado real; componente não integrado ao bot.
 
 Orquestração de resolução preparada em resolved_destination.py: resolvedor injetável, conjunto completo validado, teto DNS de três segundos dentro do deadline total e falhas sem detalhes sensíveis. Seis testes locais passaram; CI 35001642812 aprovado em af86bc7. Resolvedor real com I/O interrompível e composição com TLS/HTTP ainda pendentes; não há tráfego externo.
+
+Resolvedor real preparado em system_dns.py: getaddrinfo A/AAAA em subprocesso isolado, timeout encerra e aguarda filho; sem shell, falhas sanitizadas. 16 testes locais de resolução passaram, inclusive interrupção de processo bloqueado sem DNS externo; CI pendente. Conjunto completo segue para política de IPs. Ainda falta composição HTTP/redirects/streaming e validação controlada de TLS real; não integrado ao bot.
