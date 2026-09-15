@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.10 — Compor DNS/TLS com requisição HTTP limitada
+**Próximo item:** V2.10 — Validar transporte controlado e ampliar testes de streaming
 
 **Última atualização:** 15/09/2026
 
@@ -376,3 +376,5 @@ Conexão TLS ao IP validado preparada isoladamente em infrastructure/scrapers/pi
 Orquestração de resolução preparada em resolved_destination.py: resolvedor injetável, conjunto completo validado, teto DNS de três segundos dentro do deadline total e falhas sem detalhes sensíveis. Seis testes locais passaram; CI 35001642812 aprovado em af86bc7. Resolvedor real com I/O interrompível e composição com TLS/HTTP ainda pendentes; não há tráfego externo.
 
 Resolvedor real preparado em system_dns.py: getaddrinfo A/AAAA em subprocesso isolado, timeout encerra e aguarda filho; sem shell, falhas sanitizadas. 16 testes locais de resolução passaram, inclusive interrupção de processo bloqueado sem DNS externo; CI 35001969996 aprovado em 1d45731. Conjunto completo segue para política de IPs. Ainda falta composição HTTP/redirects/streaming e validação controlada de TLS real; não integrado ao bot.
+
+GET limitado preparado em limited_http.py: compõe DNS validado/TLS fixado, HTML 200, identidade de encoding, teto de 2 MiB e prazo monotônico com interrupção do socket. Redirects/compressão recusados. Sete testes falsos passaram; CI pendente. Validação real controlada, redirects seguros e cobertura adicional de streaming/prazo ainda pendentes; não integrado ao bot.
