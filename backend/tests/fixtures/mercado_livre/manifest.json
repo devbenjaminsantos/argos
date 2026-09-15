@@ -1,0 +1,50 @@
+[
+  {
+    "file": "json_ld_priority.html",
+    "final_url": "https://www.mercadolivre.com.br/notebook/p/MLB123456",
+    "expected": {
+      "title": "Notebook de teste",
+      "price_cents": 349990,
+      "source": "json-ld"
+    }
+  },
+  {
+    "file": "malformed_json_meta.html",
+    "final_url": "https://www.mercadolivre.com.br/notebook/p/MLB123456",
+    "expected": {
+      "title": "Caneca de teste",
+      "price_cents": 15000,
+      "source": "meta"
+    }
+  },
+  {
+    "file": "visible_price.html",
+    "final_url": "https://www.mercadolivre.com.br/notebook/p/MLB123456",
+    "expected": {
+      "title": "Notebook",
+      "price_cents": 219990,
+      "source": "visible-dom"
+    }
+  },
+  {
+    "file": "access_blocked.html",
+    "final_url": "https://www.mercadolivre.com.br/notebook/p/MLB123456",
+    "expected": {
+      "error": "access_blocked"
+    }
+  },
+  {
+    "file": "unavailable.html",
+    "final_url": "https://www.mercadolivre.com.br/notebook/p/MLB123456",
+    "expected": {
+      "error": "product_unavailable"
+    }
+  },
+  {
+    "file": "missing_price.html",
+    "final_url": "https://www.mercadolivre.com.br/notebook/p/MLB123456",
+    "expected": {
+      "error": "price_not_found"
+    }
+  }
+]
