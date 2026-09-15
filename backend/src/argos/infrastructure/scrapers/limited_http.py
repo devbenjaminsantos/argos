@@ -9,6 +9,8 @@ from argos.infrastructure.scrapers.resolved_destination import resolve_destinati
 from argos.infrastructure.scrapers.system_dns import SystemDestinationResolver
 from argos.infrastructure.scrapers.pinned_tls import PinnedTLSConnection
 
+TOTAL_TIMEOUT_SECONDS = 15
+
 MAX_BODY_BYTES = 2 * 1024 * 1024
 
 
@@ -20,7 +22,7 @@ def _interrupt(sock):
 
 
 def fetch_html_once(url: str, *, resolver=None) -> bytes:
-    deadline = time.monotonic() + 15
+    deadline = time.monotonic() + TOTAL_TIMEOUT_SECONDS
     destination = resolve_destination(url, resolver or SystemDestinationResolver(), deadline=deadline)
     remaining = deadline - time.monotonic()
     if remaining <= 0:

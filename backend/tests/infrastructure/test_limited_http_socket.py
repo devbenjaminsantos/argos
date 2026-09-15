@@ -55,3 +55,28 @@ def test_real_stream_exceeding_limit_is_rejected(monkeypatch):
             module.fetch_html_once('https://www.mercadolivre.com.br/p/MLB123',resolver=Resolver())
     finally:
         client.close();thread.join(timeout=2)
+
+
+def test_total_deadline_interrupts_blocked_read(monkeypatch):
+    client,server=socket.socketpair()
+    stopped=threading.Event()
+    class Pinned:
+        socket=client
+        def __init__(self,*args,**kwargs): pass
+        def __enter__(self): return self
+        def __exit__(self,*args): client.close()
+    monkeypatch.setattr(module,'PinnedTLSConnection',Pinned)
+    monkeypatch.setattr(module,'TOTAL_TIMEOUT_SECONDS',0.3)
+    def serve():
+        try:
+            server.recv(4096)
+            server.sendall(b'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 100\r\n\r\nx')
+            stopped.wait(3)
+        finally: server.close()
+    thread=threading.Thread(target=serve);thread.start()
+    try:
+        with pytest.raises(FetchPolicyError,match='timeout'):
+            module.fetch_html_once('https://www.mercadolivre.com.br/p/MLB123',resolver=Resolver())
+    finally:
+        stopped.set();client.close();thread.join(timeout=2)
+    assert not thread.is_alive()
