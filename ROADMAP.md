@@ -280,7 +280,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 
 - [x] Preparar contrato de fetch seguro em docs/V2_SAFE_FETCH.md: hosts exatos, DNS/IP fixado com TLS, redirects e limites de streaming; sem implementação ou tráfego externo.
 - [x] Implementar política pura de destinos e suíte negativa: hosts exatos, IPs/ranges IPv4/IPv6, respostas mistas e limite DNS; 44 testes locais passaram. CI 34992039718 aprovado em 5489150.
-- [x] Preparar transporte isolado com IP validado fixado e TLS/SNI preservados, sem DNS implícito/proxy/redirect automático. Handshake TLS real e leitura bloqueada validados com sockets locais; 35 testes relacionados passaram. Ainda não integrado ao coletor.
+- [x] Preparar transporte isolado com IP validado fixado e TLS/SNI preservados, sem DNS implícito/proxy/redirect automático. Handshake TLS real e leitura bloqueada validados com sockets locais; 35 testes relacionados passaram. CI 35004349707 aprovado em 35bc1c7. Ainda não integrado ao coletor.
 
 - [ ] Aceitar apenas HTTPS e hosts explicitamente suportados.
 - [ ] Rejeitar credenciais, portas alternativas e URLs malformadas.
