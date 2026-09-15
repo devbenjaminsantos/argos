@@ -104,3 +104,5 @@ ConfirmTelegramRemoval e PostgreSQLTelegramRemovalConfirmationRepository validam
 Confirmação aprovada no CI 34891404234, commit b81e3eb, com PostgreSQL real; cinco testes locais novos passaram. Próximo incremento: integração pública com testes de fluxo completo. Nenhum deploy necessário neste incremento isolado.
 
 Integração pública preparada em 15/09/2026: `/remover` admitido e composto no worker, ajuda atualizada; seleção/confirmação de texto delegadas na mesma transação do dispatcher. Testes HTTP→worker→PostgreSQL com updates repetidos e saída falsa preparados para remover e cancelar. CI/deploy/aceitação ainda pendentes; migração 09 já aplicada.
+
+Integração aprovada no CI 34978574492, commit 072d5b0, com PostgreSQL real, fluxo HTTP de remover/cancelar e updates repetidos; 166 testes locais de aplicação/API aprovados. Deploy manual e aceitação no bot pendentes; migração 09 já aplicada, nenhuma migração adicional.

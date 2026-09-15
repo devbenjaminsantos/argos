@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Validar CI e implantar remoção no bot
+**Próximo item:** V2.9 — Implantar e aceitar remoção no bot
 
 **Última atualização:** 14/09/2026
 
@@ -266,7 +266,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implementar confirmação vinculada à proposta: UUID próprio ativo, código completo, desativação/consumo/resposta atômicos e replay preservando substituto; sem integração pública.
 - [x] Validar confirmação no CI 34891404234, commit b81e3eb, com PostgreSQL real; cinco testes locais novos passaram.
 - [x] Integrar início/seleção/confirmação ao worker, webhook e ajuda; texto delega seleção/confirmação na mesma transação após resultado por update e bloqueio do estado.
-- [ ] Validar fluxo HTTP completo de remoção/cancelamento no CI e aceitar após deploy manual.
+- [x] Validar fluxo HTTP completo de remoção/cancelamento no CI 34978574492, commit 072d5b0, com PostgreSQL real e updates repetidos; 166 testes locais de aplicação/API aprovados.
+- [ ] Aceitar remoção após deploy manual: cancelar proposta, código incorreto, remover com código correto e conferir listagem; menu BotFather somente após validação.
 - [ ] Implementar início/seleção/confirmação de remoção; validar CI, aplicar migração administrativa e aceitar fluxo no bot após deploy manual.
 
 - [ ] Escopar todas as operações ao usuário Telegram.
