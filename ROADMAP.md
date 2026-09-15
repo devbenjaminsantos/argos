@@ -279,7 +279,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 ### V2.10 — Segurança de URLs e SSRF
 
 - [x] Preparar contrato de fetch seguro em docs/V2_SAFE_FETCH.md: hosts exatos, DNS/IP fixado com TLS, redirects e limites de streaming; sem implementação ou tráfego externo.
-- [x] Implementar política pura de destinos e suíte negativa: hosts exatos, IPs/ranges IPv4/IPv6, respostas mistas e limite DNS; 44 testes locais passaram. CI pendente.
+- [x] Implementar política pura de destinos e suíte negativa: hosts exatos, IPs/ranges IPv4/IPv6, respostas mistas e limite DNS; 44 testes locais passaram. CI 34992039718 aprovado em 5489150.
 - [ ] Preparar transporte com IP validado fixado e TLS/SNI preservados, sem DNS implícito/proxy/redirect automático.
 
 - [ ] Aceitar apenas HTTPS e hosts explicitamente suportados.
