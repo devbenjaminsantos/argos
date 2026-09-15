@@ -1,10 +1,11 @@
-"""Um GET HTML limitado; redirects ainda recusados."""
+"""GET HTML limitado com revalidação completa por redirecionamento."""
 import http.client
 import socket
 import threading
 import time
-from urllib.parse import urlsplit
-from argos.domain.safe_fetch import FetchPolicyError
+from dataclasses import dataclass
+from urllib.parse import urljoin, urlsplit
+from argos.domain.safe_fetch import FetchPolicyError, validate_fetch_url
 from argos.infrastructure.scrapers.resolved_destination import resolve_destination
 from argos.infrastructure.scrapers.system_dns import SystemDestinationResolver
 from argos.infrastructure.scrapers.pinned_tls import PinnedTLSConnection
@@ -21,8 +22,31 @@ def _interrupt(sock):
         pass
 
 
+@dataclass(frozen=True)
+class _Redirect:
+    url: str
+
+
 def fetch_html_once(url: str, *, resolver=None) -> bytes:
+    """Uma coleta, sem retries, com até três redirecionamentos."""
     deadline = time.monotonic() + TOTAL_TIMEOUT_SECONDS
+    resolver = resolver or SystemDestinationResolver()
+    current = validate_fetch_url(url)
+    seen: set[str] = set()
+    for hop in range(4):
+        if current in seen:
+            raise FetchPolicyError("redirect_rejected")
+        seen.add(current)
+        result = _fetch_hop(current, resolver=resolver, deadline=deadline)
+        if isinstance(result, bytes):
+            return result
+        if hop == 3:
+            raise FetchPolicyError("redirect_limit")
+        current = result.url
+    raise FetchPolicyError("redirect_limit")
+
+
+def _fetch_hop(url: str, *, resolver, deadline: float) -> bytes | _Redirect:
     destination = resolve_destination(url, resolver or SystemDestinationResolver(), deadline=deadline)
     remaining = deadline - time.monotonic()
     if remaining <= 0:
@@ -44,6 +68,16 @@ def fetch_html_once(url: str, *, resolver=None) -> bytes:
             # while streaming still needs timeout control on that socket.
             response = http.client.HTTPResponse(pinned.socket)
             response.begin()
+            if response.status in (301, 302, 303, 307, 308):
+                location = response.getheader("Location")
+                if not location or len(location) > 2048 or any(ord(c) < 32 or ord(c) == 127 for c in location):
+                    raise FetchPolicyError("redirect_rejected")
+                try:
+                    target = validate_fetch_url(urljoin(destination.url, location))
+                except ValueError:
+                    raise FetchPolicyError("redirect_rejected") from None
+                # Never consume a redirect body; cleanup occurs before the next DNS lookup.
+                return _Redirect(target)
             if response.status != 200:
                 raise FetchPolicyError("redirect_rejected" if 300 <= response.status < 400 else "http_failed")
             if response.getheader("Content-Type", "").split(";",1)[0].strip().lower() != "text/html":
