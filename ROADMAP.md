@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.10 — Revisar framing HTTP e respostas truncadas
+**Próximo item:** V2.10 — Preparar resultado com HTML e URL final validada
 
 **Última atualização:** 15/09/2026
 
@@ -286,7 +286,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Rejeitar credenciais, portas alternativas e URLs malformadas.
 - [ ] Resolver DNS e bloquear destinos privados, locais ou reservados.
 - [x] Validar cada redirecionamento e limitar tamanho e duração no transporte isolado; até três saltos, nova resolução/IP fixado, ciclos recusados e deadline compartilhado. 53 testes relacionados passaram localmente; CI 35004734079 aprovado em 2fdb00a.
-- [ ] Revisar framing HTTP e rejeição de respostas truncadas antes de integrar ao coletor.
+- [x] Revisar framing HTTP e rejeição de respostas truncadas antes de integrar ao coletor; 68 testes relacionados passaram localmente.
+- [ ] Preparar resultado de transporte com HTML limitado e URL final validada para o extrator.
 - [ ] Criar testes com URLs maliciosas.
 
 **Critério de conclusão:** o coletor não funciona como proxy genérico nem alcança rede interna.

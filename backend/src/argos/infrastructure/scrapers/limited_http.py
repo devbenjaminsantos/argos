@@ -68,6 +68,22 @@ def _fetch_hop(url: str, *, resolver, deadline: float) -> bytes | _Redirect:
             # while streaming still needs timeout control on that socket.
             response = http.client.HTTPResponse(pinned.socket)
             response.begin()
+            # Refuse ambiguous framing rather than relying on parser precedence.
+            headers = response.getheaders()
+            lengths = [value.strip() for key, value in headers if key.lower() == "content-length"]
+            transfers = [value.strip().lower() for key, value in headers if key.lower() == "transfer-encoding"]
+            if len(lengths) > 1 or len(transfers) > 1 or (lengths and transfers):
+                raise FetchPolicyError("http_failed")
+            if transfers and transfers != ["chunked"]:
+                raise FetchPolicyError("http_failed")
+            declared = None
+            if lengths:
+                length = lengths[0]
+                if not length or not length.isascii() or not length.isdecimal():
+                    raise FetchPolicyError("http_failed")
+                declared = int(length)
+                if declared > MAX_BODY_BYTES:
+                    raise FetchPolicyError("body_too_large")
             if response.status in (301, 302, 303, 307, 308):
                 location = response.getheader("Location")
                 if not location or len(location) > 2048 or any(ord(c) < 32 or ord(c) == 127 for c in location):
@@ -84,16 +100,6 @@ def _fetch_hop(url: str, *, resolver, deadline: float) -> bytes | _Redirect:
                 raise FetchPolicyError("invalid_content_type")
             if response.getheader("Content-Encoding", "identity").strip().lower() not in ("", "identity"):
                 raise FetchPolicyError("unsupported_encoding")
-            length = response.getheader("Content-Length")
-            if length is not None:
-                try:
-                    declared = int(length)
-                except ValueError:
-                    raise FetchPolicyError("http_failed") from None
-                if declared < 0:
-                    raise FetchPolicyError("http_failed")
-                if declared > MAX_BODY_BYTES:
-                    raise FetchPolicyError("body_too_large")
             body = bytearray()
             while True:
                 remaining = deadline - time.monotonic()
@@ -108,9 +114,13 @@ def _fetch_hop(url: str, *, resolver, deadline: float) -> bytes | _Redirect:
                     raise FetchPolicyError("body_too_large")
             if time.monotonic() >= deadline:
                 raise FetchPolicyError("timeout")
+            if declared is not None and len(body) != declared:
+                raise FetchPolicyError("http_failed")
             return bytes(body)
         except FetchPolicyError:
             raise
+        except http.client.IncompleteRead:
+            raise FetchPolicyError("timeout" if time.monotonic() >= deadline else "http_failed") from None
         except Exception:
             raise FetchPolicyError("timeout" if time.monotonic() >= deadline else "transport_failed") from None
         finally:

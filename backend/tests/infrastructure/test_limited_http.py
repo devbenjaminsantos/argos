@@ -18,6 +18,7 @@ def transport(monkeypatch):
         headers={'Content-Type':'text/html'}
         body=b'<html>ok</html>'
         def getheader(self,key,default=None): return self.headers.get(key,default)
+        def getheaders(self): return list(self.headers.items())
         def begin(self): pass
         def close(self): pass
         def read(self,size):
