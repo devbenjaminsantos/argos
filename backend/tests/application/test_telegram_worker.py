@@ -1,5 +1,6 @@
 """Testes do worker Telegram sem banco ou rede."""
 
+from argos.application.use_cases.begin_removal import BeginTelegramRemoval
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -79,6 +80,11 @@ class _InboxStub:
     ) -> bool:
         self.dead_letters.append((update_id, lease_token, error_code))
         return True
+
+
+class _RemovalStub:
+    def begin_for_update(self, **kwargs):
+        return TelegramMessage(chat_id=kwargs['chat_id'],text='Lista para remoção')
 
 
 class _ProductsStub:
@@ -165,6 +171,7 @@ def _worker(
         ),
         begin_registration=BeginTelegramRegistration(registrations or _RegistrationStub()),
         receive_registration_text=ReceiveTelegramRegistrationText(urls or _RegistrationURLStub()),
+        begin_removal=BeginTelegramRemoval(_RemovalStub()),
         list_products=ListTelegramProducts(_ProductsStub()),
         sender=sender,
         lease_duration=timedelta(seconds=20),

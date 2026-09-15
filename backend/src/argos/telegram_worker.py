@@ -1,5 +1,7 @@
 """Composição do worker Telegram executado uma vez por processo."""
 
+from argos.application.use_cases.begin_removal import BeginTelegramRemoval
+from argos.infrastructure.database.telegram_removal import PostgreSQLTelegramRemovalRepository
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import Engine
@@ -55,6 +57,7 @@ def build_worker(
         receive_registration_text=ReceiveTelegramRegistrationText(
             PostgreSQLTelegramRegistrationTextRepository(engine)
         ),
+        begin_removal=BeginTelegramRemoval(PostgreSQLTelegramRemovalRepository(engine)),
         list_products=ListTelegramProducts(PostgreSQLTelegramProductsRepository(engine)),
         sender=sender,
         lease_duration=timedelta(

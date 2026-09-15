@@ -1,5 +1,7 @@
 """Seleção do passo de texto e resposta durável sob o lease da inbox."""
 
+from argos.infrastructure.database.telegram_removal_selection import PostgreSQLTelegramRemovalSelectionRepository
+from argos.infrastructure.database.telegram_removal_confirmation import PostgreSQLTelegramRemovalConfirmationRepository
 from datetime import datetime
 from uuid import UUID, uuid4
 
@@ -27,6 +29,8 @@ from argos.infrastructure.database.models import (
 class PostgreSQLTelegramRegistrationTextRepository:
     def __init__(self, engine: Engine) -> None:
         self._engine = engine
+        self._removal_selection = PostgreSQLTelegramRemovalSelectionRepository(engine)
+        self._removal_confirmation = PostgreSQLTelegramRemovalConfirmationRepository(engine)
         self._confirmation = PostgreSQLTelegramRegistrationConfirmationRepository(engine)
 
     def receive_for_update(
@@ -74,6 +78,11 @@ class PostgreSQLTelegramRegistrationTextRepository:
             reply = url_replies.no_active_draft
             if user is not None and draft is not None and draft["expires_at"] > effective_at:
                 state = draft["state"]
+                if state in ("awaiting_product_to_remove", "awaiting_removal_confirmation"):
+                    adapter = self._removal_selection if state == "awaiting_product_to_remove" else self._removal_confirmation
+                    method = adapter.select_in_transaction if state == "awaiting_product_to_remove" else adapter.confirm_in_transaction
+                    return method(connection=connection, update_id=update_id, lease_token=lease_token,
+                        telegram_user_id=telegram_user_id, chat_id=chat_id, text=text, observed_at=observed_at)
                 if state == "awaiting_confirmation":
                     return self._confirmation.confirm_in_transaction(
                         connection=connection, update_id=update_id, lease_token=lease_token,

@@ -1,5 +1,6 @@
 """Processamento recuperável de uma entrega da inbox Telegram."""
 
+from argos.application.use_cases.begin_removal import BeginTelegramRemoval
 from datetime import datetime, timedelta
 from typing import cast
 
@@ -29,6 +30,7 @@ class TelegramInboxWorker:
         cancel_conversation: CancelTelegramConversation,
         begin_registration: BeginTelegramRegistration,
         receive_registration_text: ReceiveTelegramRegistrationText,
+        begin_removal: BeginTelegramRemoval,
         list_products: ListTelegramProducts,
         sender: TelegramMessageSender,
         lease_duration: timedelta = timedelta(seconds=30),
@@ -42,6 +44,7 @@ class TelegramInboxWorker:
         self._cancel = cancel_conversation
         self._registration = begin_registration
         self._registration_url = receive_registration_text
+        self._removal = begin_removal
         self._products = list_products
         self._sender = sender
         self._lease_duration = lease_duration
@@ -77,6 +80,9 @@ class TelegramInboxWorker:
                     chat_id=chat_id,
                     text=text,
                 )
+            elif command == "/remover":
+                reply = self._removal.execute(update_id=claimed.update_id, lease_token=claimed.lease_token,
+                    telegram_user_id=telegram_user_id, chat_id=chat_id, text=text, observed_at=now)
             elif command == "/adicionar":
                 reply = self._registration.execute(
                     update_id=claimed.update_id,

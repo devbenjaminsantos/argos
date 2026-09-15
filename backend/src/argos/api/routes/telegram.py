@@ -28,7 +28,7 @@ def _is_supported_input(text: str) -> bool:
     value = text.strip()
     if value and not value.startswith("/"):
         return True
-    return value.casefold() in {"/start", "/ajuda", "/cancelar", "/adicionar", "/produtos"}
+    return value.casefold() in {"/start", "/ajuda", "/cancelar", "/adicionar", "/produtos", "/remover"}
 
 
 def _authenticate(request: Request, settings: Settings) -> None:
