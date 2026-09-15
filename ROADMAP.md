@@ -286,7 +286,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Rejeitar credenciais, portas alternativas e URLs malformadas.
 - [ ] Resolver DNS e bloquear destinos privados, locais ou reservados.
 - [x] Validar cada redirecionamento e limitar tamanho e duração no transporte isolado; até três saltos, nova resolução/IP fixado, ciclos recusados e deadline compartilhado. 53 testes relacionados passaram localmente; CI 35004734079 aprovado em 2fdb00a.
-- [x] Revisar framing HTTP e rejeição de respostas truncadas antes de integrar ao coletor; 68 testes relacionados passaram localmente.
+- [x] Revisar framing HTTP e rejeição de respostas truncadas antes de integrar ao coletor; 68 testes relacionados passaram localmente; CI 35005275274 aprovado em 86d7951.
 - [ ] Preparar resultado de transporte com HTML limitado e URL final validada para o extrator.
 - [ ] Criar testes com URLs maliciosas.
 
