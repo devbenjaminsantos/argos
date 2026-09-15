@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Implementar extração JSON-LD e conversão monetária
+**Próximo item:** V2.11 — Preparar leitura HTML e classificação de bloqueio
 
 **Última atualização:** 15/09/2026
 
@@ -298,7 +298,9 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Implementar `/verificar` para um produto cadastrado.
 - [ ] Registrar sucesso e falhas explícitas, nunca preço zero.
 - [x] Preparar contrato e seis fixtures sintéticas com resultados esperados em docs/V2_MERCADO_LIVRE_EXTRACTION.md.
-- [ ] Criar testes do extrator Python e ampliar fixtures para casos negativos.
+- [x] Implementar componente JSON-LD e conversão Decimal isolados; 32 testes locais passaram.
+- [ ] Implementar leitura HTML e classificação de bloqueio antes da extração.
+- [ ] Criar testes do extrator HTML completo e ampliar fixtures para casos negativos.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
 

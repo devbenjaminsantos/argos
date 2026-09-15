@@ -2,7 +2,7 @@
 
 ## Estado e origem
 
-O extrator Python ainda não está implementado. O transporte isolado retorna `FetchedHTML(html: bytes, final_url: str)` após validar destino, redirects e limites. Esta preparação foi baseada em `src/stores/mercado-livre/extractor.ts` e `tests/mercado-livre-extractor.test.ts`; não houve acesso a anúncios reais.
+A extração JSON-LD isolada está implementada; o extrator HTML completo ainda não. O transporte isolado retorna `FetchedHTML(html: bytes, final_url: str)` após validar destino, redirects e limites. Esta preparação foi baseada em `src/stores/mercado-livre/extractor.ts` e `tests/mercado-livre-extractor.test.ts`; não houve acesso a anúncios reais.
 
 As seis fixtures em `backend/tests/fixtures/mercado_livre/` são sintéticas, mínimas e sem dados de usuários. `manifest.json` registra URL final e resultado esperado para a futura suíte Python. Não comprovam compatibilidade com o HTML atual da loja.
 
@@ -29,6 +29,6 @@ Bloqueio identificado por captcha/título ou frases de verificação humana tem 
 - `unavailable.html`: indisponibilidade sem preço.
 - `missing_price.html`: preço zero inválido, erro explícito.
 
-Próximo incremento: implementar somente JSON-LD e conversão monetária com Decimal, usando fixtures e casos de valores inválidos, moeda e estrutura ambígua. Definir explicitamente arredondamento, limite monetário e ofertas múltiplas antes de portar esses comportamentos; não copiar permissividade numérica da V1 automaticamente. Meta e DOM serão incrementos posteriores. Charset/decodificação e limites do parser também precisam de decisão antes da composição com transporte.
+Extração JSON-LD isolada implementada em infrastructure/scrapers/mercado_livre/json_ld.py: Product/arrays/@graph, offers.price/lowPrice, Decimal e centavos exatos positivos até 999999999, sem arredondamento; strings decimais com ponto, sem formato local/expoente. Moeda ausente aceita no contexto ML Brasil; moeda explícita diferente de BRL falha. Preços válidos conflitantes falham ambiguous_price, iguais concordam. Scripts inválidos/valores inválidos permitem fonte posterior; limites de 32 scripts, 2 MiB de texto e profundidade 32. 32 testes locais passaram. Não interpreta HTML, não classifica bloqueio e não está composto com transporte/bot. Próximo incremento: leitura inerte do HTML, charset e classificação de bloqueio antes de JSON-LD; meta/DOM posteriores.
 
 Coleta persistida, `/verificar`, observações e job continuam pendentes. A aceitação manual entre duas contas da V2.9 permanece aberta. A V2.10 não deve ser declarada encerrada apenas por estas fixtures.
