@@ -49,3 +49,5 @@ Falhas devem ser tipadas: invalid_url, host_not_allowed, dns_failed, forbidden_a
 4. Teste controlado do adaptador real para provar resolução única/destino fixado; separado de anúncios reais e sem segredos. Só depois selecionar fixtures de extração da loja e planejar coleta persistida.
 
 Esta preparação não conclui V2.10, não habilita `/verificar` e não substitui a aceitação com dois usuários da V2.9. Próximo incremento: política pura de destinos e suíte negativa, sem chamadas externas.
+
+Política pura implementada em domain/safe_fetch.py: valida hosts exatos e conjuntos DNS completos (máximo 16), rejeita ranges especiais e normaliza IPv4 mapeado. 44 testes locais passaram; CI pendente. Sem resolvedor/transporte ou tráfego externo. Próximo incremento: transporte ao IP validado com TLS/SNI.
