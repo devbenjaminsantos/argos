@@ -106,3 +106,7 @@ Confirmação aprovada no CI 34891404234, commit b81e3eb, com PostgreSQL real; c
 Integração pública preparada em 15/09/2026: `/remover` admitido e composto no worker, ajuda atualizada; seleção/confirmação de texto delegadas na mesma transação do dispatcher. Testes HTTP→worker→PostgreSQL com updates repetidos e saída falsa preparados para remover e cancelar. CI/deploy/aceitação ainda pendentes; migração 09 já aplicada.
 
 Integração aprovada no CI 34978574492, commit 072d5b0, com PostgreSQL real, fluxo HTTP de remover/cancelar e updates repetidos; 166 testes locais de aplicação/API aprovados. Deploy manual e aceitação no bot pendentes; migração 09 já aplicada, nenhuma migração adicional.
+
+## Relato manual e evidência de produção — 15/09/2026
+
+Usuário relatou fluxo operante. Deploy dep-dakl6e8u01pc73fhdp20, c3f9a85, está live. Consulta agregada independente encontrou um produto ativo, zero removidos, zero rascunhos e 89 updates completed, sem outros estados. Nas categorias consultadas, somente dois resultados de cancelamento; nenhum resumo de proposta, código incorreto, remoção ou lista vazia persistido. Assim, relato registrado, mas aceitação completa da remoção continua pendente de evidência. Não houve mutação de dados durante essa verificação.
