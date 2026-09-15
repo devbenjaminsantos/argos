@@ -87,3 +87,5 @@ Em 12/09/2026, o usuário confirmou a resposta “Não há nenhuma operação em
 Ajuste de mensagens em 9008db6: 33 testes locais focados passaram. CI 34990105419 aprovado em 9008db6; deploy manual e aceitação das mensagens pendentes.
 
 Conexão TLS ao IP validado preparada isoladamente em infrastructure/scrapers/pinned_tls.py, sem DNS implícito, mantendo SNI/certificado pelo hostname. Seis testes locais com sockets falsos passaram; CI 34992693219 aprovado em c8a288b. Falhas fecham socket; prazo TCP/TLS compartilhado de até cinco segundos. Ainda faltam resolvedor, HTTP, redirects, streaming limitado e teste controlado real; componente não integrado ao bot.
+
+Orquestração de resolução preparada em resolved_destination.py: resolvedor injetável, conjunto completo validado, teto DNS de três segundos dentro do deadline total e falhas sem detalhes sensíveis. Seis testes locais passaram; CI pendente. Resolvedor real com I/O interrompível e composição com TLS/HTTP ainda pendentes; não há tráfego externo.
