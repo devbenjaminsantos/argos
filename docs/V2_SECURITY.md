@@ -126,6 +126,8 @@ O caminho do webhook não é considerado segredo. Trocar a URL sem validar o cab
 
 ## SSRF e coleta de páginas
 
+Contrato de implementação planejado: [V2_SAFE_FETCH.md](V2_SAFE_FETCH.md). Ainda não há transporte seguro implementado; validação sintática de cadastro não autoriza tráfego.
+
 ### Ameaças
 
 - acesso a loopback, rede privada, link-local ou endpoints de metadados cloud;

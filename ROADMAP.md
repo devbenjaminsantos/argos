@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.10 — Preparar contrato de fetch seguro; duas contas pendentes
+**Próximo item:** V2.10 — Implementar política pura de destinos e testes negativos
 
 **Última atualização:** 15/09/2026
 
@@ -277,6 +277,9 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 **Critério de conclusão:** dois usuários gerenciam listas isoladas com limite individual de três produtos.
 
 ### V2.10 — Segurança de URLs e SSRF
+
+- [x] Preparar contrato de fetch seguro em docs/V2_SAFE_FETCH.md: hosts exatos, DNS/IP fixado com TLS, redirects e limites de streaming; sem implementação ou tráfego externo.
+- [ ] Implementar política pura de destinos e suíte negativa antes de escolher transporte.
 
 - [ ] Aceitar apenas HTTPS e hosts explicitamente suportados.
 - [ ] Rejeitar credenciais, portas alternativas e URLs malformadas.

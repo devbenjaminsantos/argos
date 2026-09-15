@@ -1,0 +1,51 @@
+# Contrato de fetch seguro do coletor
+
+Estado em 15/09/2026: contrato preparado, sem implementação de fetch. Complementa V2_SECURITY.md. Validação sintática de anúncio existe; DNS, transporte seguro e extração Python ainda não existem. Nenhuma URL deve gerar tráfego pelo futuro coletor antes da suíte negativa aprovada.
+
+## Fronteira e destinos
+
+Coleta recebe somente produto ativo autorizado, carregado por UUID e telegram_user_id. Não expor endpoint de proxy nem receber URL arbitrária para buscar conteúdo. Configuração da política é interna e não pode ser ampliada por mensagens Telegram.
+
+Allowlist inicial exata: mercadolivre.com.br, www.mercadolivre.com.br e produto.mercadolivre.com.br. São destinos planejados, sem prova de acessibilidade ou extração nesta etapa. Revalidar URL a cada execução: HTTPS, porta ausente ou 443, sem credenciais, controles, barra invertida, host literal, ponto final ou nome ambíguo. Não herdar automaticamente a aceitação sintática de qualquer subdomínio. Host fora da política produz falha explícita, mesmo para URL já cadastrada.
+
+Entrada inicial exige caminho de anúncio válido pelo normalizador existente. Redirect deve continuar em host exato permitido e caminho de anúncio; bloqueios/login/interstitials não justificam ampliar a política automaticamente. Resolver Location relativo contra URL atual; remover fragmento e revalidar antes de resolver DNS. Não buscar scripts, imagens ou recursos incorporados.
+
+## DNS e conexão
+
+Resolver A e AAAA com prazo limitado. Rejeitar resposta vazia, inválida, excessiva ou contendo qualquer destino privado, reservado, loopback, link-local, multicast, unspecified ou não global. Classificar IPv4 e IPv6; IPv4 mapeado em IPv6 deve ser avaliado também como IPv4. Definir tabela de ranges e testes explícitos, sem depender somente de heurística da biblioteca.
+
+Resposta mista público/privado é recusada inteira. Limite inicial de 16 endereços, contando o conjunto retornado; não validar somente o primeiro. Cada conexão usa exclusivamente endereço validado desse conjunto, sem segunda resolução implícita pelo cliente HTTP. Preservar hostname original em SNI, verificação de certificado e Host; não desabilitar TLS para conectar por IP. Verificar peer quando o transporte o permitir; testes precisam provar que a conexão usa o endereço aprovado.
+
+Desativar proxies de ambiente, cookies, autenticação e redirects automáticos. Não reutilizar conexão de outro host ou sessão autenticada. Falha de transporte não deve acionar fallback com resolução não validada. Se a biblioteca não permitir fixar destino mantendo TLS/SNI, implementação permanece bloqueada; selecionar adaptador em incremento próprio. DNS falso no teste deve conseguir alternar resposta pública/privada para demonstrar proteção contra rebinding.
+
+## Limites iniciais
+
+| Recurso | Limite planejado |
+| --- | --- |
+| URL | 2048 caracteres, inclusive em redirects |
+| DNS | 3 segundos por resolução, dentro do prazo total |
+| Conexão/TLS | 5 segundos, dentro do prazo total |
+| Inatividade de leitura | 5 segundos |
+| Tempo total | 15 segundos, incluindo DNS, redirects e leitura |
+| Redirects | Até 3; ciclos recusados |
+| Corpo transferido | 2 MiB |
+| Corpo descomprimido | 2 MiB |
+
+Prazo total é monotônico e não reinicia a cada hop/chunk. Streaming contabiliza bytes, mesmo sem Content-Length ou com declaração incorreta; Content-Length excessivo permite rejeição antecipada. Solicitar identidade de encoding; se houver compressão, decoder limitado precisa respeitar ambos os tetos ou recusar encoding sem suporte seguro. Não carregar corpo integral antes de aplicar limites. Aceitar somente sucesso HTTP 200 com conteúdo HTML; outros statuses/MIME produzem erro explícito. Sem execução de JavaScript ou HTML remoto.
+
+Não aplicar retries automáticos neste primeiro adaptador. Política de retry/agendamento pertence ao job futuro e deve limitar tentativas. Erro de coleta nunca vira preço zero.
+
+## Portas e resultados planejados
+
+Aplicação depende de porta de coleta por produto autorizado; domínio não importa cliente HTTP. Infraestrutura separa política de URL/destino, resolvedor DNS e transporte, permitindo substitutos falsos independentes. Sucesso retorna HTML limitado e URL final validada para extrator da loja; HTML não é mensagem Telegram nem material de log.
+
+Falhas devem ser tipadas: invalid_url, host_not_allowed, dns_failed, forbidden_address, redirect_rejected, redirect_limit, timeout, body_too_large, unsupported_encoding, invalid_content_type, http_failed e transport_failed. Não incluir URL completa, query, HTML, cookies ou credenciais em exceptions/logs. Logs podem conter código, host normalizado e correlação. Futuro registro de observação distingue erro e último preço válido; ainda não implementado.
+
+## Critérios de teste e sequência
+
+1. Política pura: hosts exatos, caminhos, portas/credenciais, controles, IPs literais, ranges IPv4/IPv6 e respostas mistas. Não faz rede.
+2. Transporte falso: pinning de IP, TLS/Host/SNI preservados, rebinding, nenhum proxy/cookie, redirects relativos/proibidos/cíclicos, múltiplos IPs.
+3. Streaming falso: status/MIME, corpos sem comprimento, comprimento mentiroso, teto de bytes, compressão excessiva, prazo total e leitura lenta.
+4. Teste controlado do adaptador real para provar resolução única/destino fixado; separado de anúncios reais e sem segredos. Só depois selecionar fixtures de extração da loja e planejar coleta persistida.
+
+Esta preparação não conclui V2.10, não habilita `/verificar` e não substitui a aceitação com dois usuários da V2.9. Próximo incremento: política pura de destinos e suíte negativa, sem chamadas externas.
