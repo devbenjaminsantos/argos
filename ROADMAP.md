@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Executar aceitação com duas contas Telegram
+**Próximo item:** V2.9 — Atualizar mensagens públicas enquanto a aceitação com duas contas aguarda
 
 **Última atualização:** 15/09/2026
 
@@ -307,7 +307,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 
 ### V2.13 — Fechamento do MVP
 
-- [ ] Configurar métricas, logs sem dados sensíveis e prontidão.
+- [x] Implementar prontidão PostgreSQL e correlação de erros sem payload/credenciais, com testes e validações anteriores.
+- [ ] Completar métricas operacionais e revisar cobertura de logs no fechamento do MVP.
 - [ ] Revisar permissões, backup, rollback e quotas do Render e Supabase.
 - [ ] Testar cold start, falhas do Telegram, bloqueio da loja e banco indisponível.
 - [ ] Executar teste de aceitação com dois usuários.
@@ -359,3 +360,5 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Extração de componentes para microsserviços, somente se houver necessidade comprovada.
 
 Em 15/09/2026, nova consulta confirmou aceitação da remoção: uma proposta, código incorreto recusado, remoção e lista vazia, todos completed em uma tentativa; zero ativos, um removido preservado, zero rascunhos e 94 updates completed sem outros estados. Pendência de evidência da desativação encerrada; isolamento manual entre dois usuários ainda não comprovado.
+
+Revisão de continuidade: docs/REPOSITORY_REVIEW_2026-09-15.md. Sem segunda conta, próximo incremento é corrigir textos de `/start` e `/adicionar` que ainda anunciam cadastro futuro. Depois preparar contrato e testes de fetch seguro/SSRF antes do coletor. Aceitação V2.9 continua pendente em paralelo.

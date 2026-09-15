@@ -7,7 +7,7 @@ O foco atual do projeto são anúncios do **Mercado Livre**. Shopee permanece fo
 ## Versões do projeto
 
 - **V1 — Chrome (implementada):** extensão local dedicada ao Mercado Livre; a aceitação manual no Chrome ainda está pendente.
-- **V2 — MVP Telegram (em desenvolvimento):** bot, API e monitoramento remoto em construção.
+- **V2 — MVP Telegram (em desenvolvimento):** cadastro, listagem e remoção no bot implementados; validação com duas contas pendente. Coleta remota e alertas ainda em construção.
 - **V3 — Plataforma cloud:** autenticação OIDC, API de clientes e integração cloud da extensão.
 - **V4 — Back-end local:** edição autohospedada e distribuível para execução na máquina do usuário.
 - **V5 — Android:** aplicativo móvel integrado ao back-end cloud.

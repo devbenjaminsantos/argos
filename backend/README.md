@@ -66,6 +66,10 @@ O webhook:
 
 O limite padrão do corpo é 64 KiB e pode ser reduzido com `ARGOS_TELEGRAM_WEBHOOK_MAX_BODY_BYTES`. O segredo deve existir somente em `ARGOS_TELEGRAM_WEBHOOK_SECRET` fora do Git.
 
+## Comandos Telegram disponíveis
+
+O worker processa `/start`, `/ajuda`, `/adicionar`, `/produtos`, `/remover` e `/cancelar`, somente em conversas privadas. Cadastro coleta URL, apelido, preço-alvo e intervalo antes de confirmar; remoção exige o código da proposta e preserva histórico. Respostas conversacionais de cadastro/remoção/cancelamento são persistidas por update para recuperação. Coleta, histórico de preços e alertas ainda não estão disponíveis. A aceitação manual com duas contas permanece pendente.
+
 ## PostgreSQL e migrações
 
 A persistência usa SQLAlchemy 2, Alembic e `psycopg`. A URL deve usar `postgresql+psycopg`; em produção a configuração exige `sslmode=verify-full` e um `sslrootcert` apontando para a CA do projeto. A CA pública Supabase Root 2021 fica versionada em `certs/prod-ca-2021.crt` e é copiada para `/app/certs/prod-ca-2021.crt` na imagem; credenciais permanecem somente no secret store. O Render usa o session pooler IPv4 do Supabase na porta 5432, porque o endpoint direto do plano atual expõe somente IPv6. `GET /health/ready` executa `SELECT 1` pelo engine com pool limitado; `GET /health` continua verificando apenas o processo HTTP. Consulte as instruções oficiais de [conexão SSL](https://supabase.com/docs/guides/database/psql#connecting-with-ssl).
