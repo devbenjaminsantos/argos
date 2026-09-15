@@ -298,7 +298,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Implementar `/verificar` para um produto cadastrado.
 - [ ] Registrar sucesso e falhas explícitas, nunca preço zero.
 - [x] Preparar contrato e seis fixtures sintéticas com resultados esperados em docs/V2_MERCADO_LIVRE_EXTRACTION.md.
-- [x] Implementar componente JSON-LD e conversão Decimal isolados; 32 testes locais passaram.
+- [x] Implementar componente JSON-LD e conversão Decimal isolados; 32 testes locais passaram; CI 35007318534 aprovado em 5cacc60.
 - [ ] Implementar leitura HTML e classificação de bloqueio antes da extração.
 - [ ] Criar testes do extrator HTML completo e ampliar fixtures para casos negativos.
 
