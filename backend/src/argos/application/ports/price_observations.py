@@ -8,6 +8,10 @@ from uuid import UUID
 from argos.domain.target_price import MAX_TARGET_PRICE_CENTS
 
 
+class PriceObservationConflictError(RuntimeError):
+    """O UUID já identifica uma observação com conteúdo diferente."""
+
+
 @dataclass(frozen=True, slots=True)
 class PriceObservation:
     observation_id: UUID
