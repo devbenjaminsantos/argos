@@ -303,7 +303,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Extrair título seguro e limitado e usar metadados como fallback ordenado quando JSON-LD não fornece preço; 49 testes focados passaram localmente e CI 35102552967 aprovado em 2510fed.
 - [x] Portar preço visível somente dos contêineres principais e fechar o resultado do extrator com identidade da URL final; 65 testes focados, suíte completa local e CI 35103344973 aprovado em 31fe398.
 - [x] Criar testes do extrator HTML completo e executar as seis fixtures do manifesto, incluindo bloqueio, indisponibilidade e preço ausente.
-- [x] Preparar caso de uso interno de verificação: alvo escopado por proprietário/UUID, uma coleta, identidade final conferida, comparação com preço-alvo e erros públicos seguros; 35 testes focados e suíte completa local passaram.
+- [x] Preparar caso de uso interno de verificação: alvo escopado por proprietário/UUID, uma coleta, identidade final conferida, comparação com preço-alvo e erros públicos seguros; 35 testes focados, suíte completa local e CI 35108277106 aprovado em df57d45.
 - [ ] Implementar adaptador PostgreSQL de leitura do alvo ativo com privilégio mínimo; ainda sem persistir observação.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
