@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Orquestrar `/verificar` com recuperação durável
+**Próximo item:** V2.11 — Compor `/verificar` no worker, ainda fora do webhook
 
 **Última atualização:** 15/09/2026
 
@@ -311,7 +311,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar o contrato Telegram de `/verificar <UUID canônico>`: parser estrito, observação determinística por `update_id` e mensagens públicas sem conteúdo remoto ou detalhe interno. Dezenove testes e a suíte completa foram aprovados no CI 35132873065, commit 5576eca; admissão, worker e ajuda permanecem sem o comando.
 - [x] Preparar recuperação escopada da observação por UUID + produto + proprietário, incluindo round-trip de sucesso/falha e recusa de escopo cruzado. Dez testes PostgreSQL do repositório foram aprovados no CI 35133476377, commit 93bc1ff.
 - [x] Preparar checkpoint curto da resposta Telegram: consulta antes da coleta e gravação depois, ambas revalidando lease/payload; replay igual reutiliza snapshot e resposta divergente falha. Oito integrações PostgreSQL foram aprovadas no CI 35135283856, commit ffb43a0.
-- [ ] Orquestrar `/verificar` fora de transação longa, recuperando observação/resultado durável antes de repetir coleta; preservar inbox, lease e resposta em retries. Não habilitar no webhook antes dos testes PostgreSQL.
+- [x] Orquestrar `/verificar` fora de transação longa na ordem resposta → observação → coleta; formatar sempre do snapshot durável e recuperar após perda de lease sem recoletar. Vinte e nove testes de aplicação passaram localmente; duas integrações PostgreSQL aguardam CI.
+- [ ] Compor o orquestrador no worker e testar claim → checkpoint → envio → conclusão, mantendo a admissão HTTP e `/ajuda` sem o comando.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
 

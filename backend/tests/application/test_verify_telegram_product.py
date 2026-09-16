@@ -1,11 +1,12 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 import pytest
 
 from argos.application.errors import ApplicationError
-from argos.application.use_cases.verify_product import ProductVerification
+from argos.application.ports.price_observations import PriceObservation
 from argos.application.use_cases.verify_telegram_product import (
-    format_product_verification,
+    format_price_observation,
     format_product_verification_failure,
     parse_verify_product_command,
 )
@@ -68,17 +69,19 @@ def test_noncanonical_product_code_is_rejected(code):
     (False, "O preço-alvo ainda não foi atingido."),
 ])
 def test_success_reply_contains_prices_and_comparison(reached, expected):
-    result = ProductVerification(
-        product_id=PRODUCT_ID, alias="Notebook", title="Título remoto",
-        current_price_cents=349_990, target_price_cents=350_000,
-        target_reached=reached, source="json-ld",
+    current_price = 349_990 if reached else 350_001
+    observation = PriceObservation(
+        observation_id=UUID("a3000000-0000-4000-8000-000000000001"),
+        product_id=PRODUCT_ID, telegram_user_id=700,
+        observed_at=datetime(2026, 9, 16, tzinfo=timezone.utc),
+        target_price_cents=350_000, status="success",
+        price_cents=current_price, source="json-ld",
     )
-    reply = format_product_verification(result)
-    assert "Notebook" in reply
-    assert "R$ 3.499,90" in reply
+    reply = format_price_observation(observation)
+    assert "Verificação concluída." in reply
+    assert ("R$ 3.499,90" if reached else "R$ 3.500,01") in reply
     assert "R$ 3.500,00" in reply
     assert expected in reply
-    assert "Título remoto" not in reply
     assert "json-ld" not in reply
 
 
