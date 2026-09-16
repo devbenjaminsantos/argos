@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** extração pausada após JSON-LD/Decimal isolados (5cacc60, CI 35007318534 aprovado; documentação ddcfa46). Retomar depois pela leitura inerte de HTML, charset e detecção de bloqueio antes de JSON-LD; meta/DOM e integração continuam pendentes. Usuário disponibilizou segunda conta Telegram e relatou envio de `/start` nela. Foco agora: aceitação manual V2.9 conforme docs/V2_TELEGRAM_TWO_USERS_ACCEPTANCE.md, cadastro/listagem isolados aceitos por relato em A/B, inclusive mesmo anúncio com configurações diferentes. Operações simultâneas e cancelamento independente aceitos por relato. Códigos cruzados recusados e produtos preservados por relato. Feedback distinto de código aceito por relato. Próximo passo: limite individual de três produtos; remoção/reutilização entre contas ainda pendentes. Sem nova consulta administrativa.
+**Prioridade da sessão:** extração pausada após JSON-LD/Decimal isolados (5cacc60, CI 35007318534 aprovado; documentação ddcfa46). Retomar depois pela leitura inerte de HTML, charset e detecção de bloqueio antes de JSON-LD; meta/DOM e integração continuam pendentes. Foco atual: aceitação manual V2.9 conforme docs/V2_TELEGRAM_TWO_USERS_ACCEPTANCE.md. Cadastro/listagem isolados, operações simultâneas, cancelamento independente, códigos cruzados, feedback distinto e limite individual de três produtos foram aceitos por relato em A/B. Próximo passo: remoção em A, preservação de B e reutilização da vaga/chave em A. Sem nova consulta administrativa.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 

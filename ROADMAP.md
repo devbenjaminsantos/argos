@@ -272,7 +272,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implementar e integrar início/seleção/confirmação de remoção, validar CI, aplicar migração administrativa e aceitar fluxo de remoção no bot; evidências abaixo.
 
 - [x] Escopar cadastro/listagem/remoção/cancelamento ao proprietário Telegram; consultas e claims protegidos, com testes PostgreSQL.
-- [ ] Concluir aceitação manual com duas contas e limite individual conforme docs/V2_TELEGRAM_TWO_USERS_ACCEPTANCE.md.
+- [x] Concluir aceitação manual com duas contas e limite individual conforme docs/V2_TELEGRAM_TWO_USERS_ACCEPTANCE.md. A manteve três ativos e recusou o quarto; B aceitou o segundo produto e preservou sua lista isolada, conforme relato do usuário.
 
 **Critério de conclusão:** dois usuários gerenciam listas isoladas com limite individual de três produtos.
 
@@ -397,3 +397,5 @@ Usuário confirmou que, após códigos cruzados recusados nos dois sentidos e ca
 CI 35043152303 aprovado em 0151fc2 para feedback distinto na confirmação de remoção. Deploy manual e validação Telegram das novas mensagens ainda pendentes.
 
 Usuário confirmou êxito de todos os testes manuais das novas mensagens de remoção após a orientação de deploy: código ausente, incompleto, formato inválido e código da outra conta; cancelamento e listagem com produto preservado. Aceite por relato, sem nova consulta administrativa ou inspeção de deploy. Código 0151fc2, CI 35043152303 aprovado. Próximo teste: limite individual de três ativos, quarto anúncio recusado em A sem consumir vaga de B. Extração continua pausada; limite e remoção/reutilização entre contas ainda pendentes. Critério V2.9 permanece aberto.
+
+Limite individual aceito por relato: A completou três ativos e teve o quarto anúncio distinto recusado; B cadastrou seu segundo produto e manteve a lista própria. O critério de isolamento e limite individual da V2.9 está atendido. Remoção, reutilização e repetição continuam como fechamento do roteiro ampliado, sem reabrir esse critério.
