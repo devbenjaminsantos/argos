@@ -43,13 +43,15 @@ def test_removal_and_recovery_never_touch_replacement(confirming):
         assert c.scalar(text("SELECT count(*) FROM monitored_products WHERE removed_at IS NOT NULL"))==1
 
 
-@pytest.mark.parametrize('raw',['remover','confirmar',f'remover {uuid4().hex}'])
-def test_wrong_code_preserves_proposal(confirming,raw):
+@pytest.mark.parametrize('raw,expected',[('remover','Faltou o código'),('confirmar','Formato incorreto'),('remover abc','Código incompleto'),('remover xyz','Formato do código inválido'),(f'remover {uuid4().hex}','Código incorreto')])
+def test_wrong_code_preserves_proposal(confirming,raw,expected):
     ctx,_=confirming
     original=draft(ctx)
     with ctx[0].begin() as c:
         c.execute(text("UPDATE telegram_update_inbox SET payload=jsonb_set(payload,'{message,text}',to_jsonb(CAST(:raw AS text))) WHERE update_id=2"),dict(raw=raw))
-    assert 'código completo' in confirm(confirming,text=raw).text
+    assert expected in confirm(confirming,text=raw).text
+    with ctx[0].connect() as c:
+        assert c.scalar(text('SELECT count(*) FROM monitored_products WHERE removed_at IS NOT NULL')) == 0
     assert draft(ctx)==original
 
 
@@ -76,7 +78,7 @@ def test_old_code_cannot_confirm_new_proposal(confirming):
     ctx,_=confirming
     with ctx[0].begin() as c:
         c.execute(text("UPDATE telegram_conversation_drafts SET version=:version"),dict(version=uuid4()))
-    assert 'código completo' in confirm(confirming).text
+    assert 'Código incorreto' in confirm(confirming).text
     assert draft(ctx) is not None
 
 

@@ -37,7 +37,8 @@ Menu do BotFather continua com confirmação pendente; sincronizar somente os co
 - [x] Confirmar lista inicial de B vazia com `/produtos`, enquanto A lista seu produto; relato do usuário.
 - [x] Cadastrar o mesmo anúncio em A/B, com apelidos e configurações distintos, e comprovar listas isoladas; relato do usuário.
 - [x] Executar operações simultâneas e cancelamento independente entre A/B; êxito relatado pelo usuário.
-- [ ] Testar código entre duas propostas de remoção.
+- [x] Testar código entre duas propostas de remoção e preservar ambos os produtos; êxito relatado nos dois sentidos.
+- [ ] Implantar e validar mensagens distintas para formato/código incorretos.
 - [ ] Comprovar limite individual, remoção, reutilização e repetição conforme tabela.
 
 Não há confirmação administrativa nova nesta retomada. A extração foi pausada para priorizar este aceite; cadastro/listagem foram aceitos por relato; demais resultados continuam pendentes.
@@ -47,3 +48,5 @@ Aceite manual relatado pelo usuário: A cadastrou produto e /produtos exibiu o i
 Usuário confirmou êxito do teste de operações simultâneas: A abriu proposta de remoção; B iniciou cadastro; /cancelar em A não interrompeu B, que recebeu URL e avançou para apelido. Aceite por relato, sem nova consulta administrativa; não houve confirmação de remoção. Próximo teste: código de A na proposta de remoção de B, preservando ambos os produtos. Limite individual e remoção/reutilização entre contas continuam pendentes.
 
 Código de confirmação cruzado testado nos dois sentidos pelo usuário (remover + código completo): resposta em A/B foi "Envie remover seguido do código completo desta proposta ou use /cancelar." Inspeção de telegram_removal_confirmation.py confirmou que essa é a resposta genérica quando o texto não coincide com remover + versão hex da proposta do próprio proprietário. Nessa ramificação não há UPDATE do produto nem consumo do rascunho. Corrigida interpretação anterior: mensagem não significa necessariamente formato errado. Evidência manual de resposta compatível com recusa; falta /cancelar e /produtos nas duas contas para confirmar preservação. Sem consulta administrativa nova.
+
+Usuário confirmou que, após códigos cruzados recusados nos dois sentidos e cancelamento, os produtos permaneceram nas duas contas. Aceite manual por relato, sem consulta administrativa nova. Feedback de remoção alterado: formato incorreto, código ausente/incompleto, caracteres ou tamanho inválidos e código incorreto para a proposta têm mensagens distintas. Comparação exata e escopo do proprietário preservados; não se consulta a origem de códigos divergentes. Dez testes locais passaram; 11 testes PostgreSQL focados pulados localmente por ausência de banco. Implantação e aceite das novas mensagens pendentes; extração continua pausada, limite individual e remoção/reutilização entre contas pendentes.

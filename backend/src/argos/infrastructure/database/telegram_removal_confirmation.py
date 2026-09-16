@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from argos.application.ports.telegram_messages import TelegramMessage
 from argos.application.use_cases.confirm_removal import REMOVED_TEXT
+from argos.domain.products.removal_confirmation import removal_confirmation_error
 from argos.infrastructure.database.models import (
     TelegramUpdateInbox, TelegramUserRecord, TelegramConversationDraftRecord,
     TelegramRegistrationResult, MonitoredProductRecord,
@@ -65,8 +66,9 @@ class PostgreSQLTelegramRemovalConfirmationRepository:
         if user is not None and draft is not None and draft["expires_at"] > effective:
             reply = "Continue a etapa atual ou use /cancelar."
             if draft["state"] == "awaiting_removal_confirmation":
-                reply = "Envie remover seguido do código completo desta proposta ou use /cancelar."
-                if text.strip().casefold() == f"remover {draft['version'].hex}":
+                diagnostic = removal_confirmation_error(text, draft["version"])
+                reply = diagnostic or REMOVED_TEXT
+                if diagnostic is None:
                     try:
                         product_id = UUID(draft["data"]["product_id"])
                     except (KeyError, ValueError, TypeError, AttributeError):
