@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A coleta interna tem porta, adaptador e caso de uso: `VerifyProduct` localiza alvo ativo por proprietário/UUID, coleta uma vez, confere identidade final e compara preço atual com preço-alvo. Ausente e produto alheio têm a mesma resposta; falhas externas são mapeadas sem URL/HTML. Trinta e cinco testes focados, suíte completa local e CI 35108277106 aprovado em df57d45. Próximo incremento: adaptador PostgreSQL de leitura proprietária; sem observação persistida, `/verificar` ou bot.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A verificação interna agora tem leitura PostgreSQL por UUID + proprietário + `removed_at IS NULL`, em uma consulta sem fallback e usando apenas SELECT do runtime. Vinte e três testes focados passaram localmente; oito integrações PostgreSQL aguardam CI. Próximo incremento: contrato e migração de observações de preço/falha, sem preço zero; `/verificar` e bot continuam desligados.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
