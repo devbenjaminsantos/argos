@@ -2,6 +2,8 @@
 
 ## Objetivo atual
 
+**Prioridade da sessão:** extração pausada após JSON-LD/Decimal isolados (5cacc60, CI 35007318534 aprovado; documentação ddcfa46). Retomar depois pela leitura inerte de HTML, charset e detecção de bloqueio antes de JSON-LD; meta/DOM e integração continuam pendentes. Usuário disponibilizou segunda conta Telegram e relatou envio de `/start` nela. Foco agora: aceitação manual V2.9 conforme docs/V2_TELEGRAM_TWO_USERS_ACCEPTANCE.md, começando pela lista da conta B. Envio de `/start` não comprova resposta, persistência ou isolamento; resultados ainda pendentes.
+
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
 Os fluxos reais de `/start` e `/ajuda` estão validados no `@argos_teste_bot`. `/adicionar` está implantado como início de rascunho de teste; `/cancelar` está validado com e sem rascunho. O bot permanece limitado a conversas privadas; a inclusão de `/cancelar` no menu do BotFather ainda requer confirmação. A fronteira persiste somente comandos disponíveis; texto privado não vazio passa pela admissão para receber a URL; comandos desconhecidos são confirmados sem persistência para evitar retries do Telegram. No piloto gratuito, o runner acompanha o ciclo de vida do processo HTTP, acorda depois da persistência e usa polling, inbox e leases para recuperação; o job de coleta permanece separado. O frontend ainda em desenho pode evoluir em paralelo e não deve acessar diretamente o banco ou a Bot API.

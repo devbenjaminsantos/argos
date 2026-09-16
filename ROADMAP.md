@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Preparar leitura HTML e classificação de bloqueio
+**Próximo item:** V2.9 — Aceitação manual com duas contas e limite individual
 
 **Última atualização:** 15/09/2026
 
@@ -385,3 +385,5 @@ Resolvedor real preparado em system_dns.py: getaddrinfo A/AAAA em subprocesso is
 GET limitado preparado em limited_http.py: compõe DNS validado/TLS fixado, HTML 200, identidade de encoding, teto de 2 MiB e prazo monotônico com interrupção do socket. Redirects/compressão recusados. Sete testes falsos passaram; CI 35002727975 aprovado em 7305740. Validação real controlada, redirects seguros e cobertura adicional de streaming/prazo ainda pendentes; não integrado ao bot.
 
 HTTP validado com socketpair real (TLS falso): Connection: close, chunked e corpo excessivo. Corrigido parsing para não fechar socket antes do streaming e fechar response explicitamente. Dez testes locais passaram; CI 35003760138 aprovado em 3e99e14. TLS real controlado e leitura lenta/deadline ainda pendentes; sem rede externa ou coleta no bot.
+
+Pausa solicitada: extração interrompida após JSON-LD/Decimal isolados em 5cacc60, CI 35007318534 aprovado. Retomar pela leitura HTML/charset/bloqueio, sem implementar meta/DOM ainda. Segunda conta disponível; usuário relatou envio de `/start`, sem resultado confirmado. Prioridade atual: roteiro manual de duas contas, começando por `/produtos` da conta B; critério V2.9 permanece aberto.

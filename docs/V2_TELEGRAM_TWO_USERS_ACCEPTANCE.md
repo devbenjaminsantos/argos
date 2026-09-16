@@ -28,3 +28,14 @@ Testes PostgreSQL verificam produto com mesma chave em proprietários distintos,
 Registrar quais passos foram executados e seus resultados. Marcar o critério da V2.9 somente depois de comprovar listas isoladas e limite individual. Consulta administrativa de confirmação deve retornar somente agregados: quantidade de proprietários com produtos, limite máximo de ativos por proprietário, contagens de produtos ativos/removidos e estados da inbox. Não gerar mensagens ou remover produtos reais por ferramentas para simular aceitação.
 
 Menu do BotFather continua com confirmação pendente; sincronizar somente os comandos disponíveis: start, ajuda, adicionar, produtos, remover e cancelar. Aceitação Chrome da V1 e testes reais de falhas da Bot API permanecem pendências separadas.
+
+## Retomada da validação
+
+- [x] Segunda conta disponível, conforme relato do usuário.
+- [x] Usuário relatou envio de `/start` pela conta B.
+- [ ] Confirmar resposta de `/start` e lista inicial de B com `/produtos`.
+- [ ] Cadastrar o mesmo anúncio em A/B, com apelidos distintos, e comprovar listas isoladas.
+- [ ] Executar operações independentes, cancelamento e código entre duas propostas de remoção.
+- [ ] Comprovar limite individual, remoção, reutilização e repetição conforme tabela.
+
+Não há confirmação administrativa nova nesta retomada. A extração foi pausada para priorizar este aceite; nenhum resultado manual ainda foi marcado como aprovado.
