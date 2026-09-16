@@ -92,6 +92,15 @@ class _ProductsStub:
         return TelegramMessage(chat_id=kwargs["chat_id"], text="Lista de produtos")
 
 
+class _VerificationStub:
+    def __init__(self):
+        self.calls = []
+
+    def execute(self, **kwargs):
+        self.calls.append(kwargs)
+        return TelegramMessage(chat_id=kwargs["chat_id"], text="Preço verificado")
+
+
 class _UsersStub:
     def __init__(self) -> None:
         self.upserts: list[tuple[int, int, datetime]] = []
@@ -161,6 +170,7 @@ def _worker(
     conversations: _ConversationsStub | None = None,
     registrations: _RegistrationStub | None = None,
     urls: _RegistrationURLStub | None = None,
+    verification: _VerificationStub | None = None,
 ) -> TelegramInboxWorker:
     return TelegramInboxWorker(
         inbox=inbox,
@@ -173,6 +183,7 @@ def _worker(
         receive_registration_text=ReceiveTelegramRegistrationText(urls or _RegistrationURLStub()),
         begin_removal=BeginTelegramRemoval(_RemovalStub()),
         list_products=ListTelegramProducts(_ProductsStub()),
+        verify_product=verification or _VerificationStub(),
         sender=sender,
         lease_duration=timedelta(seconds=20),
         retry_delay=timedelta(seconds=15),
@@ -357,3 +368,21 @@ def test_worker_routes_products_to_private_listing():
     assert worker.process_next(now=_NOW)
     assert sender.messages[0].text=="Lista de produtos"
     assert len(inbox.completed)==1
+
+
+def test_worker_routes_verification_with_claim_and_completes_after_send():
+    product_id = "12345678-1234-5678-9234-567812345678"
+    raw = f"/verificar {product_id}"
+    payload = {**_PAYLOAD, "message": {**_PAYLOAD["message"], "text": raw}}
+    inbox, sender = _InboxStub(payload), _SenderStub()
+    verification = _VerificationStub()
+    assert _worker(
+        inbox, sender, verification=verification,
+    ).process_next(now=_NOW)
+    assert verification.calls == [{
+        "update_id": 10, "lease_token": _LEASE_TOKEN,
+        "telegram_user_id": 700, "chat_id": 800,
+        "text": raw, "observed_at": _NOW,
+    }]
+    assert sender.messages == [TelegramMessage(chat_id=800, text="Preço verificado")]
+    assert inbox.completed == [(10, _LEASE_TOKEN, _NOW)]

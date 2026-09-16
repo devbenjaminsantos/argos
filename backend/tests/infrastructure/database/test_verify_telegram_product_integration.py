@@ -10,6 +10,7 @@ from sqlalchemy import insert, text
 from argos.application.ports.product_collection import CollectedProduct
 from argos.application.use_cases.verify_product import VerifyProduct
 from argos.application.use_cases.verify_telegram_product import VerifyTelegramProduct
+from argos.config import Settings
 from argos.infrastructure.database.models import MonitoredProductRecord
 from argos.infrastructure.database.price_observations import (
     PostgreSQLPriceObservationRepository,
@@ -20,6 +21,7 @@ from argos.infrastructure.database.product_verification import (
 from argos.infrastructure.database.telegram_verification_results import (
     PostgreSQLTelegramVerificationResults,
 )
+from argos.telegram_worker import build_worker
 from tests.infrastructure.database.test_telegram_verification_results_integration import (
     COMMAND,
     PRODUCT_ID,
@@ -129,3 +131,40 @@ def test_retry_after_lease_loss_recovers_observation_without_collection(context)
     reply = execute(recovered, now + timedelta(seconds=1), recovered_lease)
     assert "R$ 149,99" in reply.text
     assert recovery_collector.calls == 0
+
+
+def test_composed_worker_sends_checkpointed_reply_and_completes_inbox(context):
+    collector = Collector(context[0])
+    _, now, _ = prepare(context, collector)
+    with context[0].begin() as connection:
+        connection.execute(text(
+            "UPDATE telegram_update_inbox SET status='pending', "
+            "lease_token=NULL, lease_expires_at=NULL, next_attempt_at=:now"
+        ), {"now": now})
+
+    class Sender:
+        def __init__(self):
+            self.messages = []
+
+        def send(self, message):
+            self.messages.append(message)
+
+    sender = Sender()
+    worker = build_worker(
+        Settings(environment="test"), engine=context[0],
+        sender=sender, collector=collector,
+    )
+    assert worker.process_next(now=now)
+    assert collector.calls == 1
+    assert len(sender.messages) == 1
+    assert "R$ 149,99" in sender.messages[0].text
+    with context[0].connect() as connection:
+        assert connection.scalar(text(
+            "SELECT status FROM telegram_update_inbox WHERE update_id=1"
+        )) == "completed"
+        assert connection.scalar(text(
+            "SELECT count(*) FROM product_price_observations"
+        )) == 1
+        assert connection.scalar(text(
+            "SELECT count(*) FROM telegram_registration_results"
+        )) == 1

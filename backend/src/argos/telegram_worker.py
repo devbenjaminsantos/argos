@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import Engine
 
+from argos.application.ports.product_collection import ProductCollector
 from argos.application.ports.telegram_messages import TelegramMessageSender
 from argos.application.services.telegram_worker import TelegramInboxWorker
 from argos.application.use_cases.begin_registration import BeginTelegramRegistration
@@ -15,6 +16,8 @@ from argos.application.use_cases.list_products import ListTelegramProducts
 from argos.infrastructure.database.telegram_products import PostgreSQLTelegramProductsRepository
 from argos.application.use_cases.receive_registration_text import ReceiveTelegramRegistrationText
 from argos.application.use_cases.start import StartTelegramConversation
+from argos.application.use_cases.verify_product import VerifyProduct
+from argos.application.use_cases.verify_telegram_product import VerifyTelegramProduct
 from argos.config import Settings
 from argos.infrastructure.database.config import create_database_engine
 from argos.infrastructure.database.telegram_inbox import PostgreSQLTelegramInbox
@@ -26,6 +29,16 @@ from argos.infrastructure.database.telegram_registration_text import PostgreSQLT
 from argos.infrastructure.database.telegram_users import (
     PostgreSQLTelegramUserRepository,
 )
+from argos.infrastructure.database.price_observations import (
+    PostgreSQLPriceObservationRepository,
+)
+from argos.infrastructure.database.product_verification import (
+    PostgreSQLProductVerificationTargets,
+)
+from argos.infrastructure.database.telegram_verification_results import (
+    PostgreSQLTelegramVerificationResults,
+)
+from argos.infrastructure.scrapers.mercado_livre.collector import MercadoLivreCollector
 from argos.infrastructure.telegram.bot_api import TelegramBotAPI
 
 
@@ -34,6 +47,7 @@ def build_worker(
     *,
     engine: Engine,
     sender: TelegramMessageSender | None = None,
+    collector: ProductCollector | None = None,
 ) -> TelegramInboxWorker:
     """Compõe adaptadores sem iniciar loops ou chamadas externas."""
 
@@ -46,6 +60,8 @@ def build_worker(
         )
 
     users = PostgreSQLTelegramUserRepository(engine)
+    observations = PostgreSQLPriceObservationRepository(engine)
+    resolved_collector = collector or MercadoLivreCollector()
     return TelegramInboxWorker(
         inbox=PostgreSQLTelegramInbox(engine),
         start=StartTelegramConversation(users),
@@ -59,6 +75,14 @@ def build_worker(
         ),
         begin_removal=BeginTelegramRemoval(PostgreSQLTelegramRemovalRepository(engine)),
         list_products=ListTelegramProducts(PostgreSQLTelegramProductsRepository(engine)),
+        verify_product=VerifyTelegramProduct(
+            verifier=VerifyProduct(
+                PostgreSQLProductVerificationTargets(engine),
+                resolved_collector, observations,
+            ),
+            observations=observations,
+            results=PostgreSQLTelegramVerificationResults(engine),
+        ),
         sender=sender,
         lease_duration=timedelta(
             seconds=settings.telegram_worker_lease_seconds

@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Compor `/verificar` no worker, ainda fora do webhook
+**Próximo item:** V2.11 — Habilitar `/verificar` na admissão e na ajuda
 
 **Última atualização:** 15/09/2026
 
@@ -312,7 +312,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar recuperação escopada da observação por UUID + produto + proprietário, incluindo round-trip de sucesso/falha e recusa de escopo cruzado. Dez testes PostgreSQL do repositório foram aprovados no CI 35133476377, commit 93bc1ff.
 - [x] Preparar checkpoint curto da resposta Telegram: consulta antes da coleta e gravação depois, ambas revalidando lease/payload; replay igual reutiliza snapshot e resposta divergente falha. Oito integrações PostgreSQL foram aprovadas no CI 35135283856, commit ffb43a0.
 - [x] Orquestrar `/verificar` fora de transação longa na ordem resposta → observação → coleta; formatar sempre do snapshot durável e recuperar após perda de lease sem recoletar. Vinte e nove testes de aplicação e duas integrações PostgreSQL foram aprovados no CI 35136457017, commit e48e151.
-- [ ] Compor o orquestrador no worker e testar claim → checkpoint → envio → conclusão, mantendo a admissão HTTP e `/ajuda` sem o comando.
+- [x] Compor o orquestrador no worker e testar claim → checkpoint → envio → conclusão, com coletor injetável para validação sem rede. Dezessete testes locais do worker passaram e três integrações PostgreSQL aguardam CI; teste explícito mantém o webhook recusando `/verificar`.
+- [ ] Habilitar `/verificar <UUID>` na admissão HTTP e documentá-lo em `/ajuda`; validar CI, deploy e fluxo manual antes de concluir V2.11.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
 

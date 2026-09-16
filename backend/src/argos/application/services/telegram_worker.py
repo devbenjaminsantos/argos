@@ -16,6 +16,7 @@ from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.list_products import ListTelegramProducts
 from argos.application.use_cases.receive_registration_text import ReceiveTelegramRegistrationText
 from argos.application.use_cases.start import StartTelegramConversation
+from argos.application.use_cases.verify_telegram_product import VerifyTelegramProduct
 
 
 class TelegramInboxWorker:
@@ -32,6 +33,7 @@ class TelegramInboxWorker:
         receive_registration_text: ReceiveTelegramRegistrationText,
         begin_removal: BeginTelegramRemoval,
         list_products: ListTelegramProducts,
+        verify_product: VerifyTelegramProduct,
         sender: TelegramMessageSender,
         lease_duration: timedelta = timedelta(seconds=30),
         retry_delay: timedelta = timedelta(seconds=30),
@@ -46,6 +48,7 @@ class TelegramInboxWorker:
         self._registration_url = receive_registration_text
         self._removal = begin_removal
         self._products = list_products
+        self._verification = verify_product
         self._sender = sender
         self._lease_duration = lease_duration
         self._retry_delay = retry_delay
@@ -69,6 +72,13 @@ class TelegramInboxWorker:
             elif command == "/produtos":
                 reply = self._products.execute(
                     update_id=claimed.update_id, lease_token=claimed.lease_token,
+                    telegram_user_id=telegram_user_id, chat_id=chat_id,
+                    text=text, observed_at=now,
+                )
+            elif command.startswith("/verificar"):
+                reply = self._verification.execute(
+                    update_id=claimed.update_id,
+                    lease_token=claimed.lease_token,
                     telegram_user_id=telegram_user_id, chat_id=chat_id,
                     text=text, observed_at=now,
                 )

@@ -237,7 +237,10 @@ def test_webhook_acknowledges_unsupported_text_without_persisting_or_waking_work
     runner = _RunnerStub()
     client = _client(inbox=inbox, runner=runner)
 
-    for text in ("/desconhecido", "/start@outro_bot", " "):
+    for text in (
+        "/desconhecido", "/start@outro_bot",
+        "/verificar 12345678-1234-5678-9234-567812345678", " ",
+    ):
         update = {
             **_VALID_UPDATE,
             "update_id": _VALID_UPDATE["update_id"] + len(inbox.enqueued) + 1,
