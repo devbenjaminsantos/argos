@@ -294,7 +294,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 
 ### V2.11 — Coleta manual do Mercado Livre
 
-- [x] Portar o adaptador do Mercado Livre para o back-end: porta de aplicação e composição injetável entre transporte seguro e extrator, sem retries ou integração externa; 82 testes focados e suíte completa local passaram.
+- [x] Portar o adaptador do Mercado Livre para o back-end: porta de aplicação e composição injetável entre transporte seguro e extrator, sem retries ou integração externa; 82 testes focados, suíte completa local e CI 35107292418 aprovado em 5b7fede.
 - [ ] Implementar `/verificar` para um produto cadastrado.
 - [ ] Registrar sucesso e falhas explícitas, nunca preço zero.
 - [x] Preparar contrato e seis fixtures sintéticas com resultados esperados em docs/V2_MERCADO_LIVRE_EXTRACTION.md.

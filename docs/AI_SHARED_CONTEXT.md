@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O adaptador interno Mercado Livre agora implementa a porta de coleta da aplicação e compõe, por injeção, uma tentativa do transporte seguro com o extrator concluído. Falhas esperadas têm códigos sanitizados; não há retry, persistência, `/verificar` ou bot. Oitenta e dois testes focados e a suíte completa local passaram. Próximo incremento: preparar o caso de uso interno de verificação manual e seus contratos, ainda sem entrada Telegram.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O adaptador interno Mercado Livre implementa a porta de coleta da aplicação e compõe, por injeção, uma tentativa do transporte seguro com o extrator concluído. Falhas esperadas têm códigos sanitizados; não há retry, persistência, `/verificar` ou bot. Oitenta e dois testes focados, suíte completa local e CI 35107292418 aprovado em 5b7fede. Próximo incremento: preparar o caso de uso interno de verificação manual e seus contratos, ainda sem entrada Telegram.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
