@@ -309,6 +309,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implementar repositório PostgreSQL idempotente por UUID: repetição igual não duplica; conteúdo divergente com o mesmo UUID falha sem alterar o histórico. Doze testes de contrato passaram localmente e quatro integrações do repositório foram aprovadas no CI 35130500915, commit ca9b179.
 - [x] Ligar o caso de uso interno de verificação à gravação de uma observação de sucesso ou falha: executor fornece UUID/timestamp, entrada inválida ou alvo ausente não cria histórico, e resultado só retorna após persistência. Vinte e um testes do caso de uso e duas integrações PostgreSQL do caminho completo foram aprovados no CI 35132196464, commit a7fbcdf.
 - [x] Preparar o contrato Telegram de `/verificar <UUID canônico>`: parser estrito, observação determinística por `update_id` e mensagens públicas sem conteúdo remoto ou detalhe interno. Dezenove testes e a suíte completa foram aprovados no CI 35132873065, commit 5576eca; admissão, worker e ajuda permanecem sem o comando.
+- [x] Preparar recuperação escopada da observação por UUID + produto + proprietário, incluindo round-trip de sucesso/falha e recusa de escopo cruzado. Dez testes PostgreSQL do repositório aguardam CI.
 - [ ] Orquestrar `/verificar` fora de transação longa, recuperando observação/resultado durável antes de repetir coleta; preservar inbox, lease e resposta em retries. Não habilitar no webhook antes dos testes PostgreSQL.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.

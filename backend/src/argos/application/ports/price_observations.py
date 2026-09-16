@@ -56,6 +56,13 @@ class PriceObservation:
 
 
 class PriceObservationRepository(Protocol):
+    def find(
+        self, *, observation_id: UUID, product_id: UUID,
+        telegram_user_id: int,
+    ) -> PriceObservation | None:
+        """Recupera somente quando chave, produto e proprietário coincidem."""
+        ...
+
     def append(self, observation: PriceObservation) -> None:
         """Repete o mesmo UUID/dados sem duplicar; conflito divergente falha."""
         ...

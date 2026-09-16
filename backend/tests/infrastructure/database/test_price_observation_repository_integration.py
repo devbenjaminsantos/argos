@@ -88,6 +88,50 @@ def test_divergent_replay_fails_without_changing_history(context):
     assert count(context) == 1
 
 
+def test_success_can_be_recovered_only_with_complete_owner_scope(context):
+    repository = PostgreSQLPriceObservationRepository(context[0])
+    item = observation(context)
+    repository.append(item)
+    assert repository.find(
+        observation_id=item.observation_id, product_id=item.product_id,
+        telegram_user_id=item.telegram_user_id,
+    ) == item
+    assert repository.find(
+        observation_id=item.observation_id, product_id=uuid4(),
+        telegram_user_id=item.telegram_user_id,
+    ) is None
+    assert repository.find(
+        observation_id=item.observation_id, product_id=item.product_id,
+        telegram_user_id=701,
+    ) is None
+
+
+def test_failure_round_trip_preserves_explicit_error(context):
+    repository = PostgreSQLPriceObservationRepository(context[0])
+    item = observation(
+        context, status="failure", price_cents=None, source=None,
+        error_code="collection_timeout",
+    )
+    repository.append(item)
+    recovered = repository.find(
+        observation_id=item.observation_id, product_id=item.product_id,
+        telegram_user_id=item.telegram_user_id,
+    )
+    assert recovered == item
+
+
+@pytest.mark.parametrize("changes", [
+    {"observation_id": "bad"}, {"product_id": "bad"},
+    {"telegram_user_id": 0}, {"telegram_user_id": True},
+])
+def test_invalid_recovery_scope_is_rejected(context, changes):
+    values = dict(
+        observation_id=uuid4(), product_id=context[2], telegram_user_id=700,
+    ) | changes
+    with pytest.raises(ValueError, match="Consulta de observação inválida"):
+        PostgreSQLPriceObservationRepository(context[0]).find(**values)
+
+
 def test_concurrent_equal_replays_create_one_row(context):
     repository = PostgreSQLPriceObservationRepository(context[0])
     item = observation(context)

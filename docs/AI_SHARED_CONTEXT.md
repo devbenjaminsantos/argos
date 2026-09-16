@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O contrato puro `/verificar <UUID canônico>` possui parser estrito, UUID de observação determinístico por `update_id` e respostas públicas sem título remoto, fonte técnica ou detalhe interno; 19 testes e a suíte completa foram aprovados no CI 35132873065, commit 5576eca. Próximo incremento: orquestração recuperável sem transação durante a coleta, consultando resultado durável antes de repetir efeito externo. Admissão, worker, ajuda e bot continuam sem `/verificar`.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O contrato puro `/verificar <UUID canônico>` está aprovado. O repositório agora recupera observação somente quando UUID, produto e proprietário coincidem; round-trip de sucesso/falha e recusa de escopo cruzado aguardam CI PostgreSQL. Próximo incremento: orquestração recuperável sem transação durante a coleta, consultando essa observação e a resposta durável antes de repetir efeito externo. Admissão, worker, ajuda e bot continuam sem `/verificar`.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
