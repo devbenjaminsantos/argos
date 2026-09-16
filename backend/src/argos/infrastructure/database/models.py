@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Index, Integer, MetaData, String, UniqueConstraint, text
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, MetaData, String, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PostgreSQLUUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -173,6 +173,7 @@ class MonitoredProductRecord(Base):
         CheckConstraint("interval_hours IN (12,24)", name="valid_interval"),
         Index("uq_monitored_products_owner_slot", "telegram_user_id", "slot", unique=True, postgresql_where=text("removed_at IS NULL")),
         Index("uq_monitored_products_owner_key", "telegram_user_id", "product_key", unique=True, postgresql_where=text("removed_at IS NULL")),
+        UniqueConstraint("id", "telegram_user_id", name="uq_monitored_products_id_owner"),
     )
     id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
     telegram_user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("telegram_users.telegram_user_id"), nullable=False)
@@ -184,3 +185,38 @@ class MonitoredProductRecord(Base):
     interval_hours: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ProductPriceObservationRecord(Base):
+    """Histórico append-only: sucesso tem preço; falha tem apenas código."""
+    __tablename__ = "product_price_observations"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["product_id", "telegram_user_id"],
+            ["monitored_products.id", "monitored_products.telegram_user_id"],
+            name="fk_product_price_observations_product_owner",
+        ),
+        CheckConstraint("telegram_user_id > 0", name="positive_owner"),
+        CheckConstraint(
+            "target_price_cents BETWEEN 1 AND 999999999",
+            name="valid_target_price",
+        ),
+        CheckConstraint(
+            "(status = 'success' AND price_cents BETWEEN 1 AND 999999999 "
+            "AND source IN ('json-ld','meta','visible-dom') AND error_code IS NULL) OR "
+            "(status = 'failure' AND price_cents IS NULL AND source IS NULL "
+            "AND error_code ~ '^[a-z][a-z0-9_]{0,63}$')",
+            name="valid_outcome",
+        ),
+        Index("ix_product_price_observations_owner_product_time",
+              "telegram_user_id", "product_id", "observed_at"),
+    )
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True)
+    product_id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), nullable=False)
+    telegram_user_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    target_price_cents: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    price_cents: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    source: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)

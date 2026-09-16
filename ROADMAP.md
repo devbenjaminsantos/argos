@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Preparar persistência de observações de preço
+**Próximo item:** V2.11 — Implementar gravação idempotente de observações
 
 **Última atualização:** 15/09/2026
 
@@ -305,7 +305,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Criar testes do extrator HTML completo e executar as seis fixtures do manifesto, incluindo bloqueio, indisponibilidade e preço ausente.
 - [x] Preparar caso de uso interno de verificação: alvo escopado por proprietário/UUID, uma coleta, identidade final conferida, comparação com preço-alvo e erros públicos seguros; 35 testes focados, suíte completa local e CI 35108277106 aprovado em df57d45.
 - [x] Implementar adaptador PostgreSQL de leitura do alvo ativo por UUID + proprietário + estado ativo, usando apenas o SELECT já concedido ao runtime; 23 testes locais focados passaram e oito integrações PostgreSQL foram aprovadas no CI 35122262352, commit efff34c.
-- [ ] Preparar contrato e migração de observações, registrando sucesso ou falha explícita sem substituir último preço válido por zero.
+- [x] Preparar contrato e migração `20260916_10` de observações append-only: sucesso exige preço positivo/fonte, falha exige código e proíbe preço; proprietário fixado por FK composta; runtime recebe apenas SELECT/INSERT. Doze testes de contrato passaram localmente e 12 integrações PostgreSQL aguardam CI.
+- [ ] Implementar repositório idempotente por UUID: repetição igual não duplica; conteúdo divergente com o mesmo UUID falha.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
 
