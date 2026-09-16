@@ -29,7 +29,11 @@ def context():
     engine = create_engine(_URL, pool_size=5, max_overflow=0)
     now = datetime.now(UTC)
     product_id = uuid4()
-    cleanup = "TRUNCATE product_price_observations, monitored_products, telegram_users"
+    cleanup = (
+        "TRUNCATE product_price_observations, monitored_products, "
+        "telegram_registration_results, telegram_update_inbox, "
+        "telegram_conversation_drafts, telegram_users"
+    )
     with engine.begin() as connection:
         connection.execute(text(cleanup))
         connection.execute(
