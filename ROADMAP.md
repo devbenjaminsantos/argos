@@ -300,7 +300,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar contrato e seis fixtures sintéticas com resultados esperados em docs/V2_MERCADO_LIVRE_EXTRACTION.md.
 - [x] Implementar componente JSON-LD e conversão Decimal isolados; 32 testes locais passaram; CI 35007318534 aprovado em 5cacc60.
 - [x] Implementar leitura HTML inerte, UTF-8 estrito e classificação de bloqueio antes da extração JSON-LD; 112 testes relacionados passaram localmente e CI 35100500881 aprovado em 8b3a21c.
-- [x] Extrair título seguro e limitado e usar metadados como fallback ordenado quando JSON-LD não fornece preço; 49 testes focados passaram localmente.
+- [x] Extrair título seguro e limitado e usar metadados como fallback ordenado quando JSON-LD não fornece preço; 49 testes focados passaram localmente e CI 35102552967 aprovado em 2510fed.
 - [ ] Criar testes do extrator HTML completo e ampliar fixtures para casos negativos.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
