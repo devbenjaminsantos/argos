@@ -4,7 +4,7 @@ from argos.domain.products.registration import ProductRegistration
 from argos.domain.target_price import format_target_price_brl
 
 CONFIRMATION_REPLIES = RegistrationConfirmationReplies(
-    created="Produto cadastrado no ambiente de testes. A coleta de preços e os alertas ainda não estão disponíveis.",
+    created="Produto cadastrado no ambiente de testes. Use /produtos para obter o código e /verificar para consultar o preço. Alertas automáticos ainda não estão disponíveis.",
     corrected="Vamos corrigir o cadastro. Envie novamente a URL do anúncio do Mercado Livre.\n\nUse /cancelar para interromper.",
     duplicate="Você já cadastrou este produto. Use /cancelar para encerrar este rascunho.",
     limit_reached="Você atingiu o limite de três produtos. Use /cancelar para encerrar este rascunho.",
@@ -20,5 +20,5 @@ def registration_confirmation_summary(product: ProductRegistration) -> str:
         f"Confira o cadastro:\n\nURL: {product.url}\nApelido: {product.alias}\n"
         f"Preço-alvo: {format_target_price_brl(product.target_price_cents)}\nIntervalo: {product.interval_hours} horas\n\n"
         "Envie confirmar para cadastrar ou corrigir para reiniciar os dados.\nUse /cancelar para interromper.\n\n"
-        "A coleta de preços e os alertas ainda não estão disponíveis."
+        "Após cadastrar, use /produtos para obter o código e /verificar para consultar o preço. Alertas automáticos ainda não estão disponíveis."
     )

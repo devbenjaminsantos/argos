@@ -27,6 +27,17 @@ class VerifyTelegramProductRequest:
     observation_id: UUID
 
 
+def is_verify_product_input(text: str) -> bool:
+    if not isinstance(text, str):
+        return False
+    value = text.strip().casefold()
+    return (
+        value == "/verificar"
+        or value.startswith("/verificar ")
+        or value.startswith("/verificar\t")
+    )
+
+
 def parse_verify_product_command(
     *, update_id: int, text: str,
 ) -> VerifyTelegramProductRequest:
@@ -56,6 +67,8 @@ def parse_verify_product_command(
 
 
 _FAILURE_MESSAGES = {
+    "invalid_verify_command": "Envie /verificar seguido do código completo do produto.",
+    "invalid_product_code": "O código completo do produto é inválido.",
     "collection_blocked": "O Mercado Livre bloqueou temporariamente a verificação.",
     "product_unavailable": "O produto parece indisponível.",
     "price_not_found": "Não foi possível identificar um preço válido.",
@@ -115,7 +128,6 @@ class VerifyTelegramProduct:
             or chat_id <= 0 or not isinstance(observed_at, datetime)
             or observed_at.utcoffset() is None):
             raise ApplicationError("invalid_input", "Update de verificação inválido.")
-        request = parse_verify_product_command(update_id=update_id, text=text)
         claim = dict(
             update_id=update_id, lease_token=lease_token,
             telegram_user_id=telegram_user_id, chat_id=chat_id, text=text,
@@ -124,6 +136,16 @@ class VerifyTelegramProduct:
         if existing_reply is not None:
             return existing_reply
 
+        try:
+            request = parse_verify_product_command(update_id=update_id, text=text)
+        except ApplicationError as error:
+            return self._results.save_for_claim(
+                **claim,
+                reply=TelegramMessage(
+                    chat_id=chat_id,
+                    text=format_product_verification_failure(error),
+                ),
+            )
         observation = self._observations.find(
             observation_id=request.observation_id,
             product_id=request.product_id,

@@ -100,7 +100,7 @@ As implementações devem garantir o escopo pelo proprietário dentro da própri
 - `lowest_valid_since(owner_id, product_id, since) -> PriceObservation | None`
 - `list_recent(owner_id, product_id, limit) -> list[PriceObservation]`
 
-Observações inválidas não são criadas. Falhas de coleta pertencem ao registro de tentativas, não ao histórico de preços.
+Observações inválidas não são criadas. A implementação atual mantém um histórico append-only de resultados: sucesso exige preço/fonte e falha exige código sanitizado sem preço. UUID, produto e proprietário formam o escopo de recuperação; preço zero nunca representa falha.
 
 ### `CollectionAttemptRepository`
 

@@ -51,7 +51,7 @@ class PostgreSQLTelegramProductsRepository:
             reply = "Envie /start para registrar seu acesso antes de consultar produtos."
             if user is not None:
                 product = MonitoredProductRecord
-                rows = connection.execute(select(product.slot, product.alias,
+                rows = connection.execute(select(product.id, product.slot, product.alias,
                     product.target_price_cents, product.interval_hours).where(
                     product.telegram_user_id == telegram_user_id, product.removed_at.is_(None)
                 ).order_by(product.slot).limit(3)).all()

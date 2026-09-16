@@ -123,21 +123,18 @@ AGUARDANDO_CONFIRMACAO_DE_REMOCAO
 
 O bot apresenta uma lista numerada de produtos do proprietário. A seleção usa o número temporário apresentado, mas o servidor resolve e persiste o UUID correspondente no rascunho. Antes de remover, o caso de uso consulta novamente o produto com `owner_id` e UUID.
 
-A remoção é lógica: o produto deixa de ser monitorado, mas o histórico permanece disponível para evolução futura. O contrato detalhado está em [V2_TELEGRAM_REMOVAL.md](V2_TELEGRAM_REMOVAL.md), incluindo mapa de seleção persistido, confirmação vinculada à proposta e migração planejada. `/remover` ainda não está disponível.
+A remoção é lógica: o produto deixa de ser monitorado, mas o histórico permanece disponível para evolução futura. O contrato detalhado está em [V2_TELEGRAM_REMOVAL.md](V2_TELEGRAM_REMOVAL.md), incluindo mapa de seleção persistido e confirmação vinculada à proposta. `/remover` está disponível.
 
 ## Fluxo de verificação manual
 
 ```text
 OCIOSO
-  │ /verificar
+  │ /verificar <UUID completo exibido por /produtos>
   ▼
-AGUARDANDO_PRODUTO_PARA_VERIFICAR
-  │ seleção válida
-  ▼
-VERIFICACAO_SOLICITADA ──► OCIOSO
+VERIFICACAO_EM_PROCESSAMENTO ──► resposta persistida ──► OCIOSO
 ```
 
-O bot confirma que a verificação foi solicitada e retorna imediatamente ao estado ocioso. A coleta é executada fora do processamento do webhook. Repetir o mesmo update não cria uma segunda solicitação, e uma nova solicitação para um produto já em execução é recusada de maneira segura.
+O webhook persiste o update e retorna sem executar rede. O worker consulta primeiro uma resposta durável, depois uma observação escopada por proprietário/produto e somente então coleta. A coleta ocorre sem transação longa da inbox. Repetir o mesmo update reutiliza a resposta; se o lease expirar depois da observação, o retry não coleta novamente.
 
 ## Estados persistidos
 
@@ -391,7 +388,7 @@ Próximo incremento: `/produtos`, com leitura por proprietário, lista vazia e a
 
 ## `/produtos` implementado — aguarda CI e deploy
 
-Comando privado admitido com a mesma deduplicação e quota dos demais. Exibe somente produtos do proprietário Telegram, ordenados por slot, com apelido, preço-alvo BRL e intervalo; a resposta informa que coleta e alertas permanecem indisponíveis. Lista vazia orienta `/adicionar`; usuário não registrado recebe orientação `/start`. Não altera rascunhos.
+Comando privado admitido com a mesma deduplicação e quota dos demais. Exibe somente produtos do proprietário Telegram, ordenados por slot, com UUID completo, apelido, preço-alvo BRL e intervalo. O UUID permite usar `/verificar`; alertas automáticos permanecem pendentes. Lista vazia orienta `/adicionar`; usuário não registrado recebe orientação `/start`. Não altera rascunhos.
 
 A consulta verifica lease e identidade contra a inbox e grava snapshot em telegram_registration_results na mesma transação. Reprocessamento retorna a resposta original, mesmo após alteração da lista. Usa grants existentes, sem migração. Testes locais e CI devem preceder deploy manual; aceitação real ainda pendente. No BotFather, incluir `/produtos` no menu após validação do deploy.
 

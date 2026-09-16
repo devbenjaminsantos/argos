@@ -49,6 +49,7 @@ def test_start_upserts_owner_and_returns_plain_text_reply() -> None:
     assert "Eu sou o Argos" in reply.text
     assert "ambiente inicial de testes" in reply.text
     assert "/adicionar" in reply.text
+    assert "/verificar" in reply.text
     assert "/ajuda" in reply.text
 
 

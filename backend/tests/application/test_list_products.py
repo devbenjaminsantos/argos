@@ -6,10 +6,15 @@ from argos.application.use_cases.list_products import ListTelegramProducts, form
 
 
 def test_bounded_plain_text_with_three_maximum_aliases():
-    reply = format_products([(i, "á"*60,999999999,24) for i in (1,2,3)])
+    product_ids = [uuid4() for _ in range(3)]
+    reply = format_products([
+        (product_ids[i - 1], i, "á"*60, 999999999, 24)
+        for i in (1, 2, 3)
+    ])
     assert len(reply)<4096
     assert "R$ 9.999.999,99" in reply
-    assert "ainda não estão disponíveis" in reply
+    assert all(str(product_id) in reply for product_id in product_ids)
+    assert "/verificar" in reply
 
 
 @pytest.mark.parametrize("changes",[{"telegram_user_id":True},{"chat_id":0},{"update_id":-1},{"lease_token":None},{"text":"/remover"},{"observed_at":datetime(2026,9,14)}])

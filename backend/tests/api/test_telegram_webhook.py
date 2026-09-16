@@ -218,7 +218,11 @@ def test_webhook_accepts_normalized_supported_command() -> None:
     client = _client(inbox=inbox)
 
     for index, text in enumerate(
-        ("  /START  ", "  /AJUDA  ", "  /CANCELAR  ", "  /ADICIONAR  ", "  /PRODUTOS  ", " /REMOVER "), start=1
+        (
+            "  /START  ", "  /AJUDA  ", "  /CANCELAR  ",
+            "  /ADICIONAR  ", "  /PRODUTOS  ", " /REMOVER ",
+            " /VERIFICAR 12345678-1234-5678-9234-567812345678 ",
+        ), start=1
     ):
         update = {
             **_VALID_UPDATE,
@@ -229,7 +233,7 @@ def test_webhook_accepts_normalized_supported_command() -> None:
             "/webhooks/telegram", headers=_HEADERS, json=update
         ).status_code == 200
 
-    assert len(inbox.enqueued) == 6
+    assert len(inbox.enqueued) == 7
 
 
 def test_webhook_acknowledges_unsupported_text_without_persisting_or_waking_worker() -> None:
@@ -238,8 +242,7 @@ def test_webhook_acknowledges_unsupported_text_without_persisting_or_waking_work
     client = _client(inbox=inbox, runner=runner)
 
     for text in (
-        "/desconhecido", "/start@outro_bot",
-        "/verificar 12345678-1234-5678-9234-567812345678", " ",
+        "/desconhecido", "/start@outro_bot", "/verificarproduto", " ",
     ):
         update = {
             **_VALID_UPDATE,

@@ -9,11 +9,12 @@ _HELP_TEXT = """Comandos disponíveis neste ambiente de testes:
 /ajuda - mostrar esta mensagem
 /adicionar - iniciar um rascunho de teste e enviar URL, apelido, preço-alvo e intervalo
 /produtos - listar seus produtos cadastrados
+/verificar <código> - consultar agora o preço de um produto próprio
 /remover - selecionar um produto e confirmar a remoção
 /cancelar - cancelar a operação em andamento
 
 Depois dos dados, envie confirmar para cadastrar ou corrigir para reiniciar.
-A coleta de preços e os alertas serão liberados nas próximas etapas."""
+Os alertas automáticos serão liberados nas próximas etapas."""
 
 
 class HelpTelegramConversation:

@@ -7,13 +7,16 @@ from argos.application.ports.telegram_products import TelegramProductsRepository
 from argos.domain.target_price import format_target_price_brl
 
 
-def format_products(products: list[tuple[int, str, int, int]]) -> str:
+def format_products(products: list[tuple[UUID, int, str, int, int]]) -> str:
     if not products:
         return "Você ainda não cadastrou produtos. Use /adicionar para começar."
     lines = ["Seus produtos cadastrados:"]
-    for slot, alias, cents, hours in products:
-        lines.append(f"{slot}. {alias} — preço-alvo: {format_target_price_brl(cents)}; intervalo: {hours} horas")
-    lines.append("A coleta de preços e os alertas ainda não estão disponíveis.")
+    for product_id, slot, alias, cents, hours in products:
+        lines.append(
+            f"{slot}. {alias} — preço-alvo: {format_target_price_brl(cents)}; "
+            f"intervalo: {hours} horas\nCódigo: {product_id}"
+        )
+    lines.append("Para consultar o preço agora, envie /verificar seguido do código completo.")
     return "\n\n".join(lines)
 
 

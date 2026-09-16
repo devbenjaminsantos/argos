@@ -152,6 +152,23 @@ def test_missing_product_has_safe_durable_reply_without_observation():
     assert observations.item is None
 
 
+@pytest.mark.parametrize("text,expected", [
+    ("/verificar", "código completo do produto"),
+    ("/verificar código-inválido", "código completo do produto é inválido"),
+])
+def test_invalid_command_is_checkpointed_without_observation_or_collection(
+    text, expected,
+):
+    results = Results()
+    observations = Observations()
+    verifier = Verifier(observations)
+    reply = execute(results, observations, verifier, text=text)
+    assert expected in reply.text
+    assert observations.events == []
+    assert verifier.calls == []
+    assert results.saved == [reply]
+
+
 def test_lease_loss_after_collection_keeps_observation_for_retry():
     observations = Observations()
     verifier = Verifier(observations)

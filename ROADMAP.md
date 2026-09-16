@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Habilitar `/verificar` na admissão e na ajuda
+**Próximo item:** V2.11 — Implantar e validar manualmente `/verificar`
 
 **Última atualização:** 15/09/2026
 
@@ -313,7 +313,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar checkpoint curto da resposta Telegram: consulta antes da coleta e gravação depois, ambas revalidando lease/payload; replay igual reutiliza snapshot e resposta divergente falha. Oito integrações PostgreSQL foram aprovadas no CI 35135283856, commit ffb43a0.
 - [x] Orquestrar `/verificar` fora de transação longa na ordem resposta → observação → coleta; formatar sempre do snapshot durável e recuperar após perda de lease sem recoletar. Vinte e nove testes de aplicação e duas integrações PostgreSQL foram aprovados no CI 35136457017, commit e48e151.
 - [x] Compor o orquestrador no worker e testar claim → checkpoint → envio → conclusão, com coletor injetável para validação sem rede. Dezessete testes do worker e três integrações PostgreSQL foram aprovados no CI 35162870668, commit a5e9406; teste explícito mantém o webhook recusando `/verificar`.
-- [ ] Habilitar `/verificar <UUID>` na admissão HTTP e documentá-lo em `/ajuda`; validar CI, deploy e fluxo manual antes de concluir V2.11.
+- [x] Habilitar `/verificar <UUID>` na admissão HTTP, expor o UUID próprio em `/produtos`, responder sintaxe inválida de forma durável e atualizar `/start`/`/ajuda`. Suíte completa local aprovada; CI pendente.
+- [ ] Após CI verde, realizar deploy manual, incluir `/verificar` no menu do BotFather e validar `/produtos` → código próprio → `/verificar`, código inválido e código de outra conta antes de concluir V2.11.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
 

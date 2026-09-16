@@ -11,7 +11,7 @@ from argos.application.ports.telegram_registration import (
 )
 
 _REPLIES = BeginRegistrationReplies(
-    started="Rascunho de teste iniciado por 15 minutos. Envie a URL HTTPS do anúncio do Mercado Livre Brasil. Depois da URL, você informará apelido, preço-alvo e intervalo e poderá confirmar o cadastro. A coleta de preços e os alertas ainda não estão disponíveis.\n\nUse /cancelar para interromper o cadastro.",
+    started="Rascunho de teste iniciado por 15 minutos. Envie a URL HTTPS do anúncio do Mercado Livre Brasil. Depois da URL, você informará apelido, preço-alvo e intervalo e poderá confirmar o cadastro. Após cadastrar, use /produtos para obter o código e /verificar para consultar o preço. Alertas automáticos ainda não estão disponíveis.\n\nUse /cancelar para interromper o cadastro.",
     already_active="Já existe uma operação em andamento. Use /cancelar antes de iniciar outro cadastro.",
     registration_required="Envie /start para registrar seu acesso antes de cadastrar um produto.",
 )

@@ -15,6 +15,7 @@ from starlette.concurrency import run_in_threadpool
 from argos.api.schemas import TelegramUpdateInput
 from argos.application.ports.telegram_admission import TelegramAdmissionResult
 from argos.application.use_cases.admit_telegram_update import AdmitTelegramUpdate
+from argos.application.use_cases.verify_telegram_product import is_verify_product_input
 from argos.application.ports.telegram_worker import TelegramWorkerRunner
 from argos.config import Settings
 
@@ -28,7 +29,13 @@ def _is_supported_input(text: str) -> bool:
     value = text.strip()
     if value and not value.startswith("/"):
         return True
-    return value.casefold() in {"/start", "/ajuda", "/cancelar", "/adicionar", "/produtos", "/remover"}
+    return (
+        value.casefold() in {
+            "/start", "/ajuda", "/cancelar", "/adicionar",
+            "/produtos", "/remover",
+        }
+        or is_verify_product_input(value)
+    )
 
 
 def _authenticate(request: Request, settings: Settings) -> None:

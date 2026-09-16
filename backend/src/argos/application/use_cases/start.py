@@ -10,10 +10,10 @@ _START_TEXT = """Olá! Eu sou o Argos.
 
 Este é o ambiente inicial de testes. Seu acesso foi registrado com sucesso.
 
-Use /adicionar para cadastrar, /produtos para consultar seus produtos e /remover para iniciar uma remoção.
+Use /adicionar para cadastrar, /produtos para consultar seus produtos, /verificar para consultar um preço e /remover para iniciar uma remoção.
 Consulte /ajuda para ver os comandos disponíveis.
 
-A coleta de preços e os alertas ainda não estão disponíveis."""
+Os alertas automáticos ainda não estão disponíveis."""
 
 
 class StartTelegramConversation:

@@ -16,7 +16,10 @@ from argos.application.use_cases.help import HelpTelegramConversation
 from argos.application.use_cases.list_products import ListTelegramProducts
 from argos.application.use_cases.receive_registration_text import ReceiveTelegramRegistrationText
 from argos.application.use_cases.start import StartTelegramConversation
-from argos.application.use_cases.verify_telegram_product import VerifyTelegramProduct
+from argos.application.use_cases.verify_telegram_product import (
+    VerifyTelegramProduct,
+    is_verify_product_input,
+)
 
 
 class TelegramInboxWorker:
@@ -75,7 +78,7 @@ class TelegramInboxWorker:
                     telegram_user_id=telegram_user_id, chat_id=chat_id,
                     text=text, observed_at=now,
                 )
-            elif command.startswith("/verificar"):
+            elif is_verify_product_input(command):
                 reply = self._verification.execute(
                     update_id=claimed.update_id,
                     lease_token=claimed.lease_token,

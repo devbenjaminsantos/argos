@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O worker compõe o orquestrador de `/verificar`; claim → checkpoint → envio → conclusão e recuperação sem recoleta foram aprovados no CI 35162870668, commit a5e9406. O webhook possui teste explícito que ainda recusa `/verificar`, e `/ajuda` não o anuncia. Próximo incremento: habilitar admissão e ajuda, validar CI e só então implantar para teste manual.
+**Prioridade da sessão:** `/verificar <UUID>` foi habilitado na admissão HTTP e no worker; `/produtos` exibe o UUID somente na lista do proprietário, e sintaxe incompleta/inválida recebe resposta durável. `/start`, `/ajuda` e mensagens de cadastro distinguem consulta manual disponível de alertas automáticos pendentes. Suíte completa local aprovada; CI pendente. Após CI, realizar deploy manual, atualizar o menu do BotFather e validar código próprio, inválido e cruzado entre as duas contas antes de concluir V2.11.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
