@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.9 — Aceitação manual com duas contas e limite individual
+**Próximo item:** V2.11 — Leitura inerte de HTML, charset e detecção de bloqueio
 
 **Última atualização:** 15/09/2026
 
@@ -399,3 +399,5 @@ CI 35043152303 aprovado em 0151fc2 para feedback distinto na confirmação de re
 Usuário confirmou êxito de todos os testes manuais das novas mensagens de remoção após a orientação de deploy: código ausente, incompleto, formato inválido e código da outra conta; cancelamento e listagem com produto preservado. Aceite por relato, sem nova consulta administrativa ou inspeção de deploy. Código 0151fc2, CI 35043152303 aprovado. Próximo teste: limite individual de três ativos, quarto anúncio recusado em A sem consumir vaga de B. Extração continua pausada; limite e remoção/reutilização entre contas ainda pendentes. Critério V2.9 permanece aberto.
 
 Limite individual aceito por relato: A completou três ativos e teve o quarto anúncio distinto recusado; B cadastrou seu segundo produto e manteve a lista própria. O critério de isolamento e limite individual da V2.9 está atendido. Remoção, reutilização e repetição continuam como fechamento do roteiro ampliado, sem reabrir esse critério.
+
+Roteiro ampliado de duas contas concluído por relato: A removeu um produto, passou a dois ativos, recadastrou e voltou a três; B permaneceu inalterada e consultas repetidas não produziram efeitos adicionais. Remoção lógica, reutilização da vaga/chave e isolamento foram aceitos. Próxima frente retorna à V2.11, na leitura inerte de HTML/charset e detecção de bloqueio; o texto exato da resposta inicial de `/start` em B não foi registrado, sem bloquear o aceite funcional já exercitado.

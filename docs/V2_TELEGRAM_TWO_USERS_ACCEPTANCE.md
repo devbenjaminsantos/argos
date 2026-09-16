@@ -40,7 +40,7 @@ Menu do BotFather continua com confirmação pendente; sincronizar somente os co
 - [x] Testar código entre duas propostas de remoção e preservar ambos os produtos; êxito relatado nos dois sentidos.
 - [x] Validar mensagens distintas para formato/código incorretos no bot; todos os testes passaram conforme relato do usuário.
 - [x] Comprovar limite individual: A manteve três ativos e recusou o quarto; B aceitou o segundo produto e preservou sua lista isolada, conforme relato do usuário.
-- [ ] Comprovar remoção, reutilização e repetição conforme tabela.
+- [x] Comprovar remoção, reutilização e repetição: A removeu, passou a dois produtos, recadastrou e voltou a três; B permaneceu inalterada, conforme relato do usuário.
 
 Não há confirmação administrativa nova nesta retomada. A extração foi pausada para priorizar este aceite; cadastro/listagem foram aceitos por relato; demais resultados continuam pendentes.
 
@@ -57,3 +57,5 @@ CI 35043152303 aprovado em 0151fc2 para feedback distinto na confirmação de re
 Usuário confirmou êxito de todos os testes manuais das novas mensagens de remoção após a orientação de deploy: código ausente, incompleto, formato inválido e código da outra conta; cancelamento e listagem com produto preservado. Aceite por relato, sem nova consulta administrativa ou inspeção de deploy. Código 0151fc2, CI 35043152303 aprovado. Próximo teste: limite individual de três ativos, quarto anúncio recusado em A sem consumir vaga de B. Extração continua pausada; limite e remoção/reutilização entre contas ainda pendentes.
 
 Limite individual aceito por relato do usuário: A completou três produtos ativos e o quarto anúncio distinto foi recusado; B conseguiu cadastrar seu segundo produto e manteve a própria lista. O limite de A não consumiu vaga de B. Próximo teste: remover um produto em A, confirmar que B permanece intacta e recadastrar em A para comprovar reutilização da vaga e da chave.
+
+Fechamento do roteiro ampliado aceito por relato: A removeu um produto com o código correto, `/produtos` mostrou dois ativos e B permaneceu inalterada; A recadastrou o produto, voltou a três ativos e consultas repetidas não causaram efeitos adicionais. Remoção lógica, reutilização da vaga/chave e isolamento de B foram comprovados manualmente. Permanece apenas o registro explícito do texto respondido ao `/start` de B; a conta já operou cadastro, consulta, remoção e cancelamento normalmente.
