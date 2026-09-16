@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O orquestrador de `/verificar` consulta resposta durável, depois observação escopada e só então coleta; toda resposta é formatada do snapshot persistido. Perda de lease após a coleta deixa a observação para retry sem nova chamada remota. Vinte e nove testes de aplicação passaram localmente; duas integrações PostgreSQL aguardam CI. Próximo incremento: composição no worker, ainda sem admissão HTTP, `/ajuda` ou bot.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O orquestrador de `/verificar` consulta resposta durável, depois observação escopada e só então coleta; toda resposta é formatada do snapshot persistido. Perda de lease após a coleta deixa a observação para retry sem nova chamada remota. Vinte e nove testes de aplicação e duas integrações PostgreSQL foram aprovados no CI 35136457017, commit e48e151. Próximo incremento: composição no worker, ainda sem admissão HTTP, `/ajuda` ou bot.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
