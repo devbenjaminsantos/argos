@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A migração `20260916_10` prepara observações append-only: sucesso exige preço positivo/fonte, falha tem somente código sanitizado, e FK composta impede associar produto a outro proprietário. Runtime recebe SELECT/INSERT, sem UPDATE/DELETE/TRUNCATE. Doze testes de contrato passaram localmente; 12 integrações PostgreSQL aguardam CI. Próximo incremento: repositório idempotente por UUID; `/verificar` e bot continuam desligados.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A migração `20260916_10` prepara observações append-only: sucesso exige preço positivo/fonte, falha tem somente código sanitizado, e FK composta impede associar produto a outro proprietário. Runtime recebe SELECT/INSERT, sem UPDATE/DELETE/TRUNCATE. Doze testes de contrato passaram localmente e 12 integrações PostgreSQL foram aprovadas no CI 35123926472, commit 7c34163. Próximo incremento: repositório idempotente por UUID; `/verificar` e bot continuam desligados.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
