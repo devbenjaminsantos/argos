@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A migração `20260916_10` prepara observações append-only e o adaptador PostgreSQL usa o UUID como chave idempotente: repetição igual não duplica e conteúdo divergente falha sem alterar o histórico. Doze testes de contrato passaram localmente e quatro integrações concorrentes foram aprovadas no CI 35130500915, commit ca9b179. Próximo incremento: ligar `VerifyProduct` à gravação de sucesso ou falha; `/verificar` e bot continuam desligados.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. `VerifyProduct` agora exige UUID/timestamp do executor e persiste sucesso, falha de coleta ou identidade divergente antes de retornar; entrada inválida e alvo ausente não criam observação. Vinte e um testes do caso de uso e duas integrações PostgreSQL do caminho completo aguardam CI. Próximo incremento: contrato Telegram de `/verificar` por código completo próprio, mantendo inbox/lease/resposta durável; comando e bot continuam desligados.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
