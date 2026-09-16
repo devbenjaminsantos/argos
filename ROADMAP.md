@@ -299,7 +299,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Registrar sucesso e falhas explícitas, nunca preço zero.
 - [x] Preparar contrato e seis fixtures sintéticas com resultados esperados em docs/V2_MERCADO_LIVRE_EXTRACTION.md.
 - [x] Implementar componente JSON-LD e conversão Decimal isolados; 32 testes locais passaram; CI 35007318534 aprovado em 5cacc60.
-- [x] Implementar leitura HTML inerte, UTF-8 estrito e classificação de bloqueio antes da extração JSON-LD; 112 testes relacionados passaram localmente.
+- [x] Implementar leitura HTML inerte, UTF-8 estrito e classificação de bloqueio antes da extração JSON-LD; 112 testes relacionados passaram localmente e CI 35100500881 aprovado em 8b3a21c.
 - [ ] Criar testes do extrator HTML completo e ampliar fixtures para casos negativos.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
