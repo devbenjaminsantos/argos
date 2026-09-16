@@ -42,7 +42,7 @@ def test_downgrade_with_history_is_refused_and_revision_preserved(context,monkey
     with pytest.raises(RuntimeError,match="downgrade destrutivo recusado"):
         command.downgrade(Config("alembic.ini"),"20260914_08")
     with context[0].connect() as c:
-        assert c.scalar(text("SELECT version_num FROM alembic_version"))=='20260914_09'
+        assert c.scalar(text("SELECT version_num FROM alembic_version"))=='20260916_10'
         assert c.scalar(text("SELECT count(*) FROM monitored_products WHERE removed_at IS NOT NULL"))==1
 
 

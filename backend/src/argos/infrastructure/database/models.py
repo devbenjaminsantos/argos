@@ -202,7 +202,8 @@ class ProductPriceObservationRecord(Base):
             name="valid_target_price",
         ),
         CheckConstraint(
-            "(status = 'success' AND price_cents BETWEEN 1 AND 999999999 "
+            "(status = 'success' AND price_cents IS NOT NULL "
+            "AND price_cents BETWEEN 1 AND 999999999 AND source IS NOT NULL "
             "AND source IN ('json-ld','meta','visible-dom') AND error_code IS NULL) OR "
             "(status = 'failure' AND price_cents IS NULL AND source IS NULL "
             "AND error_code ~ '^[a-z][a-z0-9_]{0,63}$')",

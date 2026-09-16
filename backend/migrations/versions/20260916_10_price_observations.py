@@ -28,7 +28,8 @@ def upgrade():
         sa.CheckConstraint("telegram_user_id > 0", name=op.f("ck_product_price_observations_positive_owner")),
         sa.CheckConstraint("target_price_cents BETWEEN 1 AND 999999999", name=op.f("ck_product_price_observations_valid_target_price")),
         sa.CheckConstraint(
-            "(status = 'success' AND price_cents BETWEEN 1 AND 999999999 "
+            "(status = 'success' AND price_cents IS NOT NULL "
+            "AND price_cents BETWEEN 1 AND 999999999 AND source IS NOT NULL "
             "AND source IN ('json-ld','meta','visible-dom') AND error_code IS NULL) OR "
             "(status = 'failure' AND price_cents IS NULL AND source IS NULL "
             "AND error_code ~ '^[a-z][a-z0-9_]{0,63}$')",
