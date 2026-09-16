@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Portar preço visível do DOM e fechar o extrator
+**Próximo item:** V2.11 — Compor transporte e extrator em um adaptador interno
 
 **Última atualização:** 15/09/2026
 
@@ -301,7 +301,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implementar componente JSON-LD e conversão Decimal isolados; 32 testes locais passaram; CI 35007318534 aprovado em 5cacc60.
 - [x] Implementar leitura HTML inerte, UTF-8 estrito e classificação de bloqueio antes da extração JSON-LD; 112 testes relacionados passaram localmente e CI 35100500881 aprovado em 8b3a21c.
 - [x] Extrair título seguro e limitado e usar metadados como fallback ordenado quando JSON-LD não fornece preço; 49 testes focados passaram localmente e CI 35102552967 aprovado em 2510fed.
-- [ ] Criar testes do extrator HTML completo e ampliar fixtures para casos negativos.
+- [x] Portar preço visível somente dos contêineres principais e fechar o resultado do extrator com identidade da URL final; 65 testes focados e suíte completa local passaram.
+- [x] Criar testes do extrator HTML completo e executar as seis fixtures do manifesto, incluindo bloqueio, indisponibilidade e preço ausente.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
 
