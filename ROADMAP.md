@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Preparar o fluxo Telegram `/verificar`
+**Próximo item:** V2.11 — Orquestrar `/verificar` com recuperação durável
 
 **Última atualização:** 15/09/2026
 
@@ -308,7 +308,8 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar contrato e migração `20260916_10` de observações append-only: sucesso exige preço positivo/fonte, falha exige código e proíbe preço; proprietário fixado por FK composta; runtime recebe apenas SELECT/INSERT. Doze testes de contrato passaram localmente e 12 integrações PostgreSQL foram aprovadas no CI 35123926472, commit 7c34163.
 - [x] Implementar repositório PostgreSQL idempotente por UUID: repetição igual não duplica; conteúdo divergente com o mesmo UUID falha sem alterar o histórico. Doze testes de contrato passaram localmente e quatro integrações do repositório foram aprovadas no CI 35130500915, commit ca9b179.
 - [x] Ligar o caso de uso interno de verificação à gravação de uma observação de sucesso ou falha: executor fornece UUID/timestamp, entrada inválida ou alvo ausente não cria histórico, e resultado só retorna após persistência. Vinte e um testes do caso de uso e duas integrações PostgreSQL do caminho completo foram aprovados no CI 35132196464, commit a7fbcdf.
-- [ ] Preparar o contrato Telegram de `/verificar` por código completo de produto próprio, preservando inbox, lease, resposta durável e idempotência; não habilitar no bot antes dos testes locais e PostgreSQL.
+- [x] Preparar o contrato Telegram de `/verificar <UUID canônico>`: parser estrito, observação determinística por `update_id` e mensagens públicas sem conteúdo remoto ou detalhe interno. Dezenove testes passaram localmente; admissão, worker e ajuda permanecem sem o comando.
+- [ ] Orquestrar `/verificar` fora de transação longa, recuperando observação/resultado durável antes de repetir coleta; preservar inbox, lease e resposta em retries. Não habilitar no webhook antes dos testes PostgreSQL.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
 

@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. `VerifyProduct` agora exige UUID/timestamp do executor e persiste sucesso, falha de coleta ou identidade divergente antes de retornar; entrada inválida e alvo ausente não criam observação. Vinte e um testes do caso de uso e duas integrações PostgreSQL do caminho completo foram aprovados no CI 35132196464, commit a7fbcdf. Próximo incremento: contrato Telegram de `/verificar` por código completo próprio, mantendo inbox/lease/resposta durável; comando e bot continuam desligados.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O contrato puro `/verificar <UUID canônico>` possui parser estrito, UUID de observação determinístico por `update_id` e respostas públicas sem título remoto, fonte técnica ou detalhe interno; 19 testes passaram localmente. Próximo incremento: orquestração recuperável sem transação durante a coleta, consultando resultado durável antes de repetir efeito externo. Admissão, worker, ajuda e bot continuam sem `/verificar`.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
