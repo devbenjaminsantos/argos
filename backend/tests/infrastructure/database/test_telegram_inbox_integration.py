@@ -229,7 +229,7 @@ def test_one_shot_worker_persists_owner_sends_start_and_completes() -> None:
         connection.execute(text("TRUNCATE TABLE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
         connection.execute(
             text(
-                "TRUNCATE TABLE monitored_products, telegram_conversation_drafts, "
+                "TRUNCATE TABLE product_price_observations, monitored_products, telegram_conversation_drafts, "
                 "telegram_users"
             )
         )
@@ -278,7 +278,7 @@ def test_one_shot_worker_persists_owner_sends_start_and_completes() -> None:
         connection.execute(text("TRUNCATE TABLE telegram_registration_results, telegram_admissions, telegram_admission_owners, telegram_update_inbox"))
         connection.execute(
             text(
-                "TRUNCATE TABLE monitored_products, telegram_conversation_drafts, "
+                "TRUNCATE TABLE product_price_observations, monitored_products, telegram_conversation_drafts, "
                 "telegram_users"
             )
         )
