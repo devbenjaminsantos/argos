@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A extração foi retomada: transporte preserva charset, leitura HTML é inerte e UTF-8 estrita, e bloqueio é classificado antes do JSON-LD. 112 testes relacionados passaram localmente; CI 35100500881 aprovado em 8b3a21c. Próximo incremento: título e fallback de preço por metadados; DOM visível e integração pública continuam posteriores.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. Na extração, transporte/charset, leitura inerte, bloqueio antes de preço, JSON-LD/Decimal, título seguro e fallback ordenado por metadados estão implementados. O incremento de título/meta tem 49 testes focados e a suíte completa local aprovada. Próximo incremento: preço visível do DOM e fechamento do resultado do extrator; integração pública continua posterior.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
