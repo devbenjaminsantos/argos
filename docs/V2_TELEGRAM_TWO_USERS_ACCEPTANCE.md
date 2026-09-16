@@ -36,9 +36,12 @@ Menu do BotFather continua com confirmação pendente; sincronizar somente os co
 - [ ] Confirmar explicitamente a resposta de `/start` da conta B.
 - [x] Confirmar lista inicial de B vazia com `/produtos`, enquanto A lista seu produto; relato do usuário.
 - [x] Cadastrar o mesmo anúncio em A/B, com apelidos e configurações distintos, e comprovar listas isoladas; relato do usuário.
-- [ ] Executar operações independentes, cancelamento e código entre duas propostas de remoção.
+- [x] Executar operações simultâneas e cancelamento independente entre A/B; êxito relatado pelo usuário.
+- [ ] Testar código entre duas propostas de remoção.
 - [ ] Comprovar limite individual, remoção, reutilização e repetição conforme tabela.
 
 Não há confirmação administrativa nova nesta retomada. A extração foi pausada para priorizar este aceite; cadastro/listagem foram aceitos por relato; demais resultados continuam pendentes.
 
 Aceite manual relatado pelo usuário: A cadastrou produto e /produtos exibiu o item; B inicialmente sem produtos recebeu lista vazia. Depois, mesmo anúncio cadastrado nas duas contas: A com apelido relógio, alvo R$ 50 e intervalo 12 h; B com relógio de mesa, alvo R$ 400 e intervalo 24 h. Cada conta continuou exibindo somente seus produtos/configurações. Isolamento de cadastro/listagem aceito por relato, sem nova consulta administrativa. Operações independentes, cancelamento, códigos de remoção e limite individual ainda pendentes.
+
+Usuário confirmou êxito do teste de operações simultâneas: A abriu proposta de remoção; B iniciou cadastro; /cancelar em A não interrompeu B, que recebeu URL e avançou para apelido. Aceite por relato, sem nova consulta administrativa; não houve confirmação de remoção. Próximo teste: código de A na proposta de remoção de B, preservando ambos os produtos. Limite individual e remoção/reutilização entre contas continuam pendentes.
