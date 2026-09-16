@@ -306,7 +306,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Preparar caso de uso interno de verificação: alvo escopado por proprietário/UUID, uma coleta, identidade final conferida, comparação com preço-alvo e erros públicos seguros; 35 testes focados, suíte completa local e CI 35108277106 aprovado em df57d45.
 - [x] Implementar adaptador PostgreSQL de leitura do alvo ativo por UUID + proprietário + estado ativo, usando apenas o SELECT já concedido ao runtime; 23 testes locais focados passaram e oito integrações PostgreSQL foram aprovadas no CI 35122262352, commit efff34c.
 - [x] Preparar contrato e migração `20260916_10` de observações append-only: sucesso exige preço positivo/fonte, falha exige código e proíbe preço; proprietário fixado por FK composta; runtime recebe apenas SELECT/INSERT. Doze testes de contrato passaram localmente e 12 integrações PostgreSQL foram aprovadas no CI 35123926472, commit 7c34163.
-- [x] Implementar repositório PostgreSQL idempotente por UUID: repetição igual não duplica; conteúdo divergente com o mesmo UUID falha sem alterar o histórico. Doze testes de contrato passaram localmente; quatro integrações do repositório aguardam CI PostgreSQL.
+- [x] Implementar repositório PostgreSQL idempotente por UUID: repetição igual não duplica; conteúdo divergente com o mesmo UUID falha sem alterar o histórico. Doze testes de contrato passaram localmente e quatro integrações do repositório foram aprovadas no CI 35130500915, commit ca9b179.
 - [ ] Ligar o caso de uso interno de verificação à gravação de uma observação de sucesso ou falha, ainda sem expor `/verificar` no bot.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
