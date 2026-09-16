@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O worker agora compõe o orquestrador de `/verificar` e o coletor pode ser injetado nos testes; claim → checkpoint → envio → conclusão tem cobertura local e três integrações PostgreSQL aguardam CI. O webhook possui teste explícito que ainda recusa `/verificar`, e `/ajuda` não o anuncia. Próximo incremento: habilitar admissão e ajuda, validar CI e só então implantar para teste manual.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O worker compõe o orquestrador de `/verificar`; claim → checkpoint → envio → conclusão e recuperação sem recoleta foram aprovados no CI 35162870668, commit a5e9406. O webhook possui teste explícito que ainda recusa `/verificar`, e `/ajuda` não o anuncia. Próximo incremento: habilitar admissão e ajuda, validar CI e só então implantar para teste manual.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
