@@ -48,6 +48,11 @@ def test_html_success(transport):
     assert repr(result) == 'FetchedHTML()'
 
 
+def test_propagates_declared_charset(transport):
+    transport.headers['Content-Type'] = 'text/html; charset="UTF-8"'
+    assert fetch().charset == 'UTF-8'
+
+
 @pytest.mark.parametrize('status,headers,code',[
  (302,{},'redirect_rejected'),(403,{},'http_failed'),
  (200,{'Content-Type':'application/json'},'invalid_content_type'),

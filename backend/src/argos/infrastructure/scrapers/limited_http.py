@@ -4,6 +4,7 @@ import socket
 import threading
 import time
 from dataclasses import dataclass, field
+from email.message import Message
 from urllib.parse import urljoin, urlsplit
 from argos.domain.safe_fetch import FetchPolicyError, validate_fetch_url
 from argos.infrastructure.scrapers.resolved_destination import resolve_destination
@@ -27,6 +28,7 @@ class FetchedHTML:
     """Conteúdo limitado e destino efetivamente validado, sem exposição no repr."""
     html: bytes = field(repr=False)
     final_url: str = field(repr=False)
+    charset: str | None = field(default=None, repr=False)
 
 
 @dataclass(frozen=True)
@@ -79,6 +81,7 @@ def _fetch_hop(url: str, *, resolver, deadline: float) -> FetchedHTML | _Redirec
             headers = response.getheaders()
             lengths = [value.strip() for key, value in headers if key.lower() == "content-length"]
             transfers = [value.strip().lower() for key, value in headers if key.lower() == "transfer-encoding"]
+            content_types = [value.strip() for key, value in headers if key.lower() == "content-type"]
             if len(lengths) > 1 or len(transfers) > 1 or (lengths and transfers):
                 raise FetchPolicyError("http_failed")
             if transfers and transfers != ["chunked"]:
@@ -103,8 +106,13 @@ def _fetch_hop(url: str, *, resolver, deadline: float) -> FetchedHTML | _Redirec
                 return _Redirect(target)
             if response.status != 200:
                 raise FetchPolicyError("redirect_rejected" if 300 <= response.status < 400 else "http_failed")
-            if response.getheader("Content-Type", "").split(";",1)[0].strip().lower() != "text/html":
+            if len(content_types) != 1:
                 raise FetchPolicyError("invalid_content_type")
+            content_type = Message()
+            content_type["content-type"] = content_types[0]
+            if content_type.get_content_type() != "text/html":
+                raise FetchPolicyError("invalid_content_type")
+            charset = content_type.get_param("charset")
             if response.getheader("Content-Encoding", "identity").strip().lower() not in ("", "identity"):
                 raise FetchPolicyError("unsupported_encoding")
             body = bytearray()
@@ -123,7 +131,7 @@ def _fetch_hop(url: str, *, resolver, deadline: float) -> FetchedHTML | _Redirec
                 raise FetchPolicyError("timeout")
             if declared is not None and len(body) != declared:
                 raise FetchPolicyError("http_failed")
-            return FetchedHTML(html=bytes(body), final_url=destination.url)
+            return FetchedHTML(html=bytes(body), final_url=destination.url, charset=charset)
         except FetchPolicyError:
             raise
         except http.client.IncompleteRead:

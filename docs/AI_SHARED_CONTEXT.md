@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato: listas e configurações isoladas, operações simultâneas, cancelamento, códigos cruzados, limite individual, remoção, reutilização e repetição. Sem nova consulta administrativa; somente o texto exato da resposta inicial de `/start` em B não foi registrado. Retomar a extração pausada após JSON-LD/Decimal isolados (5cacc60, CI 35007318534 aprovado) pela leitura inerte de HTML, charset e detecção de bloqueio antes de JSON-LD; meta/DOM e integração continuam pendentes.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A extração foi retomada: transporte preserva charset, leitura HTML é inerte e UTF-8 estrita, e bloqueio é classificado antes do JSON-LD. 112 testes relacionados passaram localmente. Próximo incremento: título e fallback de preço por metadados; DOM visível e integração pública continuam posteriores.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 

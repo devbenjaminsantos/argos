@@ -282,13 +282,13 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [x] Implementar política pura de destinos e suíte negativa: hosts exatos, IPs/ranges IPv4/IPv6, respostas mistas e limite DNS; 44 testes locais passaram. CI 34992039718 aprovado em 5489150.
 - [x] Preparar transporte isolado com IP validado fixado e TLS/SNI preservados, sem DNS implícito/proxy/redirect automático. Handshake TLS real e leitura bloqueada validados com sockets locais; 35 testes relacionados passaram. CI 35004349707 aprovado em 35bc1c7. Ainda não integrado ao coletor.
 
-- [ ] Aceitar apenas HTTPS e hosts explicitamente suportados.
-- [ ] Rejeitar credenciais, portas alternativas e URLs malformadas.
-- [ ] Resolver DNS e bloquear destinos privados, locais ou reservados.
+- [x] Aceitar apenas HTTPS e hosts explicitamente suportados; política pura e normalização cobertas pela suíte negativa.
+- [x] Rejeitar credenciais, portas alternativas e URLs malformadas; política pura e normalização cobertas pela suíte negativa.
+- [x] Resolver DNS e bloquear destinos privados, locais ou reservados; conjunto completo é validado antes de abrir conexão.
 - [x] Validar cada redirecionamento e limitar tamanho e duração no transporte isolado; até três saltos, nova resolução/IP fixado, ciclos recusados e deadline compartilhado. 53 testes relacionados passaram localmente; CI 35004734079 aprovado em 2fdb00a.
 - [x] Revisar framing HTTP e rejeição de respostas truncadas antes de integrar ao coletor; 68 testes relacionados passaram localmente; CI 35005275274 aprovado em 86d7951.
 - [x] Preparar resultado de transporte com HTML limitado e URL final validada para o extrator; FetchedHTML imutável, 68 testes relacionados passaram localmente; CI 35006082395 aprovado em cb7597a.
-- [ ] Criar testes com URLs maliciosas.
+- [x] Criar testes com URLs maliciosas, ranges especiais, respostas DNS mistas, redirects inválidos e rebinding.
 
 **Critério de conclusão:** o coletor não funciona como proxy genérico nem alcança rede interna.
 
@@ -299,7 +299,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 - [ ] Registrar sucesso e falhas explícitas, nunca preço zero.
 - [x] Preparar contrato e seis fixtures sintéticas com resultados esperados em docs/V2_MERCADO_LIVRE_EXTRACTION.md.
 - [x] Implementar componente JSON-LD e conversão Decimal isolados; 32 testes locais passaram; CI 35007318534 aprovado em 5cacc60.
-- [ ] Implementar leitura HTML e classificação de bloqueio antes da extração.
+- [x] Implementar leitura HTML inerte, UTF-8 estrito e classificação de bloqueio antes da extração JSON-LD; 112 testes relacionados passaram localmente.
 - [ ] Criar testes do extrator HTML completo e ampliar fixtures para casos negativos.
 
 **Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
