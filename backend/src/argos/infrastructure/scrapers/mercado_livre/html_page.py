@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 import re
 
+from argos.application.ports.product_collection import CollectedProduct
 from argos.domain.products.registration import mercado_livre_product_key
 from argos.infrastructure.scrapers.limited_http import FetchedHTML
 from argos.infrastructure.scrapers.mercado_livre.json_ld import extract_json_ld_price, to_price_cents
@@ -32,16 +33,6 @@ class ExtractedPageBasics:
     title: str = field(repr=False)
     price_cents: int | None = field(repr=False)
     source: str | None = field(repr=False)
-
-
-@dataclass(frozen=True)
-class ExtractedProduct:
-    store: str
-    external_id: str
-    url: str = field(repr=False)
-    title: str = field(repr=False)
-    price_cents: int
-    source: str
 
 
 class _PageParser(HTMLParser):
@@ -221,7 +212,7 @@ def extract_page_basics(fetched: FetchedHTML) -> ExtractedPageBasics:
     return ExtractedPageBasics(page.title, None, None)
 
 
-def extract_product(fetched: FetchedHTML) -> ExtractedProduct:
+def extract_product(fetched: FetchedHTML) -> CollectedProduct:
     basics = extract_page_basics(fetched)
     if basics.price_cents is None or basics.source is None:
         page = parse_product_page(fetched)
@@ -230,6 +221,6 @@ def extract_product(fetched: FetchedHTML) -> ExtractedProduct:
         external_id = mercado_livre_product_key(fetched.final_url)
     except ValueError:
         raise ProductPageError("invalid_url") from None
-    return ExtractedProduct(store="mercado-livre", external_id=external_id,
+    return CollectedProduct(store="mercado-livre", external_id=external_id,
         url=fetched.final_url, title=basics.title,
         price_cents=basics.price_cents, source=basics.source)

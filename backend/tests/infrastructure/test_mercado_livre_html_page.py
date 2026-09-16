@@ -117,7 +117,7 @@ def test_visible_price_fixture_closes_extractor_result():
     assert result.title == "Notebook"
     assert result.price_cents == 219_990
     assert result.source == "visible-dom"
-    assert repr(result) == ("ExtractedProduct(store='mercado-livre', "
+    assert repr(result) == ("CollectedProduct(store='mercado-livre', "
                             "external_id='MLB123456', price_cents=219990, "
                             "source='visible-dom')")
 

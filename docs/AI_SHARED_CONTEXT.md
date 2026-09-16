@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O extrator HTML interno está fechado: bloqueio antes de preço, título, JSON-LD, meta e DOM principal, resultado com URL final/ID e falhas explícitas. Preço visível ignora recomendações e nunca vira zero. As seis fixtures do manifesto, 65 testes focados, suíte completa local e CI 35103344973 aprovado em 31fe398. Próximo incremento: compor transporte e extrator num adaptador interno injetável; ainda sem `/verificar`, persistência ou bot.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. O adaptador interno Mercado Livre agora implementa a porta de coleta da aplicação e compõe, por injeção, uma tentativa do transporte seguro com o extrator concluído. Falhas esperadas têm códigos sanitizados; não há retry, persistência, `/verificar` ou bot. Oitenta e dois testes focados e a suíte completa local passaram. Próximo incremento: preparar o caso de uso interno de verificação manual e seus contratos, ainda sem entrada Telegram.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 

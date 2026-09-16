@@ -14,7 +14,7 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Compor transporte e extrator em um adaptador interno
+**Próximo item:** V2.11 — Preparar caso de uso interno de verificação manual
 
 **Última atualização:** 15/09/2026
 
@@ -294,7 +294,7 @@ O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa se
 
 ### V2.11 — Coleta manual do Mercado Livre
 
-- [ ] Portar o adaptador do Mercado Livre para o back-end.
+- [x] Portar o adaptador do Mercado Livre para o back-end: porta de aplicação e composição injetável entre transporte seguro e extrator, sem retries ou integração externa; 82 testes focados e suíte completa local passaram.
 - [ ] Implementar `/verificar` para um produto cadastrado.
 - [ ] Registrar sucesso e falhas explícitas, nunca preço zero.
 - [x] Preparar contrato e seis fixtures sintéticas com resultados esperados em docs/V2_MERCADO_LIVRE_EXTRACTION.md.
