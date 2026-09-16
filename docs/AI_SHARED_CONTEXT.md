@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A verificação interna agora tem leitura PostgreSQL por UUID + proprietário + `removed_at IS NULL`, em uma consulta sem fallback e usando apenas SELECT do runtime. Vinte e três testes focados passaram localmente; oito integrações PostgreSQL aguardam CI. Próximo incremento: contrato e migração de observações de preço/falha, sem preço zero; `/verificar` e bot continuam desligados.
+**Prioridade da sessão:** a aceitação funcional V2.9 com duas contas foi concluída por relato; sem nova consulta administrativa e sem registro do texto exato do `/start` inicial em B. A verificação interna tem leitura PostgreSQL por UUID + proprietário + `removed_at IS NULL`, em uma consulta sem fallback e usando apenas SELECT do runtime. Vinte e três testes locais focados e oito integrações PostgreSQL foram aprovados; CI 35122262352 em efff34c. Próximo incremento: contrato e migração de observações de preço/falha, sem preço zero; `/verificar` e bot continuam desligados.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 
