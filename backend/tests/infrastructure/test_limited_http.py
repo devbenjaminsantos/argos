@@ -54,7 +54,8 @@ def test_propagates_declared_charset(transport):
 
 
 @pytest.mark.parametrize('status,headers,code',[
- (302,{},'redirect_rejected'),(403,{},'http_failed'),
+ (302,{},'redirect_rejected'),(403,{},'access_blocked'),
+ (429,{},'access_blocked'),
  (200,{'Content-Type':'application/json'},'invalid_content_type'),
  (200,{'Content-Type':'text/html','Content-Encoding':'gzip'},'unsupported_encoding'),
  (200,{'Content-Type':'text/html','Content-Length':'9999999'},'body_too_large'),
@@ -66,3 +67,19 @@ def test_invalid_response(transport,status,headers,code):
 def test_stream_without_length_is_bounded(transport,monkeypatch):
     monkeypatch.setattr(module,'MAX_BODY_BYTES',4)
     with pytest.raises(FetchPolicyError,match='body_too_large'): fetch()
+
+
+def test_tls_connection_failure_is_sanitized(transport, monkeypatch):
+    class FailedPinned:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            raise RuntimeError("sensitive transport detail")
+
+        def __exit__(self, *args):
+            pass
+
+    monkeypatch.setattr(module, 'PinnedTLSConnection', FailedPinned)
+    with pytest.raises(FetchPolicyError, match='^transport_failed$'):
+        fetch()

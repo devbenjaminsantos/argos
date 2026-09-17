@@ -2,7 +2,7 @@
 
 ## Objetivo atual
 
-**Prioridade da sessão:** `/verificar <UUID>` foi habilitado na admissão HTTP e no worker; `/produtos` exibe o UUID somente na lista do proprietário, e sintaxe incompleta/inválida recebe resposta durável. `/start`, `/ajuda` e mensagens de cadastro distinguem consulta manual disponível de alertas automáticos pendentes. Suíte completa e CI 35163551568 aprovados no commit cc427f0. Próximo passo manual: deploy, menu do BotFather e validação de código próprio, inválido e cruzado entre as duas contas antes de concluir V2.11.
+**Prioridade da sessão:** `/verificar <UUID>` foi implantado no Render pelo deploy manual `dep-daltlq6k1f9s739egh5g`, commit `c830c6c`, e a migração `20260916_10` está acessível ao runtime. Consulta agregada de produção em 17/09 confirmou quatro comandos recentes concluídos, todos apontando para produto ativo do mesmo proprietário; as quatro observações falharam em coleta, portanto não houve `product_not_found`. Reprodução controlada encontrou bloqueio HTTP 403 do Mercado Livre e também mostrou que falha ao abrir TLS escapava da classificação segura. O transporte agora classifica 403/429 como `access_blocked` e converte falhas de abertura em `transport_failed`. Próximo passo: CI, deploy e novo teste para confirmar a mensagem explícita de bloqueio antes de decidir o provedor de coleta.
 
 Preparar a V2 do Argos para um piloto Telegram com API, PostgreSQL e execução de coletas separados, preservando a V1 local da extensão Chrome.
 

@@ -46,7 +46,13 @@ def fetch_html_once(url: str, *, resolver=None) -> FetchedHTML:
         if current in seen:
             raise FetchPolicyError("redirect_rejected")
         seen.add(current)
-        result = _fetch_hop(current, resolver=resolver, deadline=deadline)
+        try:
+            result = _fetch_hop(current, resolver=resolver, deadline=deadline)
+        except FetchPolicyError:
+            raise
+        except Exception:
+            code = "timeout" if time.monotonic() >= deadline else "transport_failed"
+            raise FetchPolicyError(code) from None
         if isinstance(result, FetchedHTML):
             return result
         if hop == 3:
@@ -104,6 +110,8 @@ def _fetch_hop(url: str, *, resolver, deadline: float) -> FetchedHTML | _Redirec
                     raise FetchPolicyError("redirect_rejected") from None
                 # Never consume a redirect body; cleanup occurs before the next DNS lookup.
                 return _Redirect(target)
+            if response.status in (403, 429):
+                raise FetchPolicyError("access_blocked")
             if response.status != 200:
                 raise FetchPolicyError("redirect_rejected" if 300 <= response.status < 400 else "http_failed")
             if len(content_types) != 1:
