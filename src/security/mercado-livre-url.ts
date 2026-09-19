@@ -1,5 +1,5 @@
 const ALLOWED_ROOT_DOMAIN = "mercadolivre.com.br";
-const PRODUCT_PATH_PATTERNS = [/\/MLB-\d+/i, /\/p\/MLB\d+/i];
+const PRODUCT_PATH_PATTERNS = [/\/MLB-\d+/i, /\/p\/MLB\d+/i, /\/up\/MLBU\d+/i];
 const TRACKING_PARAMETERS = [
   "matt_tool",
   "matt_word",
@@ -57,7 +57,7 @@ export function normalizeMercadoLivreProductUrl(rawUrl: string): string {
 }
 
 export function getMercadoLivreProductId(url: string): string | null {
-  const match = url.match(/(?:\/MLB-|\/p\/MLB)(\d+)/i);
-  return match ? `MLB${match[1]}` : null;
+  const match = url.match(/(?:\/MLB-|\/p\/MLB)(\d+)|\/up\/MLBU(\d+)/i);
+  if (!match) return null;
+  return match[2] ? `MLBU${match[2]}` : `MLB${match[1]}`;
 }
-

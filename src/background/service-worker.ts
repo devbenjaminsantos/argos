@@ -24,7 +24,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 chrome.runtime.onMessage.addListener(
   (message: unknown, sender, sendResponse: (response: ExtensionResponse) => void) => {
     if (sender.id !== chrome.runtime.id || !isExtensionRequest(message)) return false;
-    if (message.type === "EXTRACT_CURRENT_PAGE" || message.type === "PARSE_MERCADO_LIVRE_HTML") {
+    if (message.type === "EXTRACT_CURRENT_PAGE" || message.type === "OBSERVE_CURRENT_PAGE"
+      || message.type === "PARSE_MERCADO_LIVRE_HTML") {
       return false;
     }
 
@@ -45,7 +46,8 @@ chrome.runtime.onMessage.addListener(
   },
 );
 
-async function handleRequest(message: Exclude<ReturnTypeMessage, { type: "EXTRACT_CURRENT_PAGE" | "PARSE_MERCADO_LIVRE_HTML" }>) {
+async function handleRequest(message: Exclude<ReturnTypeMessage,
+  { type: "EXTRACT_CURRENT_PAGE" | "OBSERVE_CURRENT_PAGE" | "PARSE_MERCADO_LIVRE_HTML" }>) {
   switch (message.type) {
     case "LIST_PRODUCTS":
       return listProducts();

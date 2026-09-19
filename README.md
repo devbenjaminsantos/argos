@@ -242,3 +242,7 @@ A coleta de preços deve considerar mudanças no HTML das lojas, páginas que ex
 V1 Chrome implementada, com suporte inicial ao Mercado Livre. Melhorias e regressões do adaptador continuam sendo tratadas conforme surgirem novos formatos de página.
 
 > **Teste de aceitação pendente:** a extensão ainda será testada manualmente no Chrome para Windows. O desenvolvimento atual está sendo realizado em um ambiente com Safari, que não executa diretamente o pacote Manifest V3 preparado para o Chrome.
+
+## Observação contextual experimental
+
+A extensão oferece “Observar preço da página aberta” para ler localmente a área principal de preço do Mercado Livre. O resultado não altera histórico, dispara alertas ou envia dados ao backend. Condições, frete e elegibilidade desconhecidos são indicados explicitamente. A validação real está pendente em [aceitação contextual](docs/CONTEXTUAL_CAPTURE_ACCEPTANCE.md); a direção futura está no [ADR 0007](docs/decisions/0007-contextual-multistore.md).

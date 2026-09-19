@@ -14,9 +14,9 @@ Este documento registra o avanço do projeto e divide as próximas versões em e
 
 **Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
 
-**Próximo item:** V2.11 — Implantar e validar manualmente `/verificar`
+**Próximo item:** Arquitetura contextual — validar a observação local em Chrome real
 
-**Última atualização:** 15/09/2026
+**Última atualização:** 18/09/2026
 
 > **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
 
@@ -415,3 +415,131 @@ Usuário confirmou êxito de todos os testes manuais das novas mensagens de remo
 Limite individual aceito por relato: A completou três ativos e teve o quarto anúncio distinto recusado; B cadastrou seu segundo produto e manteve a lista própria. O critério de isolamento e limite individual da V2.9 está atendido. Remoção, reutilização e repetição continuam como fechamento do roteiro ampliado, sem reabrir esse critério.
 
 Roteiro ampliado de duas contas concluído por relato: A removeu um produto, passou a dois ativos, recadastrou e voltou a três; B permaneceu inalterada e consultas repetidas não produziram efeitos adicionais. Remoção lógica, reutilização da vaga/chave e isolamento foram aceitos. Próxima frente retorna à V2.11, na leitura inerte de HTML/charset e detecção de bloqueio; o texto exato da resposta inicial de `/start` em B não foi registrado, sem bloquear o aceite funcional já exercitado.
+
+## Evolução contextual — ADR 0007
+
+Decisão: [arquitetura contextual](docs/decisions/0007-contextual-multistore.md). Esta seção é a fonte de progresso do plano; o ADR registra as decisões, não uma segunda lista de execução.
+
+Executar na ordem C1–C9, em alterações pequenas. Marcar `[x]` somente com evidência registrada (teste, commit, CI ou aceite manual, identificando sua origem). Implementação, implantação e aceite são estados distintos. Uma etapa só está encerrada quando seus itens e seu critério de saída forem atendidos. Manter o próximo item no início deste roadmap atualizado; registros históricos acima não substituem esta sequência.
+
+### C1 — Observação local da página aberta
+
+- [x] Registrar as decisões no ADR 0007.
+- [x] Implementar ação explícita de observação local no popup, sem enviar dados ao backend ou alterar o monitoramento V1.
+- [x] Extrair preço DOM em BRL, recusar valores inválidos/conflitantes e manter elegibilidade, vendedor, variante, frete e contexto desconhecidos quando não comprovados.
+- [x] Cobrir extração, moeda, ambiguidade, bloqueio e ausência de conteúdo sensível com testes sintéticos.
+- [x] Validar TypeScript, 29 testes Vitest (12 novos), build e `git diff --check` em 18/09/2026.
+- [ ] Executar todos os casos de [aceitação em Chrome real](docs/CONTEXTUAL_CAPTURE_ACCEPTANCE.md), incluindo outra conta/perfil, mudança de variante e regressão da V1.
+- [ ] Registrar evidência do aceite e corrigir divergências encontradas em anúncios reais.
+
+**Saída:** leitura contextual local aceita em Chrome real, sem exportação de sessão ou efeitos no monitoramento existente.
+
+### C2 — Identidade Argos e migração aditiva
+
+- [ ] Criar `argos_user_id` UUID e vínculo único com a identidade Telegram existente; preservar `chat_id` como destino.
+- [ ] Preencher contas e vínculos para os usuários existentes por migração aditiva.
+- [ ] Migrar propriedade de produtos, observações, trabalhos e resultados sem remover prematuramente as relações antigas.
+- [ ] Obter o proprietário da autenticação, nunca de identificador livre no payload.
+- [ ] Escopar repositórios e relações ao proprietário, com constraints contra vínculos cruzados.
+- [ ] Validar upgrade, preservação de registros e compatibilidade dos comandos em PostgreSQL real.
+- [ ] Testar dois proprietários, inclusive tentativa de acesso por identificador alheio e preservação dos limites individuais.
+- [ ] Preparar implantação e recuperação da migração; confirmar o resultado antes de retirar a compatibilidade antiga.
+
+**Saída:** identidade interna em uso, dados preservados e Telegram funcional com isolamento comprovado.
+
+### C3 — Oferta, monitoramento e observação contextual
+
+- [ ] Separar produto/variante, oferta, monitoramento, observação e tentativa de coleta.
+- [ ] Identificar oferta por loja/anúncio e vendedor/variante quando disponíveis; manter desconhecidos explícitos.
+- [ ] Migrar registros existentes como Mercado Livre, preservando histórico e método de extração sem inventar contexto ou condições.
+- [ ] Registrar preço inteiro, moeda, disponibilidade, condições de pagamento/cupom/assinatura/quantidade e frete separado.
+- [ ] Registrar elegibilidade e evidência, horários observado/recebido, validade comercial e geração contextual quando aplicáveis.
+- [ ] Separar origem, contexto de acesso, método de extração e personalização.
+- [ ] Separar prazo de atualização da validade da oferta e deixar claro que o alvo inicial exclui frete.
+- [ ] Registrar falhas como tentativas sem preço; preservar observações válidas sem sobrescrita normal.
+- [ ] Declarar capacidades por adaptador e manter históricos privados por proprietário, sem equivalência automática entre lojas.
+- [ ] Testar migração, dados desconhecidos, propriedade e ausência de conversão de falha em preço zero.
+
+**Saída:** modelo contextual persistido e validado, compatível com os registros anteriores.
+
+### C4 — Trabalhos e entregas duráveis
+
+- [ ] Fazer `/verificar` persistir trabalho e intenção de confirmação antes de responder que a coleta foi agendada.
+- [ ] Separar execução da coleta do processamento de comandos, com tentativa, lease e prazo.
+- [ ] Selecionar fontes conforme a tarefa; coleta pública não espera o navegador e não se apresenta como personalizada.
+- [ ] Recusar resultados de leases substituídos e revalidar autorização ao aceitar o resultado.
+- [ ] Aplicar idempotência por resultado lógico; mesma chave com conteúdo divergente deve falhar.
+- [ ] Gravar observação e intenção de notificar na mesma transação.
+- [ ] Manter entregas Telegram e frontend independentes, com retentativas limitadas e tratamento explícito de envio incerto.
+- [ ] Testar concorrência, interrupção, retomada, timeout, resultado divergente e conector offline em PostgreSQL real.
+- [ ] Validar implantação do executor separado, recuperação após reinício e indicadores de trabalho atrasado/falhas sem dados sensíveis.
+
+**Saída:** comando agenda trabalho durável e entrega posterior recuperável, sem promessa de exatamente uma entrega externa.
+
+### C5 — Pareamento e fluxo completo do conector
+
+- [ ] Integrar autenticação estabelecida no frontend; acesso a dados somente pela API Argos, sem mecanismo próprio de senhas.
+- [ ] Implementar pareamento com código descartável, expiração, confirmação na conta autorizada e auditoria.
+- [ ] Criar `connector_id` e chave por instalação, protegida do acesso de content scripts.
+- [ ] Implementar contexto por usuário/conector/loja/geração, com invalidação por desconexão ou troca de conta.
+- [ ] Tratar contexto desconhecido explicitamente quando não houver evidência confiável, sem coletar a identidade real da loja.
+- [ ] Implementar aquisição de tarefas com operação permitida, oferta, geração, prazo, tentativa e nonce.
+- [ ] Restringir tarefas e resultados por schema, URL, loja, tamanho e volume; não aceitar scripts, seletores executáveis ou HTTP arbitrário.
+- [ ] Assinar resultados vinculando tarefa, tentativa, geração, nonce e conteúdo; assinatura não comprova veracidade comercial.
+- [ ] Revalidar vínculo, proprietário, loja, oferta, lease e revogação na transação de aceitação.
+- [ ] Permitir visualizar e revogar conectores, impedindo novas aquisições e submissões após revogação.
+- [ ] Exibir conectividade, última observação e intervenção necessária, distinguindo navegador offline de login necessário.
+- [ ] Integrar observação de página aberta ao backend preservando o modo local da V1.
+- [ ] Implementar retenção e exclusão solicitada de dados personalizados; append-only não bloqueia exclusão por privacidade.
+- [ ] Testar replay, pareamento expirado/reutilizado, revogação concorrente, troca de contexto, tarefas maliciosas e acesso entre proprietários.
+- [ ] Inspecionar payloads/logs e comprovar ausência de HTML integral, cookies, tokens e identificadores reais de sessão.
+- [ ] Validar em Chrome real que Telegram, frontend e extensão vinculados acessam apenas os dados da mesma conta.
+
+**Saída:** fluxo Mercado Livre completo e revogável, com isolamento, privacidade e regressão V1 comprovados.
+
+### C6 — Comparação e alertas condicionais
+
+- [ ] Comparar apenas oferta, variante, moeda, quantidade e condições compatíveis.
+- [ ] Impedir falso alerta por mudança de vendedor, condição do produto, pagamento ou geração contextual.
+- [ ] Aplicar condições aceitas pelo usuário e evidência de elegibilidade antes de disparar alertas condicionais.
+- [ ] Exibir preço observado, condições, frete desconhecido e idade da observação sem prometer preço final garantido.
+- [ ] Manter preço público e observação de sessão identificáveis e independentes.
+- [ ] Testar Pix, cupom incerto, assinatura, quantidade, frete desconhecido, oferta expirada e observação desatualizada.
+- [ ] Validar alertas e entregas por canal com duas contas, incluindo falhas e recuperação.
+
+**Saída:** alertas baseados em evidência comparável, sem misturar contextos ou usuários.
+
+### C7 — Fontes oficiais comprovadas
+
+- [ ] Comprovar acesso autorizado à API oficial do Mercado Livre, campos, identidade da oferta, contexto de preço e limites.
+- [ ] Registrar a capacidade real e a decisão de habilitar ou manter a fonte indisponível; ausência de acesso não autoriza simular suporte.
+- [ ] Integrar somente a capacidade comprovada, mantendo credenciais no executor e fora da extensão.
+- [ ] Aplicar seleção por capacidade e classificar falhas, sem depender de cascata obrigatória pelo navegador.
+- [ ] Validar preço/identidade, permissões, quotas, falha da API e apresentação correta da origem/contexto.
+- [ ] Manter provedor pago desabilitado; qualquer avaliação exige métricas de bloqueio e aprovação de teto mensal antes de ativação.
+
+**Saída:** fontes habilitadas com evidência de viabilidade e comportamento verificável; capacidades indisponíveis documentadas.
+
+### C8 — Busca limitada de oportunidades
+
+- [ ] Criar intenção privada por loja, consulta/categoria, orçamento, filtros, frequência, validade e limite de candidatos.
+- [ ] Distribuir tarefas somente ao conector do proprietário, com limites de páginas, execução e cancelamento.
+- [ ] Receber candidatos normalizados, sem explorar histórico de compras, carrinho ou conta de forma irrestrita.
+- [ ] Deduplicar e pontuar com evidências acessíveis ao proprietário e observações compatíveis.
+- [ ] Informar falta de histórico suficiente sem fabricar preço de referência ou desconto.
+- [ ] Permitir consultar/excluir intenções e respectivos dados personalizados conforme retenção definida.
+- [ ] Testar expiração, limites, cancelamento, conector offline e duas contas buscando a mesma categoria com resultados independentes.
+
+**Saída:** descoberta delimitada, auditável e privada, sem ações de compra.
+
+### C9 — Novas lojas em incrementos independentes
+
+- [ ] Amazon Brasil: comprovar capacidades, acesso e requisitos antes de implementar o adaptador.
+- [ ] Amazon Brasil: implementar URL, identidade da oferta, extração e condições das capacidades aprovadas.
+- [ ] Amazon Brasil: aprovar fixtures, teste real controlado, duas contas e regressão Mercado Livre antes da liberação.
+- [ ] Shopee Brasil: comprovar capacidades, acesso e requisitos antes de implementar o adaptador.
+- [ ] Shopee Brasil: implementar URL, identidade da oferta, extração e condições das capacidades aprovadas.
+- [ ] Shopee Brasil: aprovar fixtures, teste real controlado, duas contas e regressão das lojas existentes antes da liberação.
+- [ ] Atualizar matriz de capacidades, permissões da extensão e documentação de produto para cada loja liberada.
+
+**Saída:** cada loja habilitada individualmente com evidências, sem generalizar suporte a capacidades não verificadas.

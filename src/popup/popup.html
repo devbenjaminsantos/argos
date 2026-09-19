@@ -24,6 +24,10 @@
 
     <main>
       <div class="status" id="status" role="status" aria-live="polite"></div>
+      <section class="panel" aria-label="Observação da página aberta">
+        <button id="observe-page" class="secondary-button" type="button">Observar preço da página aberta</button>
+        <p id="page-observation" class="hint" role="status">Leitura local experimental. Não envia dados nem altera o monitoramento.</p>
+      </section>
 
       <section id="capture-section" class="panel" hidden>
         <div class="captured-product">
@@ -77,4 +81,3 @@
     <script type="module" src="./popup.js"></script>
   </body>
 </html>
-

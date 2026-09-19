@@ -1,5 +1,29 @@
 import { MAX_PRODUCTS, type CheckIntervalHours, type ExtractedProduct, type Product } from "../domain/product";
 import type { ExtensionRequest, ExtensionResponse, ExtractionResponse, ProductListResponse } from "../shared/messages";
+import type { ContextualObservation } from "../stores/mercado-livre/contextual-observation";
+
+const observeButton = requireElement<HTMLButtonElement>("observe-page");
+const observationOutput = requireElement<HTMLElement>("page-observation");
+observeButton.addEventListener("click", () => void observePage());
+
+async function observePage(): Promise<void> {
+  observeButton.disabled = true;
+  observationOutput.textContent = "Observando a página aberta…";
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) throw new Error("Abra uma página de produto do Mercado Livre.");
+    const request: ExtensionRequest = { type: "OBSERVE_CURRENT_PAGE" };
+    const response = await chrome.tabs.sendMessage(tab.id, request) as ExtensionResponse<ContextualObservation>;
+    if (!response?.ok) throw new Error(response?.error || "Página não suportada.");
+    const result = response.data;
+    if (!Number.isSafeInteger(result.priceCents) || result.priceCents <= 0 || result.currency !== "BRL") throw new Error("Observação inválida.");
+    observationOutput.textContent = `Preço observado: ${formatCurrency(result.priceCents)}. ${result.conditions.payment === "pix" ? "Pix mencionado na área de preço. " : ""}${result.conditions.coupon === "mentioned" ? "Cupom mencionado; aplicação não confirmada. " : ""}Elegibilidade, vendedor e variante não confirmados. Frete não verificado. Contexto e personalização desconhecidos. Leitura às ${new Date(result.observedAt).toLocaleTimeString("pt-BR")}. Somente local; sem alerta.`;
+  } catch (error) {
+    observationOutput.textContent = error instanceof Error ? error.message : "Não foi possível observar a página.";
+  } finally {
+    observeButton.disabled = false;
+  }
+}
 
 const elements = {
   count: requireElement<HTMLElement>("product-count"),
@@ -199,4 +223,3 @@ function requireElement<T extends HTMLElement>(id: string): T {
   if (!element) throw new Error(`Elemento ausente: ${id}`);
   return element as T;
 }
-

@@ -17,6 +17,15 @@ describe("normalizeMercadoLivreProductUrl", () => {
     expect(getMercadoLivreProductId(result)).toBe("MLB123456");
   });
 
+  it("aceita página de catálogo MLBU e preserva sua identidade", () => {
+    const result = normalizeMercadoLivreProductUrl(
+      "https://www.mercadolivre.com.br/caneca/up/MLBU1977786059?utm_source=test#reviews",
+    );
+
+    expect(result).toBe("https://www.mercadolivre.com.br/caneca/up/MLBU1977786059");
+    expect(getMercadoLivreProductId(result)).toBe("MLBU1977786059");
+  });
+
   it.each([
     "http://www.mercadolivre.com.br/produto/p/MLB123456",
     "https://mercadolivre.com.br.evil.example/produto/p/MLB123456",
@@ -28,4 +37,3 @@ describe("normalizeMercadoLivreProductUrl", () => {
     expect(() => normalizeMercadoLivreProductUrl(url)).toThrow(UnsafeProductUrlError);
   });
 });
-

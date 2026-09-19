@@ -2,6 +2,7 @@ import type { ExtractedProduct, NewProductInput, Product } from "../domain/produ
 
 export type ExtensionRequest =
   | { type: "EXTRACT_CURRENT_PAGE" }
+  | { type: "OBSERVE_CURRENT_PAGE" }
   | { type: "LIST_PRODUCTS" }
   | { type: "ADD_PRODUCT"; payload: NewProductInput }
   | { type: "REMOVE_PRODUCT"; payload: { productId: string } }
@@ -20,6 +21,7 @@ export function isExtensionRequest(value: unknown): value is ExtensionRequest {
 
   switch (value.type) {
     case "EXTRACT_CURRENT_PAGE":
+    case "OBSERVE_CURRENT_PAGE":
     case "LIST_PRODUCTS":
       return true;
     case "ADD_PRODUCT":
