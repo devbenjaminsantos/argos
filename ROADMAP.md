@@ -119,7 +119,7 @@ A V2 já possui cadastro completo, remoção e verificação manual no código. 
 - [x] Integrar `/verificar <UUID>` com escopo do proprietário, histórico idempotente e checkpoint recuperável da resposta.
 - [x] Registrar implantação histórica de `c830c6c` e migração `20260916_10`; tentativas reais falharam em coleta.
 - [x] Classificar 403/429 como `access_blocked` e abertura de transporte como `transport_failed` (`d829a10`, testes locais e CI registrados).
-- [ ] Confirmar implantação dessa classificação e mensagem de bloqueio no bot real.
+- [ ] Confirmar a mensagem de bloqueio no bot real. Implantação conferida em 19/09/2026: deploy `dep-dalvuadbedkc73a4m4jg`, commit `6404b50`, live e sem erros recentes; o aceite da resposta ainda depende de nova mensagem.
 - [ ] Validar UUID inválido e de outro proprietário no bot real; implementação possui testes automatizados.
 - [ ] Obter preço real por fonte viável, persistir e responder pelo Telegram; registrar origem e limitações.
 
