@@ -1,0 +1,547 @@
+> Arquivo histórico anterior à reorganização de 19/09/2026. Estados e próximos passos abaixo podem estar superados. A lista ativa está no [roadmap atual](../../ROADMAP.md).
+
+# Roadmap do Argos
+
+Este documento registra o avanço do projeto e divide as próximas versões em entregas pequenas, testáveis e fáceis de revisar.
+
+## Como atualizar
+
+- `[ ]` ainda não iniciado;
+- `[x]` concluído e validado;
+- manter apenas uma etapa marcada como **próxima**;
+- concluir testes e revisão antes de iniciar o bloco seguinte;
+- não implementar vários blocos da versão atual na mesma alteração.
+
+## Estado atual
+
+**Versão implementada:** V1 — Extensão Chrome; fundação, segurança HTTP e inbox durável da V2 em andamento
+
+**Próximo item:** Arquitetura contextual — validar a observação local em Chrome real
+
+**Última atualização:** 18/09/2026
+
+> **Validação adiada da V1:** a extensão foi construída e validada automaticamente, mas o teste de aceitação no Chrome será feito posteriormente em um computador Windows. O ambiente atual utiliza Safari. Essa pendência não bloqueia o planejamento da V2.
+
+### Leitura da V2 em 10/09/2026
+
+| Bloco | Estado comprovado | Falta |
+| --- | --- | --- |
+| Runtime e migrações | Logins mínimos separados, TLS `verify-full`, readiness com consulta e Alembic administrativo validados | Revisar privilégios padrão do provedor para objetos criados fora de `argos_migrator` |
+| Webhook e inbox | Autenticação, limites, persistência, deduplicação, concorrência e recuperação validados; webhook real persistiu e concluiu o primeiro update | Restringir explicitamente os comandos aceitos |
+| Identidade e `/start` | Fluxo real mensagem → inbox → identidade → resposta concluído em produção | Ampliar comandos em incrementos posteriores |
+| Bot Telegram | `@argos_teste_bot`, token, identidade e webhook validados sem expor segredos | Validar rotação em etapa operacional posterior |
+| Domínio do monitoramento | Regras da V1 disponíveis como referência | Usuários, produtos, preços, conversas, coleta e notificações da V2 |
+
+---
+
+## V1 — Extensão Chrome
+
+- [x] Configurar TypeScript, Manifest V3, build e testes.
+- [x] Criar interface dedicada ao Mercado Livre.
+- [x] Cadastrar produtos a partir da página aberta.
+- [x] Limitar o monitoramento a três produtos.
+- [x] Armazenar produtos e histórico no IndexedDB.
+- [x] Extrair título, identificador e preço do Mercado Livre.
+- [x] Configurar preço-alvo e queda percentual relevante.
+- [x] Configurar verificações a cada 12 ou 24 horas.
+- [x] Executar coleta periódica pelo service worker.
+- [x] Enviar notificações locais pelo Chrome.
+- [x] Impedir notificações equivalentes duplicadas.
+- [x] Validar URLs e origens das mensagens.
+- [x] Aplicar controles contra XSS e requisições arbitrárias.
+- [x] Documentar segurança e limitações da extensão.
+- [x] Validar tipos, testes, build, dependências e manifesto.
+- [ ] Executar teste de aceitação no Chrome para Windows — **adiado até haver acesso ao ambiente**.
+
+**Resultado:** a V1 funciona localmente, sem conta, servidor, endpoint remoto ou segredos distribuídos no pacote.
+
+---
+
+## V2 — MVP Telegram em cloud
+
+A V2 entregará o primeiro Argos cloud utilizável. O Telegram será interface, identidade inicial e canal de notificação. OIDC, extensão cloud, modo local e Android ficam fora desta versão.
+
+Decisões relacionadas:
+
+- [`ADR 0001 — Desenvolvimento local e execução em nuvem`](../../docs/decisions/0001-local-vs-cloud.md);
+- [`ADR 0003 — FastAPI e identidades da V2`](../../docs/decisions/0003-backend-stack-and-auth.md);
+- [`ADR 0004 — Telegram como V2`](../../docs/decisions/0004-telegram-mvp.md);
+- [`ADR 0006 — Plataforma fracionada sem grandes nuvens`](../../docs/decisions/0006-fractionated-platform.md).
+
+### V2.1 — Recorte e contratos do MVP Telegram — CONCLUÍDA
+
+- [x] Escolher FastAPI e uma arquitetura cloud portátil; a infraestrutura vigente está no ADR 0006.
+- [x] Escolher Telegram como interface e canal do MVP.
+- [x] Limitar o MVP a conversas privadas e Mercado Livre.
+- [x] Identificar o proprietário por `telegram_user_id`, nunca por `username`.
+- [x] Definir os contratos de repositório, coletor e notificador em [`docs/V2_CONTRACTS.md`](../../docs/V2_CONTRACTS.md).
+- [x] Definir comandos, estados da conversa e respostas de erro em [`docs/V2_TELEGRAM_CONVERSATION.md`](../../docs/V2_TELEGRAM_CONVERSATION.md).
+- [x] Atualizar o modelo de ameaças para Telegram, webhook, SSRF e banco cloud em [`docs/V2_SECURITY.md`](../../docs/V2_SECURITY.md).
+
+**Critério de conclusão:** recorte e contratos documentados, sem servidor funcional.
+
+### V2.2 — FastAPI local e contêiner — CONCLUÍDA
+
+- [x] Criar o monólito modular Python em [`backend/`](../../backend/).
+- [x] Criar `GET /health` e tratamento centralizado de erros.
+- [x] Configurar testes e variáveis sem segredos no repositório.
+- [x] Criar a definição reproduzível da imagem com Python fixado, dependências travadas e usuário sem privilégios.
+- [x] Validar build, execução sem privilégios e `/health` dentro do contêiner.
+
+**Critério de conclusão:** API e testes passam localmente e a imagem inicia com `/health` funcional.
+
+### V2.3 — Escolha da infraestrutura cloud — CONCLUÍDA
+
+- [x] Definir API, PostgreSQL e job como responsabilidades independentes.
+- [x] Escolher Render, Supabase e GitHub Actions como candidatos iniciais do piloto.
+- [x] Registrar que grandes nuvens não serão destinos contratados; nesta etapa não foram provisionados API ou job cloud (o PostgreSQL foi provisionado posteriormente em V2.7).
+
+**Critério de conclusão:** arquitetura, limites de custo e restrições de provedor documentados, sem API ou job cloud provisionados nesta etapa.
+
+### V2.4 — Bot de teste e segredos — CONCLUÍDA
+
+- [x] Criar e configurar o bot exclusivo de desenvolvimento `@argos_teste_bot` no BotFather, limitado a conversas privadas e com `/start` e `/ajuda` anunciados.
+- [x] Guardar e validar `ARGOS_TELEGRAM_WEBHOOK_SECRET` somente no secret store do Render; o endpoint público rejeita segredo ausente ou inválido com `401`.
+- [x] Guardar `ARGOS_TELEGRAM_BOT_TOKEN` somente no secret store do Render e registrar o webhook do bot após criar sua identidade.
+- [x] Confirmar a identidade `@argos_teste_bot` com a Bot API durante a inicialização segura.
+- [x] Mascarar o token na configuração e no adaptador, substituir erros de transporte por códigos seguros e testar que a credencial não aparece nas exceções ou representações.
+- [x] Confirmar após a configuração real que logs do Render e do executor não contêm token.
+- [x] Atualizar os comandos públicos no BotFather para anunciar `/start` e `/ajuda` conforme a implementação implantada.
+
+> O plano Free não oferece shell neste serviço. A aplicação configura o webhook de forma idempotente na inicialização quando recebe a URL e o username esperados: valida `getMe`, recusa outra identidade, consulta `getWebhookInfo` e chama `setWebhook` somente quando necessário.
+
+> Em 11/09/2026, o bot `@argos_teste_bot`, sua identidade e o webhook foram validados. O token permanece somente no secret store do Render; não enviar ou versionar a credencial.
+
+**Critério de conclusão:** a API consulta a identidade do bot sem expor credenciais.
+
+### V2.5 — Webhook seguro — CONCLUÍDA
+
+- [x] Criar `POST /webhooks/telegram`.
+- [x] Validar `X-Telegram-Bot-Api-Secret-Token` em tempo constante.
+- [x] Limitar o corpo antes do parsing e aceitar somente updates de mensagem de texto.
+- [x] Restringir a persistência aos comandos implantados; texto e comandos desconhecidos recebem `200` sem entrar na inbox nem provocar retries do Telegram.
+- [x] Recusar grupos e aceitar apenas conversas privadas.
+- [x] Responder rapidamente sem executar scraping no request.
+- [x] Testar segredo ausente, inválido, payload excessivo e conteúdo malformado.
+- [x] Persistir e deduplicar o update antes de responder `200`; ausência da inbox ou falha SQL retorna `503` para permitir nova entrega.
+- [x] Validar em produção uma entrega autenticada real e confirmar no PostgreSQL uma inbox concluída em uma tentativa, sem dead letter, além da identidade persistida.
+
+**Critério de conclusão:** somente updates autenticados e válidos são aceitos.
+
+### V2.6 — Domínio e regras
+
+- [ ] Implementar usuário Telegram, produto, observação e entrega de notificação.
+- [ ] Armazenar dinheiro em unidade segura e portar regras da V1.
+- [ ] Aplicar limite de três produtos por usuário.
+- [ ] Definir estados de coleta e da conversa.
+- [ ] Criar testes sem dependência de FastAPI, Telegram ou banco.
+
+**Critério de conclusão:** regras funcionam isoladamente e mantêm paridade com a V1.
+
+### V2.7 — Supabase PostgreSQL e isolamento
+
+- [x] Adotar `psycopg` e remover dependências nativas de banco anteriores.
+- [x] Configurar SQLAlchemy e migrações versionadas com Alembic.
+- [x] Criar a migração inicial de `processed_telegram_updates` e validar `upgrade`/`downgrade` em PostgreSQL 17 efêmero.
+- [x] Criar o projeto Supabase Argos em `sa-east-1` com estimativa de US$ 0/mês, sem add-ons solicitados.
+- [x] Aplicar a revisão Alembic `20260821_01` e confirmar `alembic_version` no PostgreSQL remoto.
+- [x] Desabilitar a Data API no Dashboard do Supabase (RLS será definido quando a estrutura estiver pronta).
+- [x] Exigir `sslmode=verify-full` e `sslrootcert` existente na configuração de produção.
+- [x] Validar o handshake remoto do endpoint direto com a CA Supabase Root 2021; `psycopg` alcançou a etapa de autenticação e um hostname incorreto foi rejeitado, sem expor senha.
+- [x] Separar a configuração `ARGOS_DATABASE_URL` (runtime) de `ARGOS_MIGRATION_DATABASE_URL` (migrações) e exigir a segunda em produção.
+- [x] Criar os grupos PostgreSQL `argos_runtime` e `argos_migrator` sem `LOGIN` ou senha; o runtime recebeu somente `SELECT`, `INSERT` e `UPDATE` na inbox, e os grants das roles padrão foram revogados nas tabelas existentes.
+- [x] Conceder `USAGE`/`CREATE` no schema `public` e ownership das tabelas atuais ao grupo `argos_migrator`, em operações administrativas separadas e validadas.
+- [ ] Revisar os privilégios padrão do provedor para novas tabelas, sequências e funções no schema `public`; a inspeção atual ainda mostra grants amplos quando o owner é `postgres` ou `supabase_admin`.
+- [x] Criar o projeto Render `Argos` (`prj-dagnkh67bikc73bvd220`), seu ambiente `Production` (`evm-dagnkh67bikc73bvd22g`) e associar somente o serviço `argos-api` (`srv-dagnegm7bikc73bulvig`).
+- [x] Corrigir e confirmar o serviço web Docker do Argos no Render, com `devbenjaminsantos/argos`, diretório `backend`, health check `/health` e deploy `live` do commit `9a9eb20`.
+- [x] Configurar e validar o segredo mínimo do webhook no secret store do provedor de execução.
+- [x] Criar `argos_runtime_login` sem privilégios próprios, vinculá-lo somente ao grupo `argos_runtime` e validar seus atributos e privilégios efetivos no PostgreSQL remoto.
+- [x] Configurar `ARGOS_DATABASE_URL` no Render pelo session pooler IPv4, com `sslmode=verify-full`, CA Supabase Root 2021 e pool limitado; `/health/ready` executou `SELECT 1` e o PostgreSQL confirmou a sessão de `argos_runtime_login`.
+- [x] Criar `argos_migrator_login` sem privilégios próprios e vinculá-lo somente ao grupo `argos_migrator`.
+- [x] Configurar `argos_migrator_login` somente no GitHub Actions, assumir `argos_migrator` e validar DDL transacional reversível mais `alembic upgrade head` pelo workflow manual.
+- [x] Criar a inbox de updates Telegram com deduplicação, disponibilidade, tentativas e leases.
+- [x] Criar a identidade Telegram com ownership por `telegram_user_id`, destino separado por `chat_id`, upsert monotônico e grants mínimos.
+- [ ] Criar conversas, produtos, preços e notificações.
+- [x] Implementar o repositório da inbox e seus índices operacionais.
+- [ ] Implementar os repositórios restantes e índices de propriedade.
+- [ ] Testar que um `telegram_user_id` nunca acessa dados de outro.
+
+**Critério de conclusão:** migrações são reproduzíveis, schema público não está exposto indevidamente, credenciais não são versionadas e isolamento é comprovado.
+
+### V2.8 — Usuário, deduplicação e conversa — EM ANDAMENTO
+
+- [x] Definir a inbox durável com payload, estados, tentativas, disponibilidade, lease, conclusão, erro e índices de recuperação; a migração recusa substituir tabelas que contenham dados.
+- [x] Implementar o caso de uso isolado de `/start`, com validação do comando e identidade, upsert do proprietário e resposta em texto simples.
+- [x] Implementar `/ajuda` como caso de uso isolado, integrá-lo ao worker e liberá-lo na lista fechada do webhook, listando somente comandos disponíveis.
+- [x] Validar `/ajuda` em produção: nova entrega concluída em uma tentativa, zero dead letter e total de identidades preservado em um.
+- [x] Implementar `/cancelar` como caso de uso isolado, integrá-lo ao worker e liberá-lo na lista fechada do webhook usando o repositório por proprietário.
+- [x] Modelar rascunhos com um registro por `telegram_user_id`, estados fechados, JSONB, expiração, FK e cancelamento atômico.
+- [x] Validar a revisão `20260911_04` no PostgreSQL 17 do CI e aplicá-la em produção pela execução administrativa `34633911731`; tabela vazia sob ownership de `argos_migrator`, DML mínimo do runtime e nenhuma leitura por `anon` ou `authenticated` foram confirmados.
+- [x] Integrar `/start` ao núcleo do worker com claim, conclusão, retry apenas para falha transitória confirmada, dead letter para falha permanente ou resultado incerto e recuperação por lease para exceção inesperada.
+- [x] Persistir usuário por `telegram_user_id` e destino por `chat_id`; a revisão `20260910_03` e o repositório foram validados com concorrência em PostgreSQL 17 e aplicados em produção.
+- [x] Implementar a persistência recuperável e a deduplicação por `update_id`, com claims concorrentes, leases, retry e ligação ao webhook validados em PostgreSQL 17 no GitHub Actions.
+- [x] Validar em produção a recuperação após reinício: a nova instância retomou um lease sintético expirado, incrementou a tentativa, liberou o lease e encerrou o comando inválido sem chamar a Bot API; o registro de teste foi removido.
+- [x] Manter retry transitório confirmado e resultado incerto cobertos por adaptadores determinísticos; não provocar falhas artificiais contra a Bot API real enquanto não houver staging isolado ou injeção de falhas segura.
+- [x] Implementar rate limit persistente por usuário e validar o teto e a retomada no bot real.
+- [ ] Implementar máquina de estados persistente com transições e expiração dos rascunhos.
+
+**Critério de conclusão:** updates repetidos não duplicam ações e conversas sobrevivem a reinícios.
+
+#### Curso de ação atual
+
+1. [x] Criar a tabela e o repositório de identidade Telegram, mantendo `telegram_user_id` como proprietário e `chat_id` somente como destino; validar upsert concorrente e grants mínimos.
+2. [x] Implementar o caso de uso isolado de `/start`, que cria ou atualiza a identidade e produz a resposta definida sem depender de FastAPI, PostgreSQL ou da Bot API.
+3. [x] Criar o núcleo do worker que reivindica a inbox com lease, executa `/start` e conclui ou reagenda o update sem manter transação aberta durante chamadas externas.
+4. [x] Implementar o adaptador da Bot API com host fixo, texto simples, timeout, limite de resposta e classificação segura de falhas, sem configurar credenciais reais.
+5. [x] Criar o comando one-shot do worker e validar PostgreSQL → claim → `/start` → usuário → saída falsa → conclusão.
+6. [x] Integrar um runner recuperável ao processo HTTP do piloto gratuito, despertado após a persistência e pelo polling de recuperação, sem manter trabalho apenas em memória; o job de coleta permanece separado.
+7. [x] Criar o bot de desenvolvimento, armazenar `ARGOS_TELEGRAM_BOT_TOKEN` no Render, confirmar sua identidade, registrar o webhook e executar a aceitação ponta a ponta.
+8. [x] Implantar `/cancelar` e validar no bot real a resposta sem rascunho: em 12/09/2026, inbox `completed` em uma tentativa, zero rascunhos e zero dead letters; o caminho com rascunho permanece coberto em PostgreSQL até existir um fluxo que o crie.
+9. [ ] Confirmar a inclusão de `/cancelar` no menu público do BotFather.
+10. [x] Definir a política inicial de 10 comandos em 60 segundos e o contrato atômico de admissão; validar a aplicação isolada. Detalhes em [admissão Telegram](../../docs/V2_TELEGRAM_ADMISSION.md).
+11. [x] Implementar migração `20260912_05` e adaptador PostgreSQL; CI `34705698375` aprovou 120 testes, incluindo concorrência, repetição, fronteira da janela, horário monotônico, rollback da inbox e downgrade seguro.
+12. [x] Aplicar `20260912_05` pelo executor administrativo (workflow `34776918057`) e confirmar tabelas vazias, ownership de `argos_migrator`, SELECT/INSERT/UPDATE do runtime sem DELETE e nenhuma leitura por `anon`, `authenticated` ou `service_role`.
+13. [x] Integrar a admissão ao webhook; CI `34777851672` aprovado no commit `3c28e40`, incluindo rajada HTTP com dez admissões e um excedente deduplicado, sem worker externo.
+14. [x] Implantar a integração no Render: deploy `dep-dajg54vqj5pc73dgitfg`, commit `2dae74b`, live em 13/09/2026; `/health/ready` respondeu 200 e não houve erros recentes.
+15. [x] Validar uma mensagem real do bot: `/ajuda` gerou decisão `admitted` e inbox `completed` em uma tentativa, confirmadas no PostgreSQL em 13/09/2026.
+16. [x] Validar o teto de quota no bot de teste: em 13/09/2026, dez comandos concluídos em uma tentativa, 11º `rate_limited` sem inbox e novo comando admitido após a janela expirar. Fronteira exata de 60 segundos coberta no CI.
+17. [x] Implementar início e avanço persistentes com expiração e versão UUID; CI `34787786771` aprovado no commit `5099b39`, incluindo concorrência e cancelamento/recriação no mesmo timestamp.
+18. [x] Aplicar `20260913_06` pelo workflow `34788321746` (commit `75b31bf`); consulta independente confirmou coluna UUID NOT NULL com default `gen_random_uuid()`, ownership de `argos_migrator`, DML do runtime e nenhuma leitura por roles públicas.
+19. [x] Preparar caso de uso e contrato atômico para início de cadastro por update, com lease, resposta reutilizada, `/start` prévio e rascunho de 15 minutos; validação isolada concluída.
+20. [x] Implementar migração `20260913_07` e adaptador atômico de início e resposta; CI `34788802511` aprovado no commit `af907fb`, incluindo repetição, concorrência, recuperação com novo lease, rollback, grants e downgrade protegido.
+21. [x] Aplicar `20260913_07` pelo workflow `34789307934` (commit `a924821`); tabela vazia sob ownership de `argos_migrator`, runtime com SELECT/INSERT sem UPDATE/DELETE e roles públicas sem leitura, confirmados no PostgreSQL.
+22. [x] Integrar o início de `/adicionar` ao worker e webhook, distinguindo início de rascunho de cadastro completo; ajuda atualizada e recuperação com resposta persistida validada no CI `34789845853`, commit `724fe24`.
+23. [x] Implantar essa integração no Render e validar `/adicionar` → repetição → `/cancelar` → novo `/adicionar` no bot real. Deploy manual `dep-dajk7sh594qs73ch8spg`, commit `9a23c79`, live em 14/09/2026 UTC (13/09 no Brasil). Usuário confirmou as respostas; consulta independente encontrou cinco comandos completed em uma tentativa, dois resultados started, um already_active e um único rascunho awaiting_url vazio com duração de 15 minutos. O recebimento da URL ainda não está liberado.
+
+O frontend pode continuar sendo desenhado em paralelo. Ele não bloqueia essa sequência e deve depender dos contratos de aplicação, sem acessar diretamente tabelas ou detalhes da Bot API.
+
+### V2.9 — Cadastro de produtos pelo Telegram
+
+- [x] Preparar validação sintática da URL do Mercado Livre Brasil e contrato de recebimento por update/lease, sem rede; caso de uso isolado com resposta reutilizada.
+- [x] Implementar adaptador e persistência atômica do avanço e resposta usando telegram_registration_results existente, sem migração; testes PostgreSQL preparados para concorrência, expiração, cancelamento e recuperação. CI `34836132177` aprovado no commit `3316bd6`, com PostgreSQL 17.
+- [x] Integrar recebimento ao worker e admissão de texto ao webhook, com quota compartilhada e instruções públicas atualizadas; CI `34836665232` aprovado no commit `c247e91`, incluindo fluxo HTTP até PostgreSQL e saída falsa.
+- [x] Implantar recebimento da URL e confirmar aceitação do link /up/MLBU no bot e banco: deploy dep-dajuqnqd0e5s73dqpkp0, commit 162c26c; update completed em uma tentativa, awaiting_alias com fragmento removido e duração original de 15 minutos.
+- [ ] Concluir aceitação real de nova URL após avanço e cancelamento nessa sequência; cenários cobertos no CI.
+- [x] Preparar validador de apelido (1–60 caracteres, NFC e espaços normalizados) e contrato transacional de awaiting_alias para awaiting_target_price, sem alterar comportamento público.
+- [x] Implementar adaptador de apelido com resposta durável, preservação da URL e expiração e testes PostgreSQL de repetição, concorrência, cancelamento, recuperação e rollback; CI `34849755660` aprovado no commit `406ae1f`, com PostgreSQL 17.
+- [x] Integrar apelido ao worker com seleção transacional do passo após resultado por update; instruções atualizadas, CI `34850769222` aprovado no commit `d59cd43`, com PostgreSQL 17.
+- [x] Implantar apelido e validar caminho URL → apelido: deploy manual dep-dajvn4ojo6nc73ffi1k0, commit ebb7dcc, live; quatro updates completed em uma tentativa e rascunho awaiting_target_price com URL/apelido e duração original de 15 minutos confirmados no banco em 14/09/2026.
+- [ ] Confirmar aceitação real de apelido inválido, etapa indisponível e cancelamento após apelido. A janela consultada não contém essas respostas e mantém um rascunho; cenários cobertos no CI.
+
+- [x] Implementar `/adicionar`, `/produtos` e `/remover`; entregas e CI discriminados abaixo.
+- [x] Preparar validação BRL em centavos e contrato por update/lease do preço-alvo, limite inicial R$ 9.999.999,99, sem liberar no bot.
+- [x] Implementar persistência atômica do preço-alvo, preservando URL, apelido e expiração, sem migração; testes PostgreSQL preparados, CI 34852857248 aprovado no commit f6f2c63, com PostgreSQL 17.
+- [x] Integrar preço-alvo à seleção transacional do passo, com instruções e confirmação BRL atualizadas; CI 34854438746 aprovado no commit 15a602d, com PostgreSQL 17.
+- [x] Implantar preço-alvo e validar entrada inteira 150 → R$ 150,00: deploy dep-dak0ihuq1p3s739quj90, commit 9dbe42c; banco confirmou 15000 centavos, awaiting_interval, dados anteriores e duração original preservados, update completed em uma tentativa.
+- [ ] Confirmar aceitação manual de preço inválido, etapa indisponível e cancelamento após preço; não confirmados pelo relato atual.
+- [x] Preparar validação e contrato do intervalo (12 ou 24 horas), sem liberar no bot.
+- [x] Implementar persistência atômica do intervalo, sem migração, com preservação dos dados e expiração; testes PostgreSQL preparados, CI 34859065182 aprovado no commit 0e7f6d8, com PostgreSQL 17.
+- [x] Integrar intervalo à seleção transacional do texto e atualizar instruções; CI 34860141613 aprovado no commit 4d3a42d, com PostgreSQL 17.
+- [x] Implantar intervalo: deploy dep-dak0vj7qj5pc73fdvaug, commit dabb28b. Usuário confirmou; banco encontrou oito updates completed em uma tentativa, intervalo inválido e aceito persistidos e zero rascunhos após cancelamento.
+- [x] Encerrar a pendência histórica de confirmação indisponível: comportamento substituído pelo resumo e confirmação funcional, aceitos em 14/09/2026.
+- [x] Preparar validação dos dados completos do rascunho e decisões confirmar/corrigir no domínio, sem criar produto.
+- [x] Definir contrato transacional de confirmação e preparar schema monitored_products (20260914_08), com três slots por proprietário, chave única por proprietário, grants SELECT/INSERT e downgrade protegido; CI 34863238232 aprovado no commit 9e7e02c, com PostgreSQL 17.
+- [x] Aplicar 20260914_08 pelo workflow 34864818265 (commit 8d8bb33); consulta independente confirmou monitored_products vazia, ownership argos_migrator, runtime SELECT/INSERT sem UPDATE/DELETE/TRUNCATE e nenhuma leitura pública, constraints de slots e chave presentes.
+- [x] Implementar confirmação/correção atômicas: limite por slots, chave MLB/MLBU, criação/consumo/resposta juntos e correção com nova versão sem renovar expiração; testes PostgreSQL preparados, CI 34865501539 aprovado no commit 3b9270d, com PostgreSQL 17.
+- [x] Integrar confirmação/correção à seleção transacional do texto com resumo dos dados, mantendo coleta/alertas pendentes; CI 34865934346 aprovado no commit c2495c7, com PostgreSQL 17.
+- [x] Validar resumo → corrigir → novo preenchimento → confirmar → nova mensagem confirmar. Usuário confirmou; consulta independente em 14/09/2026 encontrou dois resumos, uma correção, um produto e duas respostas sem cadastro ativo; confirmação completed em uma tentativa. Deploy atual dep-dak2oje743jc73fojcig, commit af6068d, live. Evidências de confirmação são anteriores a esse redeploy, cujo código não mudou. Novo rascunho awaiting_interval iniciado depois do cadastro foi preservado.
+- [x] Coletar URL, apelido, preço-alvo e intervalo em passos separados.
+- [x] Validar entrada e permitir confirmação antes de salvar.
+- [x] Implementar `/produtos` com filtro por proprietário, slots ordenados, lista vazia e instrução `/start` para acesso não registrado. Snapshot durável reutiliza telegram_registration_results, com verificação de payload/lease e sem alterar produtos ou rascunhos; sem nova migração.
+- [x] Validar PostgreSQL no CI: execução 34876514072 aprovada no commit f9dd144, incluindo isolamento de proprietários, snapshot, concorrência e preservação do rascunho.
+- [x] Implantar e aceitar listagem própria de `/produtos`: usuário confirmou; deploy dep-dak3bv2d0e5s738i1m5g, b9be394, live. Consulta independente encontrou um resultado de lista própria completed em uma tentativa e 72 updates completed, sem outros estados. Um produto e um rascunho awaiting_interval expirado permanecem no banco.
+- [ ] Validar manualmente lista vazia com outro usuário e repetição de `/produtos`; cobertas no CI, sem evidência desses casos na consulta de produção.
+- [x] Definir contrato de `/remover` em docs/V2_TELEGRAM_REMOVAL.md: mapa slot/UUID persistido, confirmação vinculada à versão da proposta, remoção lógica, concorrência, replay e migração/grants planejados. Sem implementação ou alteração no banco.
+- [x] Implementar `/cancelar` transacional por update/lease: consumo do rascunho e resposta juntos, resultado consultado antes do estado; bloqueios inbox/usuário/rascunho. Sem migração, mensagens preservadas.
+- [x] Validar cancelamento durável no CI 34880965589, commit a3e0cfa, com PostgreSQL real: recuperação preservando nova operação, concorrência, isolamento, lease e rollback. Suíte local também aprovada; testes PostgreSQL pulados localmente por falta de banco.
+- [x] Implantar e aceitar cancelamento durável: usuário aprovou; deploy dep-dak3rcbl550s73buab9g, 7970d42, live. Banco confirmou um cancelamento durável completed em uma tentativa, 85 updates completed sem outros estados, um produto e um rascunho presentes. Recuperação antiga comprovada no CI, sem injeção em produção.
+- [ ] Concluir evidência manual da sequência completa de dois cancelamentos; consulta agregada encontrou somente um resultado durável. Preservar rascunho existente.
+- [x] Preparar modelo/migração 20260914_09: removed_at nullable, índices únicos parciais de ativos, filtros de consulta/cadastro e grants UPDATE somente dessa coluna. Downgrade online recusa histórico; produtos ativos preservados.
+- [x] Validar no CI migração/downgrade, grants reais, reutilização de slot/chave e filtros de histórico: execução 34884132074 aprovada no commit e6afd27, com PostgreSQL real. Suíte local aprovada com integrações PostgreSQL puladas.
+- [x] Aplicar 20260914_09 via workflow administrativo 34885202890, commit 2bcc050; consulta independente confirmou revisão, ownership argos_migrator, um produto ativo preservado, índices únicos parciais e runtime UPDATE somente removed_at, sem DELETE/TRUNCATE ou leitura pública.
+- [x] Implantar filtros de ativos: deploy dep-dak51quk1f9s73eek950, commit 79b4b93, live.
+- [ ] Confirmar aceitação manual de `/produtos` e início/cancelamento com filtros de ativos; deploy não comprova esses fluxos.
+- [x] Preparar caso de uso e adaptador isolado de início de `/remover`: lista própria ativa e mapa slot→UUID persistidos junto com resposta, preservando operação ativa e prazo no replay. Comando ainda não admitido ou composto no worker.
+- [x] Validar início de remoção no CI 34890173650, commit 786fe29, com PostgreSQL real; oito testes locais novos passaram. Nenhuma desativação neste incremento.
+- [x] Preparar seleção pelo mapa UUID: produto próprio ativo revalidado, proposta com nova versão/código completo, prazo original preservado, slot reutilizado recusado e resposta durável. Sem integração pública ou remoção.
+- [x] Validar seleção no CI 34890588429, commit a56d87e, com PostgreSQL real; seis testes locais novos passaram.
+- [x] Implementar confirmação vinculada à proposta: UUID próprio ativo, código completo, desativação/consumo/resposta atômicos e replay preservando substituto; sem integração pública.
+- [x] Validar confirmação no CI 34891404234, commit b81e3eb, com PostgreSQL real; cinco testes locais novos passaram.
+- [x] Integrar início/seleção/confirmação ao worker, webhook e ajuda; texto delega seleção/confirmação na mesma transação após resultado por update e bloqueio do estado.
+- [x] Validar fluxo HTTP completo de remoção/cancelamento no CI 34978574492, commit 072d5b0, com PostgreSQL real e updates repetidos; 166 testes locais de aplicação/API aprovados.
+- [x] Implantar remoção: deploy dep-dakl6e8u01pc73fhdp20, commit c3f9a85, live.
+- [x] Concluir evidência de remoção após deploy: consulta de 15/09/2026 confirmou proposta, código incorreto recusado, remoção e lista vazia completed em uma tentativa, zero ativos, um removido preservado e zero rascunhos. Divergência da consulta anterior encerrada.
+- [x] Implementar e integrar início/seleção/confirmação de remoção, validar CI, aplicar migração administrativa e aceitar fluxo de remoção no bot; evidências abaixo.
+
+- [x] Escopar cadastro/listagem/remoção/cancelamento ao proprietário Telegram; consultas e claims protegidos, com testes PostgreSQL.
+- [x] Concluir aceitação manual com duas contas e limite individual conforme docs/V2_TELEGRAM_TWO_USERS_ACCEPTANCE.md. A manteve três ativos e recusou o quarto; B aceitou o segundo produto e preservou sua lista isolada, conforme relato do usuário.
+
+**Critério de conclusão:** dois usuários gerenciam listas isoladas com limite individual de três produtos.
+
+### V2.10 — Segurança de URLs e SSRF
+
+- [x] Preparar contrato de fetch seguro em docs/V2_SAFE_FETCH.md: hosts exatos, DNS/IP fixado com TLS, redirects e limites de streaming; sem implementação ou tráfego externo.
+- [x] Implementar política pura de destinos e suíte negativa: hosts exatos, IPs/ranges IPv4/IPv6, respostas mistas e limite DNS; 44 testes locais passaram. CI 34992039718 aprovado em 5489150.
+- [x] Preparar transporte isolado com IP validado fixado e TLS/SNI preservados, sem DNS implícito/proxy/redirect automático. Handshake TLS real e leitura bloqueada validados com sockets locais; 35 testes relacionados passaram. CI 35004349707 aprovado em 35bc1c7. Ainda não integrado ao coletor.
+
+- [x] Aceitar apenas HTTPS e hosts explicitamente suportados; política pura e normalização cobertas pela suíte negativa.
+- [x] Rejeitar credenciais, portas alternativas e URLs malformadas; política pura e normalização cobertas pela suíte negativa.
+- [x] Resolver DNS e bloquear destinos privados, locais ou reservados; conjunto completo é validado antes de abrir conexão.
+- [x] Validar cada redirecionamento e limitar tamanho e duração no transporte isolado; até três saltos, nova resolução/IP fixado, ciclos recusados e deadline compartilhado. 53 testes relacionados passaram localmente; CI 35004734079 aprovado em 2fdb00a.
+- [x] Revisar framing HTTP e rejeição de respostas truncadas antes de integrar ao coletor; 68 testes relacionados passaram localmente; CI 35005275274 aprovado em 86d7951.
+- [x] Preparar resultado de transporte com HTML limitado e URL final validada para o extrator; FetchedHTML imutável, 68 testes relacionados passaram localmente; CI 35006082395 aprovado em cb7597a.
+- [x] Criar testes com URLs maliciosas, ranges especiais, respostas DNS mistas, redirects inválidos e rebinding.
+
+**Critério de conclusão:** o coletor não funciona como proxy genérico nem alcança rede interna.
+
+### V2.11 — Coleta manual do Mercado Livre
+
+- [x] Portar o adaptador do Mercado Livre para o back-end: porta de aplicação e composição injetável entre transporte seguro e extrator, sem retries ou integração externa; 82 testes focados, suíte completa local e CI 35107292418 aprovado em 5b7fede.
+- [ ] Implementar `/verificar` para um produto cadastrado.
+- [ ] Registrar sucesso e falhas explícitas, nunca preço zero.
+- [x] Preparar contrato e seis fixtures sintéticas com resultados esperados em docs/V2_MERCADO_LIVRE_EXTRACTION.md.
+- [x] Implementar componente JSON-LD e conversão Decimal isolados; 32 testes locais passaram; CI 35007318534 aprovado em 5cacc60.
+- [x] Implementar leitura HTML inerte, UTF-8 estrito e classificação de bloqueio antes da extração JSON-LD; 112 testes relacionados passaram localmente e CI 35100500881 aprovado em 8b3a21c.
+- [x] Extrair título seguro e limitado e usar metadados como fallback ordenado quando JSON-LD não fornece preço; 49 testes focados passaram localmente e CI 35102552967 aprovado em 2510fed.
+- [x] Portar preço visível somente dos contêineres principais e fechar o resultado do extrator com identidade da URL final; 65 testes focados, suíte completa local e CI 35103344973 aprovado em 31fe398.
+- [x] Criar testes do extrator HTML completo e executar as seis fixtures do manifesto, incluindo bloqueio, indisponibilidade e preço ausente.
+- [x] Preparar caso de uso interno de verificação: alvo escopado por proprietário/UUID, uma coleta, identidade final conferida, comparação com preço-alvo e erros públicos seguros; 35 testes focados, suíte completa local e CI 35108277106 aprovado em df57d45.
+- [x] Implementar adaptador PostgreSQL de leitura do alvo ativo por UUID + proprietário + estado ativo, usando apenas o SELECT já concedido ao runtime; 23 testes locais focados passaram e oito integrações PostgreSQL foram aprovadas no CI 35122262352, commit efff34c.
+- [x] Preparar contrato e migração `20260916_10` de observações append-only: sucesso exige preço positivo/fonte, falha exige código e proíbe preço; proprietário fixado por FK composta; runtime recebe apenas SELECT/INSERT. Doze testes de contrato passaram localmente e 12 integrações PostgreSQL foram aprovadas no CI 35123926472, commit 7c34163.
+- [x] Implementar repositório PostgreSQL idempotente por UUID: repetição igual não duplica; conteúdo divergente com o mesmo UUID falha sem alterar o histórico. Doze testes de contrato passaram localmente e quatro integrações do repositório foram aprovadas no CI 35130500915, commit ca9b179.
+- [x] Ligar o caso de uso interno de verificação à gravação de uma observação de sucesso ou falha: executor fornece UUID/timestamp, entrada inválida ou alvo ausente não cria histórico, e resultado só retorna após persistência. Vinte e um testes do caso de uso e duas integrações PostgreSQL do caminho completo foram aprovados no CI 35132196464, commit a7fbcdf.
+- [x] Preparar o contrato Telegram de `/verificar <UUID canônico>`: parser estrito, observação determinística por `update_id` e mensagens públicas sem conteúdo remoto ou detalhe interno. Dezenove testes e a suíte completa foram aprovados no CI 35132873065, commit 5576eca; admissão, worker e ajuda permanecem sem o comando.
+- [x] Preparar recuperação escopada da observação por UUID + produto + proprietário, incluindo round-trip de sucesso/falha e recusa de escopo cruzado. Dez testes PostgreSQL do repositório foram aprovados no CI 35133476377, commit 93bc1ff.
+- [x] Preparar checkpoint curto da resposta Telegram: consulta antes da coleta e gravação depois, ambas revalidando lease/payload; replay igual reutiliza snapshot e resposta divergente falha. Oito integrações PostgreSQL foram aprovadas no CI 35135283856, commit ffb43a0.
+- [x] Orquestrar `/verificar` fora de transação longa na ordem resposta → observação → coleta; formatar sempre do snapshot durável e recuperar após perda de lease sem recoletar. Vinte e nove testes de aplicação e duas integrações PostgreSQL foram aprovados no CI 35136457017, commit e48e151.
+- [x] Compor o orquestrador no worker e testar claim → checkpoint → envio → conclusão, com coletor injetável para validação sem rede. Dezessete testes do worker e três integrações PostgreSQL foram aprovados no CI 35162870668, commit a5e9406; teste explícito mantém o webhook recusando `/verificar`.
+- [x] Habilitar `/verificar <UUID>` na admissão HTTP, expor o UUID próprio em `/produtos`, responder sintaxe inválida de forma durável e atualizar `/start`/`/ajuda`. Suíte completa e CI 35163551568 aprovados no commit cc427f0.
+- [ ] Após CI verde, realizar deploy manual, incluir `/verificar` no menu do BotFather e validar `/produtos` → código próprio → `/verificar`, código inválido e código de outra conta antes de concluir V2.11.
+
+**Critério de conclusão:** uma verificação manual registra preço e responde pelo Telegram.
+
+### V2.12 — Histórico, job e alertas
+
+- [ ] Comparar preço atual, último preço válido e preço-alvo.
+- [ ] Criar comando de job separado da API.
+- [ ] Agendar o comando de coleta externamente, inicialmente com GitHub Actions, em UTC.
+- [ ] Impedir coletas concorrentes e aplicar retentativas limitadas.
+- [ ] Enviar alerta pelo Telegram, reservar entregas e tratar resultado externo incerto.
+
+**Critério de conclusão:** uma queda reserva uma entrega de alerta de forma idempotente e o job recupera trabalho após reinícios.
+
+### V2.13 — Fechamento do MVP
+
+- [x] Implementar prontidão PostgreSQL e correlação de erros sem payload/credenciais, com testes e validações anteriores.
+- [ ] Completar métricas operacionais e revisar cobertura de logs no fechamento do MVP.
+- [ ] Revisar permissões, backup, rollback e quotas do Render e Supabase.
+- [ ] Testar cold start, falhas do Telegram, bloqueio da loja e banco indisponível.
+- [ ] Executar teste de aceitação com dois usuários.
+
+**Critério de conclusão:** o usuário cadastra um link e recebe um alerta real sem acessar código ou infraestrutura cloud.
+
+---
+
+## V3 — Plataforma cloud e integração da extensão
+
+- [ ] Escolher provedor OIDC e implementar Authorization Code com PKCE.
+- [ ] Identificar contas por `issuer` + `subject` e vincular identidade Telegram.
+- [ ] Criar API pública de produtos e histórico escopada ao usuário autenticado.
+- [ ] Integrar a extensão Chrome com o modo cloud.
+- [ ] Sincronizar sem duplicar produtos ou corromper o modo local da V1.
+- [ ] Adicionar canais de notificação além do Telegram.
+
+**Critério de conclusão:** uma conta cloud acessa os mesmos produtos pelo Telegram e pela extensão.
+
+---
+
+## V4 — Back-end local/autohospedado
+
+- [ ] Definir sistemas operacionais e banco suportados.
+- [ ] Criar instalação, atualização e serviço em segundo plano.
+- [ ] Proteger API por loopback e credencial por instalação.
+- [ ] Implementar backup, diagnóstico e desinstalação.
+- [ ] Criar testes de instalação nos sistemas suportados.
+
+**Critério de conclusão:** usuário instala e remove o Argos sem configurar Python, banco ou scheduler.
+
+---
+
+## V5 — Android
+
+- [ ] Criar aplicativo com Kotlin e Jetpack Compose.
+- [ ] Integrar autenticação e API cloud.
+- [ ] Gerenciar produtos, histórico e notificações.
+
+---
+
+## Fora das versões atuais
+
+- [ ] Comparação automática entre anúncios equivalentes.
+- [ ] Recomendação de melhor momento de compra.
+- [ ] Relatórios em PDF e CSV.
+- [ ] Gráficos avançados de histórico.
+- [ ] Suporte à Shopee e a outras lojas.
+- [ ] Extração de componentes para microsserviços, somente se houver necessidade comprovada.
+
+Em 15/09/2026, nova consulta confirmou aceitação da remoção: uma proposta, código incorreto recusado, remoção e lista vazia, todos completed em uma tentativa; zero ativos, um removido preservado, zero rascunhos e 94 updates completed sem outros estados. Pendência de evidência da desativação encerrada; isolamento manual entre dois usuários ainda não comprovado.
+
+Revisão de continuidade: docs/REPOSITORY_REVIEW_2026-09-15.md. Sem segunda conta, próximo incremento é corrigir textos de `/start` e `/adicionar` que ainda anunciam cadastro futuro. Depois preparar contrato e testes de fetch seguro/SSRF antes do coletor. Aceitação V2.9 continua pendente em paralelo.
+
+Mensagens de `/start` e `/adicionar` atualizadas para cadastro/listagem/remoção disponíveis e coleta/alertas indisponíveis; CI e deploy desse ajuste pendentes.
+
+CI das mensagens 34990105419 aprovado em 9008db6; 33 testes focados passaram. Deploy e aceitação das mensagens pendentes.
+
+Conexão TLS ao IP validado preparada isoladamente em infrastructure/scrapers/pinned_tls.py, sem DNS implícito, mantendo SNI/certificado pelo hostname. Seis testes locais com sockets falsos passaram; CI 34992693219 aprovado em c8a288b. Falhas fecham socket; prazo TCP/TLS compartilhado de até cinco segundos. Ainda faltam resolvedor, HTTP, redirects, streaming limitado e teste controlado real; componente não integrado ao bot.
+
+Orquestração de resolução preparada em resolved_destination.py: resolvedor injetável, conjunto completo validado, teto DNS de três segundos dentro do deadline total e falhas sem detalhes sensíveis. Seis testes locais passaram; CI 35001642812 aprovado em af86bc7. Resolvedor real com I/O interrompível e composição com TLS/HTTP ainda pendentes; não há tráfego externo.
+
+Resolvedor real preparado em system_dns.py: getaddrinfo A/AAAA em subprocesso isolado, timeout encerra e aguarda filho; sem shell, falhas sanitizadas. 16 testes locais de resolução passaram, inclusive interrupção de processo bloqueado sem DNS externo; CI 35001969996 aprovado em 1d45731. Conjunto completo segue para política de IPs. Ainda falta composição HTTP/redirects/streaming e validação controlada de TLS real; não integrado ao bot.
+
+GET limitado preparado em limited_http.py: compõe DNS validado/TLS fixado, HTML 200, identidade de encoding, teto de 2 MiB e prazo monotônico com interrupção do socket. Redirects/compressão recusados. Sete testes falsos passaram; CI 35002727975 aprovado em 7305740. Validação real controlada, redirects seguros e cobertura adicional de streaming/prazo ainda pendentes; não integrado ao bot.
+
+HTTP validado com socketpair real (TLS falso): Connection: close, chunked e corpo excessivo. Corrigido parsing para não fechar socket antes do streaming e fechar response explicitamente. Dez testes locais passaram; CI 35003760138 aprovado em 3e99e14. TLS real controlado e leitura lenta/deadline ainda pendentes; sem rede externa ou coleta no bot.
+
+Pausa solicitada: extração interrompida após JSON-LD/Decimal isolados em 5cacc60, CI 35007318534 aprovado. Retomar pela leitura HTML/charset/bloqueio, sem implementar meta/DOM ainda. Segunda conta disponível; usuário relatou envio de `/start`, sem resultado confirmado. Prioridade atual: roteiro manual de duas contas, começando por `/produtos` da conta B; critério V2.9 permanece aberto.
+
+Aceite manual relatado pelo usuário: A cadastrou produto e /produtos exibiu o item; B inicialmente sem produtos recebeu lista vazia. Depois, mesmo anúncio cadastrado nas duas contas: A com apelido relógio, alvo R$ 50 e intervalo 12 h; B com relógio de mesa, alvo R$ 400 e intervalo 24 h. Cada conta continuou exibindo somente seus produtos/configurações. Isolamento de cadastro/listagem aceito por relato, sem nova consulta administrativa. Operações independentes, cancelamento, códigos de remoção e limite individual ainda pendentes. Critério V2.9 permanece aberto.
+
+Usuário confirmou êxito do teste de operações simultâneas: A abriu proposta de remoção; B iniciou cadastro; /cancelar em A não interrompeu B, que recebeu URL e avançou para apelido. Aceite por relato, sem nova consulta administrativa; não houve confirmação de remoção. Próximo teste: código de A na proposta de remoção de B, preservando ambos os produtos. Limite individual e remoção/reutilização entre contas continuam pendentes. Critério V2.9 permanece aberto.
+
+Usuário confirmou que, após códigos cruzados recusados nos dois sentidos e cancelamento, os produtos permaneceram nas duas contas. Aceite manual por relato, sem consulta administrativa nova. Feedback de remoção alterado: formato incorreto, código ausente/incompleto, caracteres ou tamanho inválidos e código incorreto para a proposta têm mensagens distintas. Comparação exata e escopo do proprietário preservados; não se consulta a origem de códigos divergentes. Dez testes locais passaram; 11 testes PostgreSQL focados pulados localmente por ausência de banco. Implantação e aceite das novas mensagens pendentes; extração continua pausada, limite individual e remoção/reutilização entre contas pendentes. Critério V2.9 permanece aberto.
+
+CI 35043152303 aprovado em 0151fc2 para feedback distinto na confirmação de remoção. Deploy manual e validação Telegram das novas mensagens ainda pendentes.
+
+Usuário confirmou êxito de todos os testes manuais das novas mensagens de remoção após a orientação de deploy: código ausente, incompleto, formato inválido e código da outra conta; cancelamento e listagem com produto preservado. Aceite por relato, sem nova consulta administrativa ou inspeção de deploy. Código 0151fc2, CI 35043152303 aprovado. Próximo teste: limite individual de três ativos, quarto anúncio recusado em A sem consumir vaga de B. Extração continua pausada; limite e remoção/reutilização entre contas ainda pendentes. Critério V2.9 permanece aberto.
+
+Limite individual aceito por relato: A completou três ativos e teve o quarto anúncio distinto recusado; B cadastrou seu segundo produto e manteve a lista própria. O critério de isolamento e limite individual da V2.9 está atendido. Remoção, reutilização e repetição continuam como fechamento do roteiro ampliado, sem reabrir esse critério.
+
+Roteiro ampliado de duas contas concluído por relato: A removeu um produto, passou a dois ativos, recadastrou e voltou a três; B permaneceu inalterada e consultas repetidas não produziram efeitos adicionais. Remoção lógica, reutilização da vaga/chave e isolamento foram aceitos. Próxima frente retorna à V2.11, na leitura inerte de HTML/charset e detecção de bloqueio; o texto exato da resposta inicial de `/start` em B não foi registrado, sem bloquear o aceite funcional já exercitado.
+
+## Evolução contextual — ADR 0007
+
+Decisão: [arquitetura contextual](../../docs/decisions/0007-contextual-multistore.md). Esta seção é a fonte de progresso do plano; o ADR registra as decisões, não uma segunda lista de execução.
+
+Executar na ordem C1–C9, em alterações pequenas. Marcar `[x]` somente com evidência registrada (teste, commit, CI ou aceite manual, identificando sua origem). Implementação, implantação e aceite são estados distintos. Uma etapa só está encerrada quando seus itens e seu critério de saída forem atendidos. Manter o próximo item no início deste roadmap atualizado; registros históricos acima não substituem esta sequência.
+
+### C1 — Observação local da página aberta
+
+- [x] Registrar as decisões no ADR 0007.
+- [x] Implementar ação explícita de observação local no popup, sem enviar dados ao backend ou alterar o monitoramento V1.
+- [x] Extrair preço DOM em BRL, recusar valores inválidos/conflitantes e manter elegibilidade, vendedor, variante, frete e contexto desconhecidos quando não comprovados.
+- [x] Cobrir extração, moeda, ambiguidade, bloqueio e ausência de conteúdo sensível com testes sintéticos.
+- [x] Validar TypeScript, 29 testes Vitest (12 novos), build e `git diff --check` em 18/09/2026.
+- [ ] Executar todos os casos de [aceitação em Chrome real](../../docs/CONTEXTUAL_CAPTURE_ACCEPTANCE.md), incluindo outra conta/perfil, mudança de variante e regressão da V1.
+- [ ] Registrar evidência do aceite e corrigir divergências encontradas em anúncios reais.
+
+**Saída:** leitura contextual local aceita em Chrome real, sem exportação de sessão ou efeitos no monitoramento existente.
+
+### C2 — Identidade Argos e migração aditiva
+
+- [ ] Criar `argos_user_id` UUID e vínculo único com a identidade Telegram existente; preservar `chat_id` como destino.
+- [ ] Preencher contas e vínculos para os usuários existentes por migração aditiva.
+- [ ] Migrar propriedade de produtos, observações, trabalhos e resultados sem remover prematuramente as relações antigas.
+- [ ] Obter o proprietário da autenticação, nunca de identificador livre no payload.
+- [ ] Escopar repositórios e relações ao proprietário, com constraints contra vínculos cruzados.
+- [ ] Validar upgrade, preservação de registros e compatibilidade dos comandos em PostgreSQL real.
+- [ ] Testar dois proprietários, inclusive tentativa de acesso por identificador alheio e preservação dos limites individuais.
+- [ ] Preparar implantação e recuperação da migração; confirmar o resultado antes de retirar a compatibilidade antiga.
+
+**Saída:** identidade interna em uso, dados preservados e Telegram funcional com isolamento comprovado.
+
+### C3 — Oferta, monitoramento e observação contextual
+
+- [ ] Separar produto/variante, oferta, monitoramento, observação e tentativa de coleta.
+- [ ] Identificar oferta por loja/anúncio e vendedor/variante quando disponíveis; manter desconhecidos explícitos.
+- [ ] Migrar registros existentes como Mercado Livre, preservando histórico e método de extração sem inventar contexto ou condições.
+- [ ] Registrar preço inteiro, moeda, disponibilidade, condições de pagamento/cupom/assinatura/quantidade e frete separado.
+- [ ] Registrar elegibilidade e evidência, horários observado/recebido, validade comercial e geração contextual quando aplicáveis.
+- [ ] Separar origem, contexto de acesso, método de extração e personalização.
+- [ ] Separar prazo de atualização da validade da oferta e deixar claro que o alvo inicial exclui frete.
+- [ ] Registrar falhas como tentativas sem preço; preservar observações válidas sem sobrescrita normal.
+- [ ] Declarar capacidades por adaptador e manter históricos privados por proprietário, sem equivalência automática entre lojas.
+- [ ] Testar migração, dados desconhecidos, propriedade e ausência de conversão de falha em preço zero.
+
+**Saída:** modelo contextual persistido e validado, compatível com os registros anteriores.
+
+### C4 — Trabalhos e entregas duráveis
+
+- [ ] Fazer `/verificar` persistir trabalho e intenção de confirmação antes de responder que a coleta foi agendada.
+- [ ] Separar execução da coleta do processamento de comandos, com tentativa, lease e prazo.
+- [ ] Selecionar fontes conforme a tarefa; coleta pública não espera o navegador e não se apresenta como personalizada.
+- [ ] Recusar resultados de leases substituídos e revalidar autorização ao aceitar o resultado.
+- [ ] Aplicar idempotência por resultado lógico; mesma chave com conteúdo divergente deve falhar.
+- [ ] Gravar observação e intenção de notificar na mesma transação.
+- [ ] Manter entregas Telegram e frontend independentes, com retentativas limitadas e tratamento explícito de envio incerto.
+- [ ] Testar concorrência, interrupção, retomada, timeout, resultado divergente e conector offline em PostgreSQL real.
+- [ ] Validar implantação do executor separado, recuperação após reinício e indicadores de trabalho atrasado/falhas sem dados sensíveis.
+
+**Saída:** comando agenda trabalho durável e entrega posterior recuperável, sem promessa de exatamente uma entrega externa.
+
+### C5 — Pareamento e fluxo completo do conector
+
+- [ ] Integrar autenticação estabelecida no frontend; acesso a dados somente pela API Argos, sem mecanismo próprio de senhas.
+- [ ] Implementar pareamento com código descartável, expiração, confirmação na conta autorizada e auditoria.
+- [ ] Criar `connector_id` e chave por instalação, protegida do acesso de content scripts.
+- [ ] Implementar contexto por usuário/conector/loja/geração, com invalidação por desconexão ou troca de conta.
+- [ ] Tratar contexto desconhecido explicitamente quando não houver evidência confiável, sem coletar a identidade real da loja.
+- [ ] Implementar aquisição de tarefas com operação permitida, oferta, geração, prazo, tentativa e nonce.
+- [ ] Restringir tarefas e resultados por schema, URL, loja, tamanho e volume; não aceitar scripts, seletores executáveis ou HTTP arbitrário.
+- [ ] Assinar resultados vinculando tarefa, tentativa, geração, nonce e conteúdo; assinatura não comprova veracidade comercial.
+- [ ] Revalidar vínculo, proprietário, loja, oferta, lease e revogação na transação de aceitação.
+- [ ] Permitir visualizar e revogar conectores, impedindo novas aquisições e submissões após revogação.
+- [ ] Exibir conectividade, última observação e intervenção necessária, distinguindo navegador offline de login necessário.
+- [ ] Integrar observação de página aberta ao backend preservando o modo local da V1.
+- [ ] Implementar retenção e exclusão solicitada de dados personalizados; append-only não bloqueia exclusão por privacidade.
+- [ ] Testar replay, pareamento expirado/reutilizado, revogação concorrente, troca de contexto, tarefas maliciosas e acesso entre proprietários.
+- [ ] Inspecionar payloads/logs e comprovar ausência de HTML integral, cookies, tokens e identificadores reais de sessão.
+- [ ] Validar em Chrome real que Telegram, frontend e extensão vinculados acessam apenas os dados da mesma conta.
+
+**Saída:** fluxo Mercado Livre completo e revogável, com isolamento, privacidade e regressão V1 comprovados.
+
+### C6 — Comparação e alertas condicionais
+
+- [ ] Comparar apenas oferta, variante, moeda, quantidade e condições compatíveis.
+- [ ] Impedir falso alerta por mudança de vendedor, condição do produto, pagamento ou geração contextual.
+- [ ] Aplicar condições aceitas pelo usuário e evidência de elegibilidade antes de disparar alertas condicionais.
+- [ ] Exibir preço observado, condições, frete desconhecido e idade da observação sem prometer preço final garantido.
+- [ ] Manter preço público e observação de sessão identificáveis e independentes.
+- [ ] Testar Pix, cupom incerto, assinatura, quantidade, frete desconhecido, oferta expirada e observação desatualizada.
+- [ ] Validar alertas e entregas por canal com duas contas, incluindo falhas e recuperação.
+
+**Saída:** alertas baseados em evidência comparável, sem misturar contextos ou usuários.
+
+### C7 — Fontes oficiais comprovadas
+
+- [ ] Comprovar acesso autorizado à API oficial do Mercado Livre, campos, identidade da oferta, contexto de preço e limites.
+- [ ] Registrar a capacidade real e a decisão de habilitar ou manter a fonte indisponível; ausência de acesso não autoriza simular suporte.
+- [ ] Integrar somente a capacidade comprovada, mantendo credenciais no executor e fora da extensão.
+- [ ] Aplicar seleção por capacidade e classificar falhas, sem depender de cascata obrigatória pelo navegador.
+- [ ] Validar preço/identidade, permissões, quotas, falha da API e apresentação correta da origem/contexto.
+- [ ] Manter provedor pago desabilitado; qualquer avaliação exige métricas de bloqueio e aprovação de teto mensal antes de ativação.
+
+**Saída:** fontes habilitadas com evidência de viabilidade e comportamento verificável; capacidades indisponíveis documentadas.
+
+### C8 — Busca limitada de oportunidades
+
+- [ ] Criar intenção privada por loja, consulta/categoria, orçamento, filtros, frequência, validade e limite de candidatos.
+- [ ] Distribuir tarefas somente ao conector do proprietário, com limites de páginas, execução e cancelamento.
+- [ ] Receber candidatos normalizados, sem explorar histórico de compras, carrinho ou conta de forma irrestrita.
+- [ ] Deduplicar e pontuar com evidências acessíveis ao proprietário e observações compatíveis.
+- [ ] Informar falta de histórico suficiente sem fabricar preço de referência ou desconto.
+- [ ] Permitir consultar/excluir intenções e respectivos dados personalizados conforme retenção definida.
+- [ ] Testar expiração, limites, cancelamento, conector offline e duas contas buscando a mesma categoria com resultados independentes.
+
+**Saída:** descoberta delimitada, auditável e privada, sem ações de compra.
+
+### C9 — Novas lojas em incrementos independentes
+
+- [ ] Amazon Brasil: comprovar capacidades, acesso e requisitos antes de implementar o adaptador.
+- [ ] Amazon Brasil: implementar URL, identidade da oferta, extração e condições das capacidades aprovadas.
+- [ ] Amazon Brasil: aprovar fixtures, teste real controlado, duas contas e regressão Mercado Livre antes da liberação.
+- [ ] Shopee Brasil: comprovar capacidades, acesso e requisitos antes de implementar o adaptador.
+- [ ] Shopee Brasil: implementar URL, identidade da oferta, extração e condições das capacidades aprovadas.
+- [ ] Shopee Brasil: aprovar fixtures, teste real controlado, duas contas e regressão das lojas existentes antes da liberação.
+- [ ] Atualizar matriz de capacidades, permissões da extensão e documentação de produto para cada loja liberada.
+
+**Saída:** cada loja habilitada individualmente com evidências, sem generalizar suporte a capacidades não verificadas.
