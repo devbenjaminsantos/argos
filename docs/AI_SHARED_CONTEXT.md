@@ -14,7 +14,7 @@ O [roadmap](../ROADMAP.md) é a fonte única de progresso. Foi reorganizado entr
 - Proprietário atual é `telegram_user_id`; `chat_id` é destino. UUID Argos será introduzido aditivamente em C2. Cadastro/listagem/remoção e limites têm testes PostgreSQL e aceites relatados entre duas contas, com regressões manuais restantes no roadmap.
 - Coletor público compõe transporte SSRF seguro e extração JSON-LD/meta/DOM. `/verificar` grava sucesso/falha idempotente e checkpoint da resposta. A coleta ainda ocupa o worker de comandos; não há fila contextual, outbox geral, coleta periódica ou alertas cloud aceitos.
 - O modelo atual reúne sucesso e falha em observações; C3 separará tentativas. Método de extração não comprova sessão ou personalização. Reutilizar garantias existentes sem confundi-las com o modelo contextual pronto.
-- O workflow local agora possui job independente da extensão com Node 24, instalação pelo lockfile, tipos, 29 testes Vitest e build, sem alterar o job PostgreSQL do backend. `npm ci`, tipos, testes e build foram reproduzidos localmente em 19/09, e o YAML foi validado; a execução remota ainda não ocorreu. Manter a pendência V2.13 aberta até o CI aprovar o commit.
+- O workflow possui job independente da extensão com Node 24, instalação pelo lockfile, tipos, 29 testes Vitest e build, sem alterar o job PostgreSQL do backend. O workflow `35448434102`, commit `9166d37`, foi aprovado em 19/09 com os jobs `extension` e `backend` concluídos; a pendência específica de incluir a extensão no CI está encerrada.
 
 ## Limites operacionais e evidência histórica
 

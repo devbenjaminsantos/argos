@@ -140,7 +140,7 @@ A V2 já possui cadastro completo, remoção e verificação manual no código. 
 ### V2.13 — Operação e fechamento — parcial
 
 - [x] Implementar readiness PostgreSQL e correlação de erros sem credenciais/payloads.
-- [ ] Incluir extensão no CI: job com Node 24, `npm ci`, tipos, 29 testes Vitest e build preparado e reproduzido localmente em 19/09/2026; concluir após execução remota aprovada.
+- [x] Incluir extensão no CI: job com Node 24, `npm ci`, tipos, 29 testes Vitest e build; workflow `35448434102` aprovado no commit `9166d37`, com jobs `extension` e `backend` concluídos.
 - [ ] Completar indicadores de atrasos/falhas, cobertura de logs e quotas operacionais.
 - [ ] Validar permissões, backup/restauração, rollback e rotação de segredos em procedimento controlado.
 - [ ] Testar cold start, Telegram indisponível, loja bloqueada e banco indisponível; usar staging/injeção segura para falhas de envio.
